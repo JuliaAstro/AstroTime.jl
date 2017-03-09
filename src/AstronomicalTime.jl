@@ -8,6 +8,7 @@ using Unitful
 import Base.Operators: +,-
 
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
+export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
@@ -45,6 +46,15 @@ immutable Epoch{T<:Timescale}
 end
 Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
 
+function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0.0) where T<:Timescale
+    jd, jd1 = eraDtf2d(string(T.name.name),
+    year, month, day, hour, minute, seconds)
+    Epoch{T}(jd, jd1)
+end
+
+fjd1(ep) = ustrip(ep.jd1)
+fjd2(ep) = ustrip(ep.jd2)
+
 function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
     if abs(dt) >= days
         return Epoch{T}(ep.jd1 + day(dt), ep.jd2)
@@ -73,7 +83,7 @@ for scale in scales
 end
 
 function Base.DateTime{T<:Timescale}(ep::Epoch{T})
-    dt = eraD2dtf(string(T.name.name), 3, ustrip(ep.jd1), ustrip(ep.jd2))
+    dt = eraD2dtf(string(T.name.name), 3, fjd1(ep), fjd2(ep))
     DateTime(dt...)
 end
 
