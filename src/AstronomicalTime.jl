@@ -3,8 +3,11 @@ module AstronomicalTime
 using Compat
 using Convertible
 using ERFA
+using Unitful
 
-export Timescale, Epoch, EpochPeriod
+import Base.Operators: +,-
+
+export Timescale, Epoch, seconds, minutes, hours, days, +, -
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
@@ -15,6 +18,11 @@ const TT0 = 2443144.5003725
 const MJD0 = 2400000.5
 const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
 const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0))
+
+const seconds = 1.0u"s"
+const minutes = 60.0u"s"
+const hours = 3600.0u"s"
+const days = 1.0u"d"
 
 @compat abstract type Timescale end
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
@@ -33,7 +41,22 @@ immutable Epoch{T<:Timescale}
     jd1::Float64
     jd2::Float64
 end
-Epoch{T<:Timescale}(::Type{T}, args...) = Epoch{T}(args...)
+
+function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
+    if dt > days
+        return Epoch{T}(ep.jd1 + ustrip(u"d"(dt)), ep.jd2)
+    else
+        return Epoch{T}(ep.jd1, ep.jd2 + ustrip(u"d"(dt)))
+    end
+end
+
+function (-){T}(ep::Epoch{T}, dt::Unitful.Time)
+    if dt > days
+        return Epoch{T}(ep.jd1 - ustrip(u"d"(dt)), ep.jd2)
+    else
+        return Epoch{T}(ep.jd1, ep.jd2 - ustrip(u"d"(dt)))
+    end
+end
 
 Base.show{T<:Timescale}(io::IO, ep::Epoch{T}) = print(io, "$(DateTime(ep)) $(T.name.name)")
 
@@ -50,12 +73,5 @@ function Base.DateTime{T<:Timescale}(ep::Epoch{T})
     dt = eraD2dtf(string(T.name.name), 3, ep.jd1, ep.jd2)
     DateTime(dt...)
 end
-
-immutable EpochPeriod
-    djd1::Float64
-    djd2::Float64
-end
-EpochPeriod(;days=0, seconds=0) = EpochPeriod(days, seconds/SEC_PER_DAY)
-
 
 end # module
