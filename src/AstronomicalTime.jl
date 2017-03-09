@@ -7,7 +7,7 @@ using Unitful
 
 import Base.Operators: +,-
 
-export Timescale, Epoch, seconds, minutes, hours, days, +, -
+export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
@@ -19,10 +19,12 @@ const MJD0 = 2400000.5
 const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
 const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0))
 
-const seconds = 1.0u"s"
-const minutes = 60.0u"s"
-const hours = 3600.0u"s"
-const days = 1.0u"d"
+const second = u"s"
+const seconds = 1.0second
+const minutes = 60.0second
+const hours = 3600.0second
+const day = u"d"
+const days = 1.0day
 
 @compat abstract type Timescale end
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
@@ -38,23 +40,24 @@ const scales = (
 )
 
 immutable Epoch{T<:Timescale}
-    jd1::Float64
-    jd2::Float64
+    jd1::typeof(days)
+    jd2::typeof(days)
 end
+Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
 
 function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
-    if dt > days
-        return Epoch{T}(ep.jd1 + ustrip(u"d"(dt)), ep.jd2)
+    if abs(dt) >= days
+        return Epoch{T}(ep.jd1 + day(dt), ep.jd2)
     else
-        return Epoch{T}(ep.jd1, ep.jd2 + ustrip(u"d"(dt)))
+        return Epoch{T}(ep.jd1, ep.jd2 + day(dt))
     end
 end
 
 function (-){T}(ep::Epoch{T}, dt::Unitful.Time)
-    if dt > days
-        return Epoch{T}(ep.jd1 - ustrip(u"d"(dt)), ep.jd2)
+    if abs(dt) >= days
+        return Epoch{T}(ep.jd1 - day(dt), ep.jd2)
     else
-        return Epoch{T}(ep.jd1, ep.jd2 - ustrip(u"d"(dt)))
+        return Epoch{T}(ep.jd1, ep.jd2 - day(dt))
     end
 end
 
@@ -70,7 +73,7 @@ for scale in scales
 end
 
 function Base.DateTime{T<:Timescale}(ep::Epoch{T})
-    dt = eraD2dtf(string(T.name.name), 3, ep.jd1, ep.jd2)
+    dt = eraD2dtf(string(T.name.name), 3, ustrip(ep.jd1), ustrip(ep.jd2))
     DateTime(dt...)
 end
 
