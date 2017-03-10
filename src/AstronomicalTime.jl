@@ -1,8 +1,11 @@
 module AstronomicalTime
 
+__precompile__()
+
 using Compat
 using Convertible
 using ERFA
+using RemoteFiles
 using Unitful
 
 import Base.Operators: +, -, ==
@@ -10,6 +13,8 @@ import Base: convert, isapprox
 
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
 export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
+
+const LSK_FILE = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
