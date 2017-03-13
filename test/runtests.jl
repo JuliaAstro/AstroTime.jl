@@ -88,6 +88,7 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
     @testset "Leap Seconds" begin
+        @test leapseconds(TTEpoch(1959,1,1)) == 0
         for year = 1960:Dates.year(now())
             @test leapseconds(TTEpoch(year, 4, 1)) == eraDat(year, 4, 1, 0.0)
         end
