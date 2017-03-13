@@ -6,7 +6,7 @@
 [travis-url]: https://travis-ci.org/JuliaAstrodynamics/AstronomicalTime.jl
 [av-badge]: https://ci.appveyor.com/api/projects/status/70b374auiy0j29cd?svg=true
 [av-url]: https://ci.appveyor.com/project/JuliaAstrodynamics/astronomicaltime-jl
-[coveralls-badge]: https://coveralls.io/repos/JuliaAstrodynamics/AstronomicalTime.jl/badge.svg?branch=master&service=github
+[coveralls-badge]: https://coveralls.io/repos/github/JuliaAstrodynamics/AstronomicalTime.jl/badge.svg?branch=master
 [coveralls-url]: https://coveralls.io/github/JuliaAstrodynamics/AstronomicalTime.jl?branch=master
 [codecov-badge]: http://codecov.io/github/JuliaAstrodynamics/AstronomicalTime.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaAstrodynamics/AstronomicalTime.jl?branch=master
