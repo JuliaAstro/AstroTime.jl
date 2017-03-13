@@ -2,6 +2,12 @@ function deltatr(ep::Epoch)
     eraDtdb(fjd1(ep), fjd2(ep), 0.0, 0.0, 0.0, 0.0)
 end
 
+function deltat(ep::Epoch)
+    leapsec = leapseconds(ep)
+    ΔUT1 = dut1(ep)
+    32.184 + leapsec - ΔUT1
+end
+
 # TAI <-> UTC
 function convert(::Type{TAIEpoch}, ep::UTCEpoch)
     date, date1 = eraUtctai(fjd1(ep), fjd2(ep))
@@ -14,39 +20,39 @@ function convert(::Type{UTCEpoch}, ep::TAIEpoch)
 end
 
 # UTC <-> UT1
-#= function convert(::Type{UTCEpoch}, ep::UT1Epoch) =#
-#=     date, date1 = eraUt1utc(fjd1(ep), fjd2(ep), dut1(ep)) =#
-#=     UTCEpoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
-#=  =#
-#= function convert(::Type{UT1Epoch}, ep::UTCEpoch) =#
-#=     date, date1 = eraUtcut1(fjd1(ep), fjd2(ep), dut1(ep)) =#
-#=     UT1Epoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
+function convert(::Type{UTCEpoch}, ep::UT1Epoch)
+    date, date1 = eraUt1utc(fjd1(ep), fjd2(ep), dut1(ep))
+    UTCEpoch(date, date1)
+end
+
+function convert(::Type{UT1Epoch}, ep::UTCEpoch)
+    date, date1 = eraUtcut1(fjd1(ep), fjd2(ep), dut1(ep))
+    UT1Epoch(date, date1)
+end
 
 # TAI <-> UT1
-#= function convert(::Type{TAIEpoch}, ep::UT1Epoch) =#
-#=     date, date1 = eraUt1tai(fjd1(ep), fjd2(ep), dut1(ep)-leapseconds(ep)) =#
-#=     TAIEpoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
-#=  =#
-#= function convert(::Type{UT1Epoch}, ep::TAIEpoch) =#
-#=     date, date1 = eraTaiut1(fjd1(ep), fjd2(ep), dut1(ep)-leapseconds(ep)) =#
-#=     UT1Epoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
+function convert(::Type{TAIEpoch}, ep::UT1Epoch)
+    date, date1 = eraUt1tai(fjd1(ep), fjd2(ep), dut1(ep)-leapseconds(ep))
+    TAIEpoch(date, date1)
+end
+
+function convert(::Type{UT1Epoch}, ep::TAIEpoch)
+    date, date1 = eraTaiut1(fjd1(ep), fjd2(ep), dut1(ep)-leapseconds(ep))
+    UT1Epoch(date, date1)
+end
 
 # TT <-> UT1
-#= function convert(::Type{TTEpoch}, ep::UT1Epoch) =#
-#=     dt = deltat(ep) =#
-#=     date, date1 = eraUt1tt(fjd1(ep), fjd2(ep), dt) =#
-#=     TTEpoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
-#=  =#
-#= function convert(::Type{UT1Epoch}, ep::TTEpoch) =#
-#=     dt = deltat(ep) =#
-#=     date, date1 = eraTtut1(fjd1(ep), fjd2(ep), dt) =#
-#=     UT1Epoch(date, date1, ep.leapseconds, ep.ΔUT1) =#
-#= end =#
+function convert(::Type{TTEpoch}, ep::UT1Epoch)
+    dt = deltat(ep)
+    date, date1 = eraUt1tt(fjd1(ep), fjd2(ep), dt)
+    TTEpoch(date, date1)
+end
+
+function convert(::Type{UT1Epoch}, ep::TTEpoch)
+    dt = deltat(ep)
+    date, date1 = eraTtut1(fjd1(ep), fjd2(ep), dt)
+    UT1Epoch(date, date1)
+end
 
 # TAI <-> TT
 function convert(::Type{TAIEpoch}, ep::TTEpoch)

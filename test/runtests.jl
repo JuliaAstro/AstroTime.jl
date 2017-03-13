@@ -14,6 +14,11 @@ AstronomicalTime.update()
 
         ep0 = TTEpoch(2000, 1, 1)
         @test ep0.jd1 == (J2000 - 0.5)*days
+
+        @test TTEpoch(2000,1,1) < TTEpoch(2001,1,1)
+        @test TTEpoch(2000,1,1) <= TTEpoch(2001,1,1)
+        @test TTEpoch(2001,1,1) > TTEpoch(2000,1,1)
+        @test TTEpoch(2001,1,1) >= TTEpoch(2000,1,1)
     end
     @testset "Conversions" begin
         dt = DateTime(2000, 1, 1, 12, 0, 0.0)
@@ -24,7 +29,7 @@ AstronomicalTime.update()
         tcg = TCGEpoch(tt)
         tai = TAIEpoch(tt)
         utc = UTCEpoch(tt)
-        #= ut1 = UT1Epoch(tt) =#
+        ut1 = UT1Epoch(tt)
 
         @test TTEpoch(J2000) ≈ tt
         @test jd2000(tt) ≈ 0
@@ -34,12 +39,12 @@ AstronomicalTime.update()
 
         @test tai ≈ TAIEpoch(utc)
         @test utc ≈ UTCEpoch(tai)
-        @test_skip utc ≈ UTCEpoch(ut1)
-        @test_skip ut1 ≈ UT1Epoch(utc)
-        @test_skip tai ≈ TAIEpoch(ut1)
-        @test_skip ut1 ≈ UT1Epoch(tai)
-        @test_skip tt ≈ TTEpoch(ut1)
-        @test_skip ut1 ≈ UT1Epoch(tt)
+        @test utc ≈ UTCEpoch(ut1)
+        @test ut1 ≈ UT1Epoch(utc)
+        @test tai ≈ TAIEpoch(ut1)
+        @test ut1 ≈ UT1Epoch(tai)
+        @test tt ≈ TTEpoch(ut1)
+        @test ut1 ≈ UT1Epoch(tt)
         @test tt ≈ TTEpoch(tai)
         @test tai ≈ TAIEpoch(tt)
         @test tt ≈ TTEpoch(tcg)
@@ -56,13 +61,13 @@ AstronomicalTime.update()
 
         # Reference values from Orekit
         ref = TDBEpoch(2013, 3, 18, 12)
-        @test_skip UT1Epoch(ref) == UT1Epoch("2013-03-18T11:58:52.994")
+        @test UT1Epoch(ref) == UT1Epoch("2013-03-18T11:58:52.994")
         @test UTCEpoch(ref) == UTCEpoch("2013-03-18T11:58:52.814")
         @test TAIEpoch(ref) == TAIEpoch("2013-03-18T11:59:27.814")
         @test TTEpoch(ref) == TTEpoch("2013-03-18T11:59:59.998")
         @test TCBEpoch(ref) == TCBEpoch("2013-03-18T12:00:17.718")
         @test TCGEpoch(ref) == TCGEpoch("2013-03-18T12:00:00.795")
-        @test_skip ref == TDBEpoch(UT1Epoch("2013-03-18T11:58:52.994"))
+        @test ref == TDBEpoch(UT1Epoch("2013-03-18T11:58:52.994"))
         @test ref == TDBEpoch(UTCEpoch("2013-03-18T11:58:52.814"))
         @test ref == TDBEpoch(TAIEpoch("2013-03-18T11:59:27.814"))
         @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))

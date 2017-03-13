@@ -10,7 +10,7 @@ using RemoteFiles
 using Unitful
 
 import Base.Operators: +, -, ==
-import Base: convert, isapprox
+import Base: convert, isapprox, isless
 
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
 export julian, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
@@ -78,6 +78,12 @@ jd1950(ep) = julian(ep) - J1950
 in_centuries(ep::Epoch, base=J2000) = (julian(ep) - base) / JULIAN_CENTURY
 in_days(ep, base=J2000) = julian(ep) - base
 in_seconds(ep, base=J2000) = (julian(ep) - base) * SEC_PER_DAY
+function dut1(ep::Epoch)
+    if !isassigned(EOP_DATA)
+        error("No earth orientation data has been loaded. Run `AstronomicalTime.update()` or manually load EOP.")
+    end
+    getΔUT1(EOP_DATA[], julian(ep))
+end
 
 function isapprox{T<:Timescale}(a::Epoch{T}, b::Epoch{T})
     return julian(a) ≈ julian(b)
@@ -86,6 +92,8 @@ end
 function (==){T<:Timescale}(a::Epoch{T}, b::Epoch{T})
     return DateTime(a) == DateTime(b)
 end
+
+isless{T<:Timescale}(ep1::Epoch{T}, ep2::Epoch{T}) = julian(ep1) < julian(ep2)
 
 function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
     if abs(dt) >= days
@@ -125,8 +133,13 @@ end
 include("leapseconds.jl")
 include("conversions.jl")
 
+function load_eop(eop)
+    EOP_DATA[] = eop
+end
+
 function update()
     EarthOrientation.update()
+    load_eop(EOParams())
     download(LSK_FILE)
     load_lsk(path(LSK_FILE))
     nothing
