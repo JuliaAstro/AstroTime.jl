@@ -15,6 +15,7 @@ import Base: convert, isapprox, isless
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
 export julian, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
 export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
+export @timescale
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
@@ -127,6 +128,17 @@ for scale in scales
         immutable $scale <: Timescale end
         @convertible const $epoch = Epoch{$scale}
         export $scale, $epoch
+    end
+end
+
+macro timescale(scale)
+    if !(scale isa Symbol)
+        error("Invalid time scale name.")
+    end
+    epoch = Symbol(scale, "Epoch")
+    return quote
+        immutable $(esc(scale)) <: Timescale end
+        @convertible const $(esc(epoch)) = Epoch{$(esc(scale))}
     end
 end
 
