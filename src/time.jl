@@ -54,18 +54,6 @@ function deltatr(ep::Epoch)
     eraDtdb(jd(ep), jd1(ep), 0.0, 0.0, 0.0, 0.0)
 end
 
-function dms2rad(deg, arcmin, arcsec)
-    deg2rad(deg + arcmin/60 + arcsec/3600)
-end
-
-function rad2dms(rad)
-    d = rad2deg(rad)
-    deg = trunc(d)
-    arcmin = trunc((d-deg)*60)
-    arcsec = (d-deg-arcmin/60)*3600
-    return deg, arcmin, arcsec
-end
-
 centuries(ep::Epoch, base=J2000) = (juliandate(ep) - base)/JULIAN_CENTURY
 days(ep::Epoch, base=J2000) = juliandate(ep) - base
 seconds(ep::Epoch, base=J2000) = (juliandate(ep) - base)*86400

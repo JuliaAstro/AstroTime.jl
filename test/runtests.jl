@@ -1,5 +1,8 @@
 using AstronomicalTime
 using Base.Test
+import ERFA: eraDat
+
+AstronomicalTime.update()
 
 @testset "AstronomicalTime" begin
     ep0 = TTEpoch(0.0)
@@ -14,16 +17,21 @@ using Base.Test
     @testset "Conversions" begin
         ref = TDBEpoch(2013, 3, 18, 12)
         @test_skip UT1Epoch(ref) == UT1Epoch("2013-03-18T11:58:52.994")
-        @test_skip UTCEpoch(ref) == UTCEpoch("2013-03-18T11:58:52.814")
+        @test UTCEpoch(ref) == UTCEpoch("2013-03-18T11:58:52.814")
         @test TAIEpoch(ref) == TAIEpoch("2013-03-18T11:59:27.814")
         @test TTEpoch(ref) == TTEpoch("2013-03-18T11:59:59.998")
         @test TCBEpoch(ref) == TCBEpoch("2013-03-18T12:00:17.718")
         @test TCGEpoch(ref) == TCGEpoch("2013-03-18T12:00:00.795")
         @test_skip ref == TDBEpoch(UT1Epoch("2013-03-18T11:58:52.994"))
-        @test_skip ref == TDBEpoch(UTCEpoch("2013-03-18T11:58:52.814"))
+        @test ref == TDBEpoch(UTCEpoch("2013-03-18T11:58:52.814"))
         @test ref == TDBEpoch(TAIEpoch("2013-03-18T11:59:27.814"))
         @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
+    end
+    @testset "Leap Seconds" begin
+        for year = 1970:Dates.year(now())
+            @test leapseconds(TTEpoch(year, 4, 1)) == eraDat(year, 4, 1, 0.0)
+        end
     end
 end

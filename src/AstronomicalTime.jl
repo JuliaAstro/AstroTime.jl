@@ -4,6 +4,7 @@ __precompile__()
 
 using Compat
 using Convertible
+using EarthOrientation
 using ERFA
 using RemoteFiles
 using Unitful
@@ -12,9 +13,8 @@ import Base.Operators: +, -, ==
 import Base: convert, isapprox
 
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
+export julian, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
 export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
-
-const LSK_FILE = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
 
 const JULIAN_CENTURY = 36525
 const SEC_PER_DAY = 86400
@@ -32,6 +32,8 @@ const minutes = 60.0second
 const hours = 3600.0second
 const day = u"d"
 const days = 1.0day
+
+const EOP_DATA = Ref{EOParams}()
 
 @compat abstract type Timescale end
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
@@ -68,9 +70,16 @@ Epoch{T}(str::AbstractString) where T<:Timescale = Epoch{T}(DateTime(str))
 
 fjd1(ep) = ustrip(ep.jd1)
 fjd2(ep) = ustrip(ep.jd2)
+julian(ep) = fjd1(ep) + fjd2(ep)
+mjd(ep) = julian(ep) - MJD
+jd2000(ep) = julian(ep) - J2000
+jd1950(ep) = julian(ep) - J1950
+in_centuries(ep::Epoch, base=J2000) = (julian(ep) - base) / JULIAN_CENTURY
+in_days(ep, base=J2000) = julian(ep) - base
+in_seconds(ep, base=J2000) = (julian(ep) - base) * SEC_PER_DAY
 
 function isapprox{T<:Timescale}(a::Epoch{T}, b::Epoch{T})
-    return juliandate(a) ≈ juliandate(b)
+    return julian(a) ≈ julian(b)
 end
 
 function (==){T<:Timescale}(a::Epoch{T}, b::Epoch{T})
@@ -112,6 +121,14 @@ for scale in scales
     end
 end
 
+include("leapseconds.jl")
 include("conversions.jl")
+
+function update()
+    EarthOrientation.update()
+    download(LSK_FILE)
+    load_lsk(path(LSK_FILE))
+    nothing
+end
 
 end # module
