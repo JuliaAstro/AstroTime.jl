@@ -66,6 +66,7 @@ function Base.DateTime{T<:Timescale}(ep::Epoch{T})
 end
 
 Epoch{T}(ep::Epoch{S}) where T<:Timescale where S<:Timescale = @convert convert(Epoch{T}, ep)
+Epoch{T}(ep::Epoch{T}) where T<:Timescale = ep
 Epoch{T}(str::AbstractString) where T<:Timescale = Epoch{T}(DateTime(str))
 
 fjd1(ep) = ustrip(ep.jd1)
