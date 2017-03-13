@@ -22,7 +22,7 @@ const SEC_PER_CENTURY = SEC_PER_DAY*JULIAN_CENTURY
 const TAI_TO_TT = 32.184/SEC_PER_DAY
 const LG = 6.969290134e-10
 const TT0 = 2443144.5003725
-const MJD0 = 2400000.5
+const MJD = 2400000.5
 const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
 const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0))
 
@@ -49,9 +49,9 @@ end
 
 Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
 
-function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0.0) where T<:Timescale
+function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
     jd, jd1 = eraDtf2d(string(T.name.name),
-    year, month, day, hour, minute, seconds)
+    year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
 end
 

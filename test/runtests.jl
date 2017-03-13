@@ -6,9 +6,17 @@ AstronomicalTime.update()
 
 @testset "AstronomicalTime" begin
     @testset "Epoch Type" begin
+        @test string(TT) == "TT"
+
         ep0 = TTEpoch(0.0)
+
         ep1 = ep0 - 1days
         @test ep1.jd1 == -1days
+        ep1 = ep0 - 2minutes
+        @test ep1.jd2 == -day(2minutes)
+
+        ep1 = ep0 + 1days
+        @test ep1.jd1 == 1days
         ep1 = ep0 + 2minutes
         @test ep1.jd2 == day(2minutes)
 
@@ -19,6 +27,9 @@ AstronomicalTime.update()
         @test TTEpoch(2000,1,1) <= TTEpoch(2001,1,1)
         @test TTEpoch(2001,1,1) > TTEpoch(2000,1,1)
         @test TTEpoch(2001,1,1) >= TTEpoch(2000,1,1)
+
+        ep0 = TTEpoch(2000,1,1,12,0,0,123)
+        @test string(ep0) == "2000-01-01T12:00:00.123 TT"
     end
     @testset "Conversions" begin
         dt = DateTime(2000, 1, 1, 12, 0, 0.0)
@@ -34,8 +45,10 @@ AstronomicalTime.update()
         @test TTEpoch(J2000) ≈ tt
         @test jd2000(tt) ≈ 0
         @test jd1950(TTEpoch(1950, 1, 1, 12)) ≈ 0
+        @test mjd(TTEpoch(1858, 11, 17)) ≈ 0
         @test in_centuries(TTEpoch(2010, 1, 1)) == 0.1
         @test in_days(TTEpoch(2000, 1, 2, 12)) == 1
+        @test in_seconds(TTEpoch(2000, 1, 2, 12)) == SEC_PER_DAY
 
         @test tai ≈ TAIEpoch(utc)
         @test utc ≈ UTCEpoch(tai)
