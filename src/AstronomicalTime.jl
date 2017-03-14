@@ -1,8 +1,7 @@
 module AstronomicalTime
 
-__precompile__()
+#= __precompile__() =#
 
-using Compat
 using Convertible
 using EarthOrientation
 using ERFA
@@ -35,7 +34,7 @@ const days = 1.0day
 
 const EOP_DATA = Ref{EOParams}()
 
-@compat abstract type Timescale end
+abstract type Timescale end
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
 
 immutable Epoch{T<:Timescale}
@@ -49,12 +48,38 @@ end
 
 Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
 
+"""
+    Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
+
+Construct an `Epoch` with timescale `T` at the given date and time.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
+2017-03-14T07:18:20.325 TT
+```
+"""
 function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
     jd, jd1 = eraDtf2d(string(T.name.name),
     year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
 end
 
+# FIXME: Wait for upstream fix.
+#= """ =#
+#=     Epoch{T}(dt::DateTime) where T<:Timescale =#
+#=  =#
+#= Convert a `DateTime` object to an `Epoch` with timescale `T`. =#
+#=  =#
+#= # Example =#
+#=  =#
+#= ```jldoctest =#
+#= julia> dt = DateTime(2017, 3, 14, 7, 18, 20, 325); =#
+#= julia> Epoch{TT}(dt) =#
+#= 2017-03-14T07:18:20.325 TT =#
+#= ``` =#
+#= """ =#
 function Epoch{T}(dt::DateTime) where T<:Timescale
     Epoch{T}(Dates.year(dt), Dates.month(dt), Dates.day(dt),
         Dates.hour(dt), Dates.minute(dt), Dates.second(dt) + Dates.millisecond(dt)/1000)
@@ -78,6 +103,7 @@ jd1950(ep) = julian(ep) - J1950
 in_centuries(ep::Epoch, base=J2000) = (julian(ep) - base) / JULIAN_CENTURY
 in_days(ep, base=J2000) = julian(ep) - base
 in_seconds(ep, base=J2000) = (julian(ep) - base) * SEC_PER_DAY
+
 function dut1(ep::Epoch)
     if !isassigned(EOP_DATA)
         error("No earth orientation data has been loaded. Run `AstronomicalTime.update()` or manually load EOP.")
