@@ -1,6 +1,6 @@
 module AstronomicalTime
 
-#= __precompile__() =#
+__precompile__()
 
 using Convertible
 using EarthOrientation
@@ -34,10 +34,23 @@ const days = 1.0day
 
 const EOP_DATA = Ref{EOParams}()
 
+"""
+All timescales are subtypes of the abstract type `Timescale`.
+The following timescales are defined:
+
+* `UTC` — Coordinated Universal Time
+* `UT1` — Universal Time
+* `TAI` — International Atomic Time
+* `TT` — Terrestrial Time
+* `TCG` — Geocentric Coordinate Time
+* `TCB` — Barycentric Coordinate Time
+* `TDB` — Barycentric Dynamical Time
+"""
 abstract type Timescale end
+
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
 
-immutable Epoch{T<:Timescale}
+struct Epoch{T<:Timescale}
     jd1::typeof(days)
     jd2::typeof(days)
 end
@@ -46,6 +59,18 @@ function Base.show{T<:Timescale}(io::IO, ep::Epoch{T})
     print(io, "$(Dates.format(DateTime(ep), "yyyy-mm-ddTHH:MM:SS.sss")) $(T.name.name)")
 end
 
+"""
+    Epoch{T}(jd1, jd2=0.0) where T<:Timescale
+
+Construct an `Epoch` with timescale `T` from a two-part Julian date.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TT
+```
+"""
 Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
 
 """
@@ -66,32 +91,67 @@ function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0)
     Epoch{T}(jd, jd1)
 end
 
-# FIXME: Wait for upstream fix.
-#= """ =#
-#=     Epoch{T}(dt::DateTime) where T<:Timescale =#
-#=  =#
-#= Convert a `DateTime` object to an `Epoch` with timescale `T`. =#
-#=  =#
-#= # Example =#
-#=  =#
-#= ```jldoctest =#
-#= julia> dt = DateTime(2017, 3, 14, 7, 18, 20, 325); =#
-#= julia> Epoch{TT}(dt) =#
-#= 2017-03-14T07:18:20.325 TT =#
-#= ``` =#
-#= """ =#
+"""
+    Epoch{T}(dt::DateTime) where T<:Timescale
+
+Convert a `DateTime` object to an `Epoch` with timescale `T`.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}(DateTime(2017, 3, 14, 7, 18, 20, 325))
+2017-03-14T07:18:20.325 TT
+```
+"""
 function Epoch{T}(dt::DateTime) where T<:Timescale
     Epoch{T}(Dates.year(dt), Dates.month(dt), Dates.day(dt),
         Dates.hour(dt), Dates.minute(dt), Dates.second(dt) + Dates.millisecond(dt)/1000)
 end
 
+"""
+    DateTime{T<:Timescale}(ep::Epoch{T})
+
+Convert an `Epoch` with timescale `T` to a `DateTime` object.
+
+# Example
+
+```jldoctest
+julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
+2017-03-14T07:18:20.325
+```
+"""
 function Base.DateTime{T<:Timescale}(ep::Epoch{T})
     dt = eraD2dtf(string(T.name.name), 3, fjd1(ep), fjd2(ep))
     DateTime(dt...)
 end
 
-Epoch{T}(ep::Epoch{S}) where T<:Timescale where S<:Timescale = @convert convert(Epoch{T}, ep)
+"""
+    Epoch{T}(ep::Epoch{S}) where {T<:Timescale, S<:Timescale}
+
+Convert an `Epoch` with timescale `S` to an `Epoch` with timescale `T`.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}(Epoch{TAI}(2000, 1, 1))
+2000-01-01T00:00:32.184 TT
+```
+"""
+Epoch{T}(ep::Epoch{S}) where {T<:Timescale,S<:Timescale} = @convert convert(Epoch{T}, ep)
 Epoch{T}(ep::Epoch{T}) where T<:Timescale = ep
+
+"""
+    Epoch{T}(timestamp::AbstractString) where T<:Timescale
+
+Construct an `Epoch` with timescale `T` from a timestamp.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}("2017-03-14T07:18:20.325")
+2017-03-14T07:18:20.325 TT
+```
+"""
 Epoch{T}(str::AbstractString) where T<:Timescale = Epoch{T}(DateTime(str))
 
 fjd1(ep) = ustrip(ep.jd1)
