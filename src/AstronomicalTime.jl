@@ -217,6 +217,22 @@ for scale in scales
     end
 end
 
+"""
+    @timescale scale
+
+Define a new timescale and the corresponding `Epoch` type alias.
+
+# Example
+
+```jldoctest
+julia> @timescale Custom
+
+julia> Custom <: Timescale
+true
+julia> CustomEpoch == Epoch{Custom}
+true
+```
+"""
 macro timescale(scale)
     if !(scale isa Symbol)
         error("Invalid time scale name.")
