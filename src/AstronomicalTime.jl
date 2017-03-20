@@ -16,8 +16,8 @@ export julian, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
 export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
 export @timescale
 
-const JULIAN_CENTURY = 36525
-const SEC_PER_DAY = 86400
+const JULIAN_CENTURY = 36525.0
+const SEC_PER_DAY = 86400.0
 const SEC_PER_CENTURY = SEC_PER_DAY*JULIAN_CENTURY
 const TAI_TO_TT = 32.184/SEC_PER_DAY
 const LG = 6.969290134e-10
