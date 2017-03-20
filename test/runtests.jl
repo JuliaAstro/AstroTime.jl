@@ -34,7 +34,7 @@ AstronomicalTime.update()
     @testset "Conversions" begin
         dt = DateTime(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
-        @test_skip string(tt) == "2000-01-01T12:00:00.000 TT"
+        @test string(tt) == "2000-01-01T12:00:00.000 TT"
         tdb = TDBEpoch(tt)
         tcb = TCBEpoch(tt)
         tcg = TCGEpoch(tt)
