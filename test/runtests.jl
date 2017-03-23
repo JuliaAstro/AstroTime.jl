@@ -35,7 +35,7 @@ AstronomicalTime.update()
         dt = DateTime(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
         # Fixed on master, still broken v0.6-alpha
-        @test_broken string(tt) == "2000-01-01T12:00:00.000 TT"
+        @test_skip string(tt) == "2000-01-01T12:00:00.000 TT"
         tdb = TDBEpoch(tt)
         tcb = TCBEpoch(tt)
         tcg = TCGEpoch(tt)
