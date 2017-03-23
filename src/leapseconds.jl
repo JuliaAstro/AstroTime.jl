@@ -22,17 +22,13 @@ function LSK(file)
 end
 
 const LSK_FILE = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
-const LSK_DATA = Ref{LSK}()
+@OptionalData LSK_DATA LSK "Run 'AstronomicalTime.update()' to load it."
 
 function fractionofday(dt)
     Dates.hour(dt)/24 + Dates.minute(dt)/(24*60) + Dates.second(dt)/86400 + Dates.millisecond(dt)/8.64e7
 end
 
-function leapseconds(ep::Epoch)
-    if !isassigned(LSK_DATA)
-        error("No leapseconds kernel has been loaded. Run `AstronomicalTime.update()` or manually load an LSK.")
-    end
-    lsk = LSK_DATA[]
+function leapseconds(lsk::LSK, ep::Epoch)
     jd = julian(ep)
 
     # Before 1960-01-01
@@ -45,7 +41,4 @@ function leapseconds(ep::Epoch)
         return lsk.leapseconds[findlast(jd .>= lsk.t)]
     end
 end
-
-function load_lsk(file)
-    LSK_DATA[] = LSK(file)
-end
+leapseconds(ep::Epoch) = leapseconds(get(LSK_DATA), ep)

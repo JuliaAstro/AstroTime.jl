@@ -4,7 +4,7 @@ os:
   - linux
   - osx
 julia:
-  # - release
+  - 0.6
   - nightly
 notifications:
   email: false
@@ -19,6 +19,7 @@ script:
  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
  - julia -e 'Pkg.clone("https://github.com/helgee/Convertible.jl.git")'
  - julia -e 'Pkg.clone("https://github.com/helgee/RemoteFiles.jl.git")'
+ - julia -e 'Pkg.clone("https://github.com/helgee/OptionalData.jl.git")'
  - julia -e 'Pkg.clone("https://github.com/helgee/EarthOrientation.jl.git")'
  - julia -e 'Pkg.clone(pwd()); Pkg.build("AstronomicalTime"); Pkg.test("AstronomicalTime"; coverage=true)'
 after_success:

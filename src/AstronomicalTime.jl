@@ -5,6 +5,7 @@ __precompile__()
 using Convertible
 using EarthOrientation
 using ERFA
+using OptionalData
 using RemoteFiles
 using Unitful
 
@@ -32,8 +33,6 @@ const minutes = 60.0second
 const hours = 3600.0second
 const day = u"d"
 const days = 1.0day
-
-const EOP_DATA = Ref{EOParams}()
 
 """
 All timescales are subtypes of the abstract type `Timescale`.
@@ -168,12 +167,7 @@ in_centuries(ep::Epoch, base=J2000) = (julian(ep) - base) / JULIAN_CENTURY
 in_days(ep, base=J2000) = julian(ep) - base
 in_seconds(ep, base=J2000) = (julian(ep) - base) * SEC_PER_DAY
 
-function dut1(ep::Epoch)
-    if !isassigned(EOP_DATA)
-        error("No earth orientation data has been loaded. Run `AstronomicalTime.update()` or manually load EOP.")
-    end
-    getΔUT1(EOP_DATA[], julian(ep))
-end
+dut1(ep::Epoch) = getΔUT1(julian(ep))
 
 function isapprox{T<:Timescale}(a::Epoch{T}, b::Epoch{T})
     return julian(a) ≈ julian(b)
@@ -250,15 +244,10 @@ end
 include("leapseconds.jl")
 include("conversions.jl")
 
-function load_eop(eop)
-    EOP_DATA[] = eop
-end
-
 function update()
     EarthOrientation.update()
-    load_eop(EOParams())
     download(LSK_FILE)
-    load_lsk(path(LSK_FILE))
+    push!(LSK_DATA, path(LSK_FILE))
     nothing
 end
 
