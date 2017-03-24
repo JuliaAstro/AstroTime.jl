@@ -29,7 +29,7 @@ function fractionofday(dt)
 end
 
 function leapseconds(lsk::LSK, ep::Epoch)
-    jd = julian(ep)
+    jd = julian_strip(ep)
 
     # Before 1960-01-01
     if jd < 2.4369345e6

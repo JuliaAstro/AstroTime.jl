@@ -21,7 +21,7 @@ AstronomicalTime.update()
         @test ep1.jd2 == day(2minutes)
 
         ep0 = TTEpoch(2000, 1, 1)
-        @test ep0.jd1 == (J2000 - 0.5)*days
+        @test ep0.jd1 == J2000 - 0.5days
 
         @test TTEpoch(2000,1,1) < TTEpoch(2001,1,1)
         @test TTEpoch(2000,1,1) <= TTEpoch(2001,1,1)
@@ -44,11 +44,11 @@ AstronomicalTime.update()
         ut1 = UT1Epoch(tt)
 
         @test TTEpoch(J2000) ≈ tt
-        @test jd2000(tt) ≈ 0
-        @test jd1950(TTEpoch(1950, 1, 1, 12)) ≈ 0
-        @test mjd(TTEpoch(1858, 11, 17)) ≈ 0
+        @test jd2000(tt) == 0days
+        @test jd1950(TTEpoch(1950, 1, 1, 12)) == 0days
+        @test mjd(TTEpoch(1858, 11, 17)) == 0days
         @test in_centuries(TTEpoch(2010, 1, 1)) == 0.1
-        @test in_days(TTEpoch(2000, 1, 2, 12)) == 1
+        @test in_days(TTEpoch(2000, 1, 2, 12)) == 1days
         @test in_seconds(TTEpoch(2000, 1, 2, 12)) == SEC_PER_DAY
 
         @test tai ≈ TAIEpoch(utc)

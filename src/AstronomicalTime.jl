@@ -11,21 +11,13 @@ using Unitful
 
 import Base.Operators: +, -, ==
 import Base: convert, isapprox, isless
+import Unitful: Time
 
-export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
-export julian, julian1, julian2, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
-export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
-export @timescale
-
-const JULIAN_CENTURY = 36525.0
-const SEC_PER_DAY = 86400.0
-const SEC_PER_CENTURY = SEC_PER_DAY*JULIAN_CENTURY
-const TAI_TO_TT = 32.184/SEC_PER_DAY
-const LG = 6.969290134e-10
-const TT0 = 2443144.5003725
-const MJD = 2400000.5
-const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
-const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0))
+export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -,
+    julian, julian1, julian2, julian_strip, julian1_strip, julian2_strip,
+    mjd, jd2000, jd1950, in_seconds, in_days, in_centuries,
+    JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD, J2000, J1950,
+    @timescale
 
 const second = u"s"
 const seconds = 1.0second
@@ -33,6 +25,13 @@ const minutes = 60.0second
 const hours = 3600.0second
 const day = u"d"
 const days = 1.0day
+
+const JULIAN_CENTURY = 36525.0days
+const SEC_PER_DAY = 86400.0seconds
+const SEC_PER_CENTURY = second(JULIAN_CENTURY)
+const MJD = 2400000.5days
+const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0)) * days
+const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0)) * days
 
 """
 All timescales are subtypes of the abstract type `Timescale`.
@@ -56,10 +55,14 @@ Base.show(io::IO, ::Type{Union{}}) = print(io, "Union{}")
 struct Epoch{T<:Timescale}
     jd1::typeof(days)
     jd2::typeof(days)
+    function Epoch{T}(jd1::Time, jd2::Time=0.0days) where T<:Timescale
+        new{T}(day(jd1), day(jd2))
+    end
 end
 
 function Base.show{T<:Timescale}(io::IO, ep::Epoch{T})
-    print(io, "$(Dates.format(DateTime(ep), "yyyy-mm-ddTHH:MM:SS.sss")) $(T.name.name)")
+    print(io, "$(Dates.format(DateTime(ep),
+        "yyyy-mm-ddTHH:MM:SS.sss")) $(T.name.name)")
 end
 
 """
@@ -74,10 +77,13 @@ julia> Epoch{TT}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TT
 ```
 """
-Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale = Epoch{T}(jd1*days, jd2*days)
+function Epoch{T}(jd1::Float64, jd2::Float64=0.0) where T<:Timescale
+    Epoch{T}(jd1 * days, jd2 * days)
+end
 
 """
-    Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
+    Epoch{T}(year, month, day,
+        hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
 
 Construct an `Epoch` with timescale `T` at the given date and time.
 
@@ -88,7 +94,8 @@ julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
 2017-03-14T07:18:20.325 TT
 ```
 """
-function Epoch{T}(year, month, day, hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
+function Epoch{T}(year, month, day,
+    hour=0, minute=0, seconds=0, milliseconds=0) where T<:Timescale
     jd, jd1 = eraDtf2d(string(T.name.name),
     year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
@@ -108,7 +115,8 @@ julia> Epoch{TT}(DateTime(2017, 3, 14, 7, 18, 20, 325))
 """
 function Epoch{T}(dt::DateTime) where T<:Timescale
     Epoch{T}(Dates.year(dt), Dates.month(dt), Dates.day(dt),
-        Dates.hour(dt), Dates.minute(dt), Dates.second(dt) + Dates.millisecond(dt)/1000)
+        Dates.hour(dt), Dates.minute(dt),
+        Dates.second(dt) + Dates.millisecond(dt)/1000)
 end
 
 """
@@ -124,7 +132,7 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 ```
 """
 function Base.DateTime{T<:Timescale}(ep::Epoch{T})
-    dt = eraD2dtf(string(T.name.name), 3, julian1(ep), julian2(ep))
+    dt = eraD2dtf(string(T.name.name), 3, julian1_strip(ep), julian2_strip(ep))
     DateTime(dt...)
 end
 
@@ -140,7 +148,9 @@ julia> Epoch{TT}(Epoch{TAI}(2000, 1, 1))
 2000-01-01T00:00:32.184 TT
 ```
 """
-Epoch{T}(ep::Epoch{S}) where {T<:Timescale,S<:Timescale} = @convert convert(Epoch{T}, ep)
+function Epoch{T}(ep::Epoch{S}) where {T<:Timescale,S<:Timescale}
+    @convert convert(Epoch{T}, ep)
+end
 Epoch{T}(ep::Epoch{T}) where T<:Timescale = ep
 
 """
@@ -157,17 +167,20 @@ julia> Epoch{TT}("2017-03-14T07:18:20.325")
 """
 Epoch{T}(str::AbstractString) where T<:Timescale = Epoch{T}(DateTime(str))
 
-julian1(ep) = ustrip(ep.jd1)
-julian2(ep) = ustrip(ep.jd2)
+julian1(ep) = ep.jd1
+julian2(ep) = ep.jd2
+julian1_strip(ep) = ustrip(ep.jd1)
+julian2_strip(ep) = ustrip(ep.jd2)
 julian(ep) = julian1(ep) + julian2(ep)
+julian_strip(ep) = julian1_strip(ep) + julian2_strip(ep)
 mjd(ep) = julian(ep) - MJD
 jd2000(ep) = julian(ep) - J2000
 jd1950(ep) = julian(ep) - J1950
 in_centuries(ep::Epoch, base=J2000) = (julian(ep) - base) / JULIAN_CENTURY
 in_days(ep, base=J2000) = julian(ep) - base
-in_seconds(ep, base=J2000) = (julian(ep) - base) * SEC_PER_DAY
+in_seconds(ep, base=J2000) = second(julian(ep) - base)
 
-dut1(ep::Epoch) = getΔUT1(julian(ep))
+dut1(ep::Epoch) = getΔUT1(julian_strip(ep))
 
 function isapprox{T<:Timescale}(a::Epoch{T}, b::Epoch{T})
     return julian(a) ≈ julian(b)
