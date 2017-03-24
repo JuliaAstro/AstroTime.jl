@@ -13,7 +13,7 @@ import Base.Operators: +, -, ==
 import Base: convert, isapprox, isless
 
 export Timescale, Epoch, second, seconds, minutes, hours, day, days, +, -
-export julian, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
+export julian, julian1, julian2, mjd, jd2000, jd1950, in_seconds, in_days, in_centuries
 export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD0, J2000, J1950
 export @timescale
 
@@ -124,7 +124,7 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 ```
 """
 function Base.DateTime{T<:Timescale}(ep::Epoch{T})
-    dt = eraD2dtf(string(T.name.name), 3, fjd1(ep), fjd2(ep))
+    dt = eraD2dtf(string(T.name.name), 3, julian1(ep), julian2(ep))
     DateTime(dt...)
 end
 
@@ -157,9 +157,9 @@ julia> Epoch{TT}("2017-03-14T07:18:20.325")
 """
 Epoch{T}(str::AbstractString) where T<:Timescale = Epoch{T}(DateTime(str))
 
-fjd1(ep) = ustrip(ep.jd1)
-fjd2(ep) = ustrip(ep.jd2)
-julian(ep) = fjd1(ep) + fjd2(ep)
+julian1(ep) = ustrip(ep.jd1)
+julian2(ep) = ustrip(ep.jd2)
+julian(ep) = julian1(ep) + julian2(ep)
 mjd(ep) = julian(ep) - MJD
 jd2000(ep) = julian(ep) - J2000
 jd1950(ep) = julian(ep) - J1950
