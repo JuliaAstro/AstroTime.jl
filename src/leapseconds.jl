@@ -21,7 +21,7 @@ function LSK(file)
     LSK(t, leapseconds)
 end
 
-const LSK_FILE = @RemoteFile "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
+@RemoteFile LSK_FILE "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
 @OptionalData LSK_DATA LSK "Run 'AstronomicalTime.update()' to load it."
 
 function fractionofday(dt)
