@@ -208,6 +208,10 @@ function (-){T}(ep::Epoch{T}, dt::Unitful.Time)
     end
 end
 
+function (-){T}(ep1::Epoch{T}, ep2::Epoch{T})
+    (ep1.jd1 - ep2.jd1) + (ep1.jd2 - ep2.jd2)
+end
+
 const scales = (
     :TAI,
     :TT,
