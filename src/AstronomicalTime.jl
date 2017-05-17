@@ -49,9 +49,6 @@ abstract type Timescale end
 
 Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
 
-# FIXME: Workaround for #21016
-Base.show(io::IO, ::Type{Union{}}) = print(io, "Union{}")
-
 struct Epoch{T<:Timescale}
     jd1::typeof(days)
     jd2::typeof(days)
