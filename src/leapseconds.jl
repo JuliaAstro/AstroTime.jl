@@ -1,6 +1,6 @@
 export leapseconds, LSK
 
-type LSK
+struct LSK
     t::Vector{Float64}
     leapseconds::Vector{Float64}
 end

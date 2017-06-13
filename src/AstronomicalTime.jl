@@ -47,7 +47,7 @@ The following timescales are defined:
 """
 abstract type Timescale end
 
-Base.show{T<:Timescale}(io::IO, ::Type{T}) = print(io, T.name.name)
+Base.show(io::IO, ::Type{T}) where {T<:Timescale} = print(io, T.name.name)
 
 struct Epoch{T<:Timescale}
     jd1::typeof(days)
@@ -57,7 +57,7 @@ struct Epoch{T<:Timescale}
     end
 end
 
-function Base.show{T<:Timescale}(io::IO, ep::Epoch{T})
+function Base.show(io::IO, ep::Epoch{T}) where T<:Timescale
     print(io, "$(Dates.format(DateTime(ep),
         "yyyy-mm-ddTHH:MM:SS.sss")) $(T.name.name)")
 end
@@ -128,7 +128,7 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 2017-03-14T07:18:20.325
 ```
 """
-function Base.DateTime{T<:Timescale}(ep::Epoch{T})
+function Base.DateTime(ep::Epoch{T}) where T<:Timescale
     dt = eraD2dtf(string(T.name.name), 3, julian1_strip(ep), julian2_strip(ep))
     DateTime(dt...)
 end
@@ -179,17 +179,17 @@ in_seconds(ep, base=J2000) = second(julian(ep) - base)
 
 dut1(ep::Epoch) = getΔUT1(julian_strip(ep))
 
-function isapprox{T<:Timescale}(a::Epoch{T}, b::Epoch{T})
+function isapprox(a::Epoch{T}, b::Epoch{T}) where T<:Timescale
     return julian(a) ≈ julian(b)
 end
 
-function (==){T<:Timescale}(a::Epoch{T}, b::Epoch{T})
+function (==)(a::Epoch{T}, b::Epoch{T}) where T<:Timescale
     return DateTime(a) == DateTime(b)
 end
 
-isless{T<:Timescale}(ep1::Epoch{T}, ep2::Epoch{T}) = julian(ep1) < julian(ep2)
+isless(ep1::Epoch{T}, ep2::Epoch{T}) = julian(ep1) < julian(ep2) where T<:Timescale
 
-function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
+function (+)(ep::Epoch{T}, dt::Unitful.Time) where T<:Timescale
     if abs(dt) >= days
         return Epoch{T}(ep.jd1 + day(dt), ep.jd2)
     else
@@ -197,7 +197,7 @@ function (+){T}(ep::Epoch{T}, dt::Unitful.Time)
     end
 end
 
-function (-){T}(ep::Epoch{T}, dt::Unitful.Time)
+function (-)(ep::Epoch{T}, dt::Unitful.Time) where T<:Timescale
     if abs(dt) >= days
         return Epoch{T}(ep.jd1 - day(dt), ep.jd2)
     else
@@ -205,7 +205,7 @@ function (-){T}(ep::Epoch{T}, dt::Unitful.Time)
     end
 end
 
-function (-){T}(ep1::Epoch{T}, ep2::Epoch{T})
+function (-)(ep1::Epoch{T}, ep2::Epoch{T}) where T<:Timescale
     (ep1.jd1 - ep2.jd1) + (ep1.jd2 - ep2.jd2)
 end
 
@@ -222,7 +222,7 @@ const scales = (
 for scale in scales
     epoch = Symbol(scale, "Epoch")
     @eval begin
-        immutable $scale <: Timescale end
+        struct $scale <: Timescale end
         @convertible const $epoch = Epoch{$scale}
         export $scale, $epoch
     end
@@ -250,7 +250,7 @@ macro timescale(scale)
     end
     epoch = Symbol(scale, "Epoch")
     return quote
-        immutable $(esc(scale)) <: Timescale end
+        struct $(esc(scale)) <: Timescale end
         @convertible const $(esc(epoch)) = Epoch{$(esc(scale))}
     end
 end
