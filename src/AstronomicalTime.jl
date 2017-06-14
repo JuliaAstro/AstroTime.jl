@@ -187,7 +187,7 @@ function (==)(a::Epoch{T}, b::Epoch{T}) where T<:Timescale
     return DateTime(a) == DateTime(b)
 end
 
-isless(ep1::Epoch{T}, ep2::Epoch{T}) = julian(ep1) < julian(ep2) where T<:Timescale
+isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T<:Timescale} = julian(ep1) < julian(ep2)
 
 function (+)(ep::Epoch{T}, dt::Unitful.Time) where T<:Timescale
     if abs(dt) >= days
