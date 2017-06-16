@@ -1,4 +1,11 @@
-export leapseconds, LSK
+module LeapSeconds
+
+using OptionalData
+using RemoteFiles
+
+import ERFA: eraDat
+
+export leapseconds, LSK, LSK_FILE, LSK_DATA
 
 struct LSK
     t::Vector{Float64}
@@ -28,17 +35,17 @@ function fractionofday(dt)
     Dates.hour(dt)/24 + Dates.minute(dt)/(24*60) + Dates.second(dt)/86400 + Dates.millisecond(dt)/8.64e7
 end
 
-function leapseconds(lsk::LSK, ep::Epoch)
-    jd = julian_strip(ep)
-
+function leapseconds(lsk::LSK, jd)
     # Before 1960-01-01
     if jd < 2.4369345e6
         return 0.0
     elseif jd < lsk.t[1]
-        dt = DateTime(ep)
+        dt = Dates.julian2datetime(jd)
         return eraDat(Dates.year(dt), Dates.month(dt), Dates.day(dt), fractionofday(dt))
     else
         return lsk.leapseconds[findlast(jd .>= lsk.t)]
     end
 end
-leapseconds(ep::Epoch) = leapseconds(get(LSK_DATA), ep)
+leapseconds(jd) = leapseconds(get(LSK_DATA), jd)
+
+end
