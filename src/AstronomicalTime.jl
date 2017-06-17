@@ -17,6 +17,9 @@ const MJD = 2400000.5
 const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
 const J1950 = Dates.datetime2julian(DateTime(1950, 1, 1, 12, 0, 0))
 
+function in_seconds end
+function in_days end
+
 include("LeapSeconds.jl")
 include("TimeScales.jl")
 include("Periods.jl")

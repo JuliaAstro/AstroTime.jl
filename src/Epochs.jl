@@ -9,7 +9,8 @@ using ..TimeScales
 import ..TimeScales: scales
 import ..Periods: TimeUnit, Period, Δt
 import ..LeapSeconds: leapseconds
-import ..J2000, ..J1950, ..MJD, ..JULIAN_CENTURY, ..SEC_PER_DAY
+import ..J2000, ..J1950, ..MJD, ..JULIAN_CENTURY, ..SEC_PER_DAY, ..in_seconds,
+    ..in_days
 
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
     in_seconds, in_days, in_centuries, leapseconds, jd2000, jd1950, mjd
@@ -159,7 +160,7 @@ end
 isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T<:TimeScale} = julian(ep1) < julian(ep2)
 
 function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
-    delta = Δt(p)
+    delta = in_days(p)
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) + delta, julian2(ep))
     else
@@ -168,7 +169,7 @@ function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:Time
 end
 
 function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
-    delta = Δt(p)
+    delta = in_days(p)
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) - delta, julian2(ep))
     else

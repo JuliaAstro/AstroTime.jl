@@ -1,7 +1,6 @@
 using AstronomicalTime
 using Base.Test
 import ERFA: eraDat
-import AstronomicalTime.Periods: Δt
 
 AstronomicalTime.update()
 
@@ -16,12 +15,18 @@ AstronomicalTime.update()
         @test 1.0days == Period{Days}(1.0)
         @test 1.0weeks == Period{Weeks}(1.0)
         @test 1.0years == Period{Years}(1.0)
-        @test Δt(1.0seconds) == 1/86400.0
-        @test Δt(1.0minutes) == 1/1440.0
-        @test Δt(1.0hours) == 1/24.0
-        @test Δt(1.0days) == 1.0
-        @test Δt(1.0weeks) == 7.0
-        @test Δt(1.0years) == 365.0
+        @test in_days(1.0seconds) == 1/86400.0
+        @test in_days(1.0minutes) == 1/1440.0
+        @test in_days(1.0hours) == 1/24.0
+        @test in_days(1.0days) == 1.0
+        @test in_days(1.0weeks) == 7.0
+        @test in_days(1.0years) == 365.0
+        @test in_seconds(1.0seconds) == 1
+        @test in_seconds(1.0minutes) == 60
+        @test in_seconds(1.0hours) == 3600
+        @test in_seconds(1.0days) == 86400
+        @test in_seconds(1.0weeks) == 604800
+        @test in_seconds(1.0years) == 31536000
     end
     @testset "Epoch Type" begin
         ep0 = TTEpoch(0.0)
