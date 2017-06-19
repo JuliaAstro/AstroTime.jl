@@ -1,10 +1,10 @@
 module Periods
 
-import Base: *
+import Base: *, /
 import ..in_seconds, ..in_days
 
 export TimeUnit, Seconds, Minutes, Hours, Days, Weeks, Years,
-    seconds, minutes, hours, days, weeks, years, Period, *
+    seconds, minutes, hours, days, weeks, years, Period, *, /
 
 abstract type TimeUnit end
 
@@ -29,8 +29,11 @@ struct Period{U<:TimeUnit,T<:Number}
 end
 
 (*)(Δt::T, ::Type{U}) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
+
 (*)(x::T, p::Period) where {T<:Number} = Period{p.unit}(p.Δt * x)
 (*)(p::Period, x::T) where {T<:Number}= Period{p.unit}(p.Δt * x)
+(/)(x::T, p::Period) where {T<:Number} = Period{p.unit}(x / p.Δ)
+(/)(p::Period, x::T) where {T<:Number}= Period{p.unit}(p.Δt / x)
 
 in_days(p::Period{Seconds,T}) where {T} = p.Δt / 86400.0
 in_days(p::Period{Minutes,T}) where {T} = p.Δt / 1440.0

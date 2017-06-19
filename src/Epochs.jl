@@ -7,7 +7,7 @@ import Base: +, -, ==, isapprox, isless
 
 using ..TimeScales
 import ..TimeScales: scales
-import ..Periods: TimeUnit, Period, Δt
+import ..Periods: TimeUnit, Period, in_seconds, days
 import ..LeapSeconds: leapseconds
 import ..J2000, ..J1950, ..MJD, ..JULIAN_CENTURY, ..SEC_PER_DAY, ..in_seconds,
     ..in_days
@@ -178,7 +178,7 @@ function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:Time
 end
 
 function (-)(ep1::Epoch{T}, ep2::Epoch{T}) where T<:TimeScale
-    (julian(ep1) - julian(ep2)) * days
+    ((julian1(ep1) - julian1(ep2)) + (julian2(ep1) - julian2(ep2))) * days
 end
 
 include("conversions.jl")
