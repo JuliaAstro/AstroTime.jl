@@ -9,24 +9,60 @@ AstronomicalTime.update()
         @test string(TT) == "TT"
     end
     @testset "Periods" begin
-        @test 1.0seconds == Period{Seconds}(1.0)
-        @test 1.0minutes == Period{Minutes}(1.0)
-        @test 1.0hours == Period{Hours}(1.0)
-        @test 1.0days == Period{Days}(1.0)
-        @test 1.0weeks == Period{Weeks}(1.0)
-        @test 1.0years == Period{Years}(1.0)
-        @test in_days(1.0seconds) == 1/86400.0
-        @test in_days(1.0minutes) == 1/1440.0
-        @test in_days(1.0hours) == 1/24.0
-        @test in_days(1.0days) == 1.0
-        @test in_days(1.0weeks) == 7.0
-        @test in_days(1.0years) == 365.0
-        @test in_seconds(1.0seconds) == 1
-        @test in_seconds(1.0minutes) == 60
-        @test in_seconds(1.0hours) == 3600
-        @test in_seconds(1.0days) == 86400
-        @test in_seconds(1.0weeks) == 604800
-        @test in_seconds(1.0years) == 31536000
+        s = 1.0seconds
+        m = 1.0minutes
+        h = 1.0hours
+        d = 1.0days
+        y = 1.0years
+        c = 1.0centuries
+        @test s == Period{Second}(1.0)
+        @test m == Period{Minute}(1.0)
+        @test h == Period{Hour}(1.0)
+        @test d == Period{Day}(1.0)
+        @test y == Period{Year}(1.0)
+        @test c == Period{Century}(1.0)
+
+        @test seconds(s) == 1.0
+        @test seconds(m) == 60.0
+        @test seconds(h) == 3600.0
+        @test seconds(d) == 86400.0
+        @test seconds(y) == 3.15576e7
+        @test seconds(c) == 3.15576e9
+
+        @test minutes(s) == 1.0 / 60.0
+        @test minutes(m) == 1.0
+        @test minutes(h) == 60.0
+        @test minutes(d) == 1440.0
+        @test minutes(y) == 525960.0
+        @test minutes(c) == 5.2596e7
+
+        @test hours(s) == 1.0 / 3600.0
+        @test hours(m) == 1.0 / 60.0
+        @test hours(h) == 1.0
+        @test hours(d) == 24.0
+        @test hours(y) == 8766.0
+        @test hours(c) == 876600.0
+
+        @test days(s) == 1.0 / 86400.0
+        @test days(m) == 1.0 / 1440.0
+        @test days(h) == 1.0 / 24.0
+        @test days(d) == 1.0
+        @test days(y) == 365.25
+        @test days(c) == 36525.0
+
+        @test years(s) == 1.0 / 3.15576e7
+        @test years(m) == 1.0 / 525960.0
+        @test years(h) == 1.0 / 8766.0
+        @test years(d) == 1.0 / 365.25
+        @test years(y) == 1.0
+        @test years(c) == 100.0
+
+        @test centuries(s) == 1.0 / 3.15576e9
+        @test centuries(m) == 1.0 / 5.2596e7
+        @test centuries(h) == 1.0 / 876600.0
+        @test centuries(d) == 1.0 / 36525.0
+        @test centuries(y) == 1.0 / 100.0
+        @test centuries(c) == 1.0
     end
     @testset "Epoch Type" begin
         ep0 = TTEpoch(0.0)
@@ -68,9 +104,9 @@ AstronomicalTime.update()
         @test jd2000(tt) == 0
         @test jd1950(TTEpoch(1950, 1, 1, 12)) == 0
         @test mjd(TTEpoch(1858, 11, 17)) == 0
-        @test in_centuries(TTEpoch(2010, 1, 1)) == 0.1
-        @test in_days(TTEpoch(2000, 1, 2, 12)) == 1.0
-        @test in_seconds(TTEpoch(2000, 1, 2, 12)) == SEC_PER_DAY
+        @test centuries(TTEpoch(2010, 1, 1), J2000) == 0.1
+        @test days(TTEpoch(2000, 1, 2, 12), J2000) == 1.0
+        @test seconds(TTEpoch(2000, 1, 2, 12), J2000) == 86400.0
 
         @test tai ≈ TAIEpoch(utc)
         @test utc ≈ UTCEpoch(tai)
