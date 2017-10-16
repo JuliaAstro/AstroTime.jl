@@ -1,4 +1,6 @@
 julia 0.6
-Convertible
-ERFA
-OptionalData
+Convertible 0.1.2
+ERFA 0.2.0
+EarthOrientation 0.1.0
+OptionalData 0.1.0
+RemoteFiles 0.1.0
