@@ -7,8 +7,7 @@ using Reexport
 
 import RemoteFiles: path
 
-export JULIAN_CENTURY, SEC_PER_DAY, SEC_PER_CENTURY, MJD, J2000, J1950,
-    @timescale
+export @timescale
 
 include("LeapSeconds.jl")
 include("TimeScales.jl")
