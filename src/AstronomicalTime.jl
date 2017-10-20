@@ -5,7 +5,7 @@ __precompile__()
 using EarthOrientation
 using Reexport
 
-import RemoteFiles: path
+import RemoteFiles: path, isfile
 
 export @timescale
 
@@ -19,6 +19,10 @@ include("Epochs.jl")
 @reexport using .LeapSeconds
 @reexport using .Epochs
 
+function __init__()
+    isfile(LSK_FILE) && push!(LSK_DATA, path(LSK_FILE))
+end
+
 """
     @timescale scale
 
@@ -31,7 +35,7 @@ julia> @timescale Custom
 
 julia> Custom <: TimeScale
 true
-julia> CustomEpoch == Epoch{Custom}
+julia> CustomEpoch == Epoch{Custom, T} where T <: Number
 true
 ```
 """
@@ -42,7 +46,7 @@ macro timescale(scale)
     epoch = Symbol(scale, "Epoch")
     return quote
         struct $(esc(scale)) <: TimeScale end
-        @convertible const $(esc(epoch)) = Epoch{$(esc(scale))}
+        const $(esc(epoch)) = Epoch{$(esc(scale))}
     end
 end
 
