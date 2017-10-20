@@ -47,6 +47,7 @@ macro timescale(scale)
     return quote
         struct $(esc(scale)) <: TimeScale end
         const $(esc(epoch)) = Epoch{$(esc(scale))}
+        nothing
     end
 end
 
