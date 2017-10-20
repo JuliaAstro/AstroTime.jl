@@ -141,12 +141,12 @@ mjd(ep) = julian(ep) - MJD
 jd2000(ep) = julian(ep) - J2000
 jd1950(ep) = julian(ep) - J1950
 
-(::Second)(ep::Epoch, base=0.0) = seconds((julian(ep) - base) * days)
-(::Minute)(ep::Epoch, base=0.0) = minutes((julian(ep) - base) * days)
-(::Hour)(ep::Epoch, base=0.0) = hours((julian(ep) - base) * days)
-(::Day)(ep::Epoch, base=0.0) = days((julian(ep) - base) * days)
-(::Year)(ep::Epoch, base=0.0) = years((julian(ep) - base) * days)
-(::Century)(ep::Epoch, base=0.0) = centuries((julian(ep) - base) * days)
+(::Second)(ep::Epoch, base=0.0) = seconds((julian1(ep) - base + julian2(ep)) * days)
+(::Minute)(ep::Epoch, base=0.0) = minutes((julian1(ep) - base + julian2(ep)) * days)
+(::Hour)(ep::Epoch, base=0.0) = hours((julian1(ep) - base + julian2(ep)) * days)
+(::Day)(ep::Epoch, base=0.0) = days((julian1(ep) - base + julian2(ep)) * days)
+(::Year)(ep::Epoch, base=0.0) = years((julian1(ep) - base + julian2(ep)) * days)
+(::Century)(ep::Epoch, base=0.0) = centuries((julian1(ep) - base + julian2(ep)) * days)
 
 dut1(ep::Epoch) = getΔUT1(julian(ep))
 leapseconds(ep::Epoch) = leapseconds(julian(ep))

@@ -104,9 +104,14 @@ AstronomicalTime.update()
         @test jd2000(tt) == 0
         @test jd1950(TTEpoch(1950, 1, 1, 12)) == 0
         @test mjd(TTEpoch(1858, 11, 17)) == 0
-        @test centuries(TTEpoch(2010, 1, 1), J2000) == 0.1
-        @test days(TTEpoch(2000, 1, 2, 12), J2000) == 1.0
-        @test seconds(TTEpoch(2000, 1, 2, 12), J2000) == 86400.0
+
+
+        @test seconds(tt + 1seconds, J2000) ≈ 1.0
+        @test minutes(tt + 1minutes, J2000) ≈ 1.0
+        @test hours(tt + 1hours, J2000) ≈ 1.0
+        @test days(tt + 1days, J2000) ≈ 1.0
+        @test years(tt + 1years, J2000) ≈ 1.0
+        @test centuries(tt + 1centuries, J2000) ≈ 1.0
 
         @test tai ≈ TAIEpoch(utc)
         @test utc ≈ UTCEpoch(tai)
