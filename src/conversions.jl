@@ -1,5 +1,7 @@
 import Convertible: findpath, haspath
 
+export rescale
+
 using ..LeapSeconds
 
 function deltatr(ep::Epoch)
@@ -124,16 +126,16 @@ end
 function getgraph()
     graph = Dict{DataType,Set{DataType}}()
     for m in methods(rescale)
-        t1 = Base.unwrap_unionall(m.sig.parameters[2].parameters[1]).parameters[1]
-        t2 = Base.unwrap_unionall(m.sig.parameters[3]).parameters[1]
+        from = Base.unwrap_unionall(m.sig.parameters[3]).parameters[1]
+        to = Base.unwrap_unionall(m.sig.parameters[2].parameters[1]).parameters[1]
 
-        if !haskey(graph, t1)
-            merge!(graph, Dict(t1=>Set{DataType}()))
+        if !haskey(graph, from)
+            merge!(graph, Dict(from=>Set{DataType}()))
         end
-        if !haskey(graph, t2)
-            merge!(graph, Dict(t2=>Set{DataType}()))
+        if !haskey(graph, to)
+            merge!(graph, Dict(to=>Set{DataType}()))
         end
-        push!(graph[t1], t2)
+        push!(graph[from], to)
     end
     graph
 end
