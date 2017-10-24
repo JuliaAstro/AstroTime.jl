@@ -10,7 +10,6 @@ import ..TimeScales: scales
 import ..LeapSeconds: leapseconds
 
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
-    seconds, minutes, hours, days, weeks, years, centuries,
     leapseconds, jd2000, jd1950, mjd
 
 struct Epoch{S<:TimeScale,T<:Number}

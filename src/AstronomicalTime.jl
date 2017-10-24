@@ -1,6 +1,6 @@
-module AstronomicalTime
+# __precompile__()
 
-__precompile__()
+module AstronomicalTime
 
 using EarthOrientation
 using Reexport

@@ -2,9 +2,9 @@ module Periods
 
 import Base: *, /
 
-export TimeUnit, Second, Minute, Hour, Day, Week, Year, Century,
+export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     J2000, J1950, MJD,
-    seconds, minutes, hours, days, weeks, years, centuries, Period, *, /
+    seconds, minutes, hours, days, years, centuries, Period, *, /
 
 include("constants.jl")
 
