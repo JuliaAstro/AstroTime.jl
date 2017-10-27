@@ -1,10 +1,11 @@
 module Periods
 
-import Base: *, /
+import Base: *, /, get, isapprox, show
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     J2000, J1950, MJD,
-    seconds, minutes, hours, days, years, centuries, Period, *, /
+    seconds, minutes, hours, days, years, centuries,
+    Period, *, /, get
 
 include("constants.jl")
 
@@ -30,53 +31,65 @@ struct Period{U<:TimeUnit,T<:Number}
     Period{U}(Δt::T) where {U<:TimeUnit,T<:Number} = new{U,T}(U, Δt)
 end
 
+get(p::Period) = p.Δt
+
+show(io::IO, p::Period{Second}) = print(io, "$(get(p)) seconds")
+show(io::IO, p::Period{Minute}) = print(io, "$(get(p)) minutes")
+show(io::IO, p::Period{Hour}) = print(io, "$(get(p)) hours")
+show(io::IO, p::Period{Day}) = print(io, "$(get(p)) days")
+show(io::IO, p::Period{Year}) = print(io, "$(get(p)) years")
+show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
+
 (*)(Δt::T, ::U) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
 
 (*)(x::T, p::Period) where {T<:Number} = Period{p.unit}(p.Δt * x)
-(*)(p::Period, x::T) where {T<:Number}= Period{p.unit}(p.Δt * x)
+(*)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt * x)
 (/)(x::T, p::Period) where {T<:Number} = Period{p.unit}(x / p.Δ)
-(/)(p::Period, x::T) where {T<:Number}= Period{p.unit}(p.Δt / x)
+(/)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt / x)
 
-(::Second)(p::Period{Second})  = p.Δt
-(::Second)(p::Period{Minute})  = p.Δt * SECONDS_PER_MINUTE
-(::Second)(p::Period{Hour})    = p.Δt * SECONDS_PER_HOUR
-(::Second)(p::Period{Day})     = p.Δt * SECONDS_PER_DAY
-(::Second)(p::Period{Year})    = p.Δt * SECONDS_PER_YEAR
-(::Second)(p::Period{Century}) = p.Δt * SECONDS_PER_CENTURY
+isapprox(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit} = get(p1) ≈ get(p2)
 
-(::Minute)(p::Period{Second})  = p.Δt / SECONDS_PER_MINUTE
-(::Minute)(p::Period{Minute})  = p.Δt
-(::Minute)(p::Period{Hour})    = p.Δt * MINUTES_PER_HOUR
-(::Minute)(p::Period{Day})     = p.Δt * MINUTES_PER_DAY
-(::Minute)(p::Period{Year})    = p.Δt * MINUTES_PER_YEAR
-(::Minute)(p::Period{Century}) = p.Δt * MINUTES_PER_CENTURY
 
-(::Hour)(p::Period{Second})  = p.Δt / SECONDS_PER_HOUR
-(::Hour)(p::Period{Minute})  = p.Δt / MINUTES_PER_HOUR
-(::Hour)(p::Period{Hour})    = p.Δt
-(::Hour)(p::Period{Day})     = p.Δt * HOURS_PER_DAY
-(::Hour)(p::Period{Year})    = p.Δt * HOURS_PER_YEAR
-(::Hour)(p::Period{Century}) = p.Δt * HOURS_PER_CENTURY
+(::Second)(p::Period{Second})  = p
+(::Second)(p::Period{Minute})  = Period{Second}(p.Δt * SECONDS_PER_MINUTE)
+(::Second)(p::Period{Hour})    = Period{Second}(p.Δt * SECONDS_PER_HOUR)
+(::Second)(p::Period{Day})     = Period{Second}(p.Δt * SECONDS_PER_DAY)
+(::Second)(p::Period{Year})    = Period{Second}(p.Δt * SECONDS_PER_YEAR)
+(::Second)(p::Period{Century}) = Period{Second}(p.Δt * SECONDS_PER_CENTURY)
 
-(::Day)(p::Period{Second})  = p.Δt / SECONDS_PER_DAY
-(::Day)(p::Period{Minute})  = p.Δt / MINUTES_PER_DAY
-(::Day)(p::Period{Hour})    = p.Δt / HOURS_PER_DAY
-(::Day)(p::Period{Day})     = p.Δt
-(::Day)(p::Period{Year})    = p.Δt * DAYS_PER_YEAR
-(::Day)(p::Period{Century}) = p.Δt * DAYS_PER_CENTURY
+(::Minute)(p::Period{Second})  = Period{Minute}(p.Δt / SECONDS_PER_MINUTE)
+(::Minute)(p::Period{Minute})  = p
+(::Minute)(p::Period{Hour})    = Period{Minute}(p.Δt * MINUTES_PER_HOUR)
+(::Minute)(p::Period{Day})     = Period{Minute}(p.Δt * MINUTES_PER_DAY)
+(::Minute)(p::Period{Year})    = Period{Minute}(p.Δt * MINUTES_PER_YEAR)
+(::Minute)(p::Period{Century}) = Period{Minute}(p.Δt * MINUTES_PER_CENTURY)
 
-(::Year)(p::Period{Second})  = p.Δt / SECONDS_PER_YEAR
-(::Year)(p::Period{Minute})  = p.Δt / MINUTES_PER_YEAR
-(::Year)(p::Period{Hour})    = p.Δt / HOURS_PER_YEAR
-(::Year)(p::Period{Day})     = p.Δt / DAYS_PER_YEAR
-(::Year)(p::Period{Year})    = p.Δt
-(::Year)(p::Period{Century}) = p.Δt * YEARS_PER_CENTURY
+(::Hour)(p::Period{Second})  = Period{Hour}(p.Δt / SECONDS_PER_HOUR)
+(::Hour)(p::Period{Minute})  = Period{Hour}(p.Δt / MINUTES_PER_HOUR)
+(::Hour)(p::Period{Hour})    = p
+(::Hour)(p::Period{Day})     = Period{Hour}(p.Δt * HOURS_PER_DAY)
+(::Hour)(p::Period{Year})    = Period{Hour}(p.Δt * HOURS_PER_YEAR)
+(::Hour)(p::Period{Century}) = Period{Hour}(p.Δt * HOURS_PER_CENTURY)
 
-(::Century)(p::Period{Second})  = p.Δt / SECONDS_PER_CENTURY
-(::Century)(p::Period{Minute})  = p.Δt / MINUTES_PER_CENTURY
-(::Century)(p::Period{Hour})    = p.Δt / HOURS_PER_CENTURY
-(::Century)(p::Period{Day})     = p.Δt / DAYS_PER_CENTURY
-(::Century)(p::Period{Year})    = p.Δt / YEARS_PER_CENTURY
-(::Century)(p::Period{Century}) = p.Δt
+(::Day)(p::Period{Second})  = Period{Day}(p.Δt / SECONDS_PER_DAY)
+(::Day)(p::Period{Minute})  = Period{Day}(p.Δt / MINUTES_PER_DAY)
+(::Day)(p::Period{Hour})    = Period{Day}(p.Δt / HOURS_PER_DAY)
+(::Day)(p::Period{Day})     = p
+(::Day)(p::Period{Year})    = Period{Day}(p.Δt * DAYS_PER_YEAR)
+(::Day)(p::Period{Century}) = Period{Day}(p.Δt * DAYS_PER_CENTURY)
+
+(::Year)(p::Period{Second})  = Period{Year}(p.Δt / SECONDS_PER_YEAR)
+(::Year)(p::Period{Minute})  = Period{Year}(p.Δt / MINUTES_PER_YEAR)
+(::Year)(p::Period{Hour})    = Period{Year}(p.Δt / HOURS_PER_YEAR)
+(::Year)(p::Period{Day})     = Period{Year}(p.Δt / DAYS_PER_YEAR)
+(::Year)(p::Period{Year})    = p
+(::Year)(p::Period{Century}) = Period{Year}(p.Δt * YEARS_PER_CENTURY)
+
+(::Century)(p::Period{Second})  = Period{Century}(p.Δt / SECONDS_PER_CENTURY)
+(::Century)(p::Period{Minute})  = Period{Century}(p.Δt / MINUTES_PER_CENTURY)
+(::Century)(p::Period{Hour})    = Period{Century}(p.Δt / HOURS_PER_CENTURY)
+(::Century)(p::Period{Day})     = Period{Century}(p.Δt / DAYS_PER_CENTURY)
+(::Century)(p::Period{Year})    = Period{Century}(p.Δt / YEARS_PER_CENTURY)
+(::Century)(p::Period{Century}) = p
 
 end

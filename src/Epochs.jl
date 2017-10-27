@@ -161,7 +161,7 @@ end
 isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T<:TimeScale} = julian(ep1) < julian(ep2)
 
 function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
-    delta = days(p)
+    delta = get(days(p))
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) + delta, julian2(ep))
     else
@@ -170,7 +170,7 @@ function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:Time
 end
 
 function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
-    delta = days(p)
+    delta = get(days(p))
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) - delta, julian2(ep))
     else
