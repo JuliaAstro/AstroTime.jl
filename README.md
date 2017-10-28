@@ -2,7 +2,7 @@
 
 *Astronomical time keeping in Julia*
 
-[![Build Status Unix][travis-image]][travis-link] [![Build Status Windows][av-image]][av-link] [![Coveralls][coveralls-image]][coveralls-link] [![Codecov][codecov-image]][codecov-link] [![Docs Stable][docs-badge-stable]][docs-url-stable] [![Docs Latest][docs-badge-latest]][docs-url-latest]
+[![Build Status Unix][travis-badge]][travis-url] [![Build Status Windows][av-badge]][av-url] [![Coveralls][coveralls-badge]][coveralls-url] [![Codecov][codecov-badge]][codecov-url] [![Docs Stable][docs-badge-stable]][docs-url-stable] [![Docs Latest][docs-badge-latest]][docs-url-latest]
 
 ## Installation
 
