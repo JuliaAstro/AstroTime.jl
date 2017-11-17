@@ -16,8 +16,6 @@ The following timescales are defined:
 """
 abstract type TimeScale end
 
-Base.show(io::IO, ::Type{T}) where {T<:TimeScale} = print(io, T.name.name)
-
 const scales = (
     :TAI,
     :TT,

@@ -5,9 +5,6 @@ import ERFA: eraDat
 AstronomicalTime.update()
 
 @testset "AstronomicalTime" begin
-    @testset "Time Scales" begin
-        @test string(TT) == "TT"
-    end
     @testset "Periods" begin
         s = 1.0seconds
         m = 1.0minutes
