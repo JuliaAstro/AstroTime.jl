@@ -10,7 +10,9 @@ import ..TimeScales: scales
 import ..LeapSeconds: leapseconds
 
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
-    leapseconds, jd2000, jd1950, mjd
+    leapseconds, jd2000, jd1950, mjd, timescale
+
+const date_fmt = dateformat"yyyy-mm-ddTHH:MM:SS.sss"
 
 struct Epoch{S<:TimeScale,T<:Number}
     scale::Type{S}
@@ -34,10 +36,10 @@ struct Epoch{S<:TimeScale,T<:Number}
 end
 
 function Base.show(io::IO, ep::Epoch{S}) where S<:TimeScale
-    print(io, "$(Dates.format(DateTime(ep),
-        "yyyy-mm-ddTHH:MM:SS.sss")) $(S.name.name)")
+    print(io, "$(Dates.format(DateTime(ep), date_fmt)) $(S.name.name)")
 end
 
+timescale(ep::Epoch{S}) where S<:TimeScale = S
 
 """
     Epoch{T}(year, month, day,
@@ -112,9 +114,12 @@ end
 Epoch{T}(ep::Epoch{T}) where T<:TimeScale = ep
 
 """
-    Epoch{T}(timestamp::AbstractString) where T<:TimeScale
+    Epoch{T}(timestamp::AbstractString,
+        fmt::DateFormat=dateformat"yyyy-mm-ddTHH:MM:SS.sss") where T<:TimeScale
 
-Construct an `Epoch` with timescale `T` from a timestamp.
+Construct an `Epoch` with timescale `T` from a timestamp. Optionally a `DateFormat`
+object can be passed which improves performance if many date strings need to be
+parsed and the format is known in advance.
 
 # Example
 
@@ -123,7 +128,7 @@ julia> Epoch{TT}("2017-03-14T07:18:20.325")
 2017-03-14T07:18:20.325 TT
 ```
 """
-Epoch{T}(str::AbstractString) where T<:TimeScale = Epoch{T}(DateTime(str))
+Epoch{T}(str::AbstractString, fmt=date_fmt) where T<:TimeScale = Epoch{T}(DateTime(str, fmt))
 
 for scale in scales
     epoch = Symbol(scale, "Epoch")
