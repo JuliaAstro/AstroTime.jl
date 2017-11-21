@@ -9,6 +9,17 @@ export TimeUnit, Second, Minute, Hour, Day, Year, Century,
 
 include("constants.jl")
 
+"""
+All time units are subtypes of the abstract type `TimeUnit`.
+The following time units are defined:
+
+* `Second`
+* `Minute`
+* `Hour`
+* `Day`
+* `Year`
+* `Century`
+"""
 abstract type TimeUnit end
 
 struct Second <: TimeUnit end
@@ -48,7 +59,6 @@ show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
 (/)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt / x)
 
 isapprox(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit} = get(p1) ≈ get(p2)
-
 
 (::Second)(p::Period{Second})  = p
 (::Second)(p::Period{Minute})  = Period{Second}(p.Δt * SECONDS_PER_MINUTE)
