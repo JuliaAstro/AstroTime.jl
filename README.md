@@ -27,7 +27,7 @@ utc = TDBEpoch(utc)
 
 ## Documentation
 
-Please refer to the [documentation][docs-url-stable] for additional
+Please refer to the [documentation][docs-url-latest] for additional
 information.
 
 [travis-badge]: https://travis-ci.org/JuliaAstro/AstronomicalTime.jl.svg?branch=master
