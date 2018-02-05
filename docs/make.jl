@@ -8,6 +8,7 @@ makedocs(
         "Home" => "index.md",
         "API" => "api.md",
     ],
+    doctest = false,
 )
 
 deploydocs(
