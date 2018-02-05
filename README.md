@@ -9,10 +9,21 @@
 The package can be installed through Julia's package manager:
 
 ```julia
-Pkg.add("AstronomicalTime")
+Pkg.clone("https://github.com/JuliaAstro/AstronomicalTime.jl")
 ```
 
 ## Quickstart
+
+```julia
+# Create an Epoch based on the TT (Terrestial Time) scale
+tt = TTEpoch("2018-01-01T12:00:00")
+
+# Transform to UTC (Universal Time Coordinated)
+utc = UTCEpoch(tt)
+
+# Transform to TDB (Barycentric Dynamical Time)
+utc = TDBEpoch(utc)
+```
 
 ## Documentation
 
