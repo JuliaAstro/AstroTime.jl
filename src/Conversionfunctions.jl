@@ -1,7 +1,8 @@
 module Conversionfunctions
+
+export Taitt
 import Convertible: findpath, haspath
 include("constants.jl")
-export Taitt
 
 function Taitt(tai1::Float64, tai2::Float64)
     const dtat = TTMTAI/SECONDS_PER_DAY;
