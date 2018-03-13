@@ -7,7 +7,7 @@ export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
     Period, *, /, get
 
-include("constants.jl")
+# using ..constants
 
 """
 All time units are subtypes of the abstract type `TimeUnit`.
