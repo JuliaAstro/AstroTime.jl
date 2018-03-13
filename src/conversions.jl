@@ -3,7 +3,9 @@ import Convertible: findpath, haspath
 using ..Periods
 export rescale
 
-using ..LeapSeconds
+using ..LeapSeconds, ..Conversionfunctions
+
+
 
 
 """
@@ -109,7 +111,11 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
+<<<<<<< 56a7a738ef60532ddd337827a009c79f33aa4eeb
     date, date1 = taitt(jd1, jd2)
+=======
+    date, date1 = Taitt(jd1, jd2)   # Ported 
+>>>>>>> Ported function eraTaitt
     TTEpoch(date, date1)
 end
 
