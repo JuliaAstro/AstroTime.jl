@@ -1,7 +1,8 @@
 import Convertible: findpath, haspath
 
 include("constants.jl")
-export rescale
+export rescale,
+       taitt
 
 using ..LeapSeconds
 
