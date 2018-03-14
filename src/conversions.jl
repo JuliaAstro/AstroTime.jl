@@ -1,9 +1,9 @@
 import Convertible: findpath, haspath
 
+include("constants.jl")
 export rescale
 
-using ..LeapSeconds, ..Conversionfunctions
-
+using ..LeapSeconds
 
 
 function deltatr(ep::Epoch)
@@ -80,8 +80,16 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = Taitt(jd1, jd2)   # Ported 
-    TTEpoch(date, date1)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+    # Result, safeguarding precision
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 = jd2 + dtat
+    else
+        jd1 = jd1 + dtat
+        jd2 = jd2
+    end
+    TTEpoch(jd1, jd2)
 end
 
 # TT <-> TCG
