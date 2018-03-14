@@ -15,6 +15,17 @@ function taitt(tai1,tai2)
         tt2 = tai2
     end
 end
+function tttai(tt1,tt2)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
+    if tt1 > tt2
+        tai1 = tt1
+        tai2 = tt2 - dtat
+    else
+        tai1 = tt1 - dtat
+        tai2 = tt2
+    end
+end
+
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
@@ -83,7 +94,7 @@ end
 # TAI <-> TT
 function rescale(::Type{TAIEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTttai(jd1, jd2)
+    date, date1 = tttai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
