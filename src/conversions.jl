@@ -2,6 +2,7 @@ import Convertible: findpath, haspath
 
 export rescale
 export taitt
+export tttai
 
 using ..LeapSeconds
 
