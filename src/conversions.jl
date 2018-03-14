@@ -4,6 +4,7 @@ export rescale
 
 using ..LeapSeconds
 
+
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
@@ -72,8 +73,16 @@ end
 # TAI <-> TT
 function rescale(::Type{TAIEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTttai(jd1, jd2)
-    TAIEpoch(date, date1)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 -= dtat
+    else
+        jd1 -= dtat
+        jd2 = jd2
+    end
+    
+    TAIEpoch(jd1, jd2)
 end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
@@ -156,3 +165,4 @@ end
 @generated function _rescale(::Type{Epoch{S2}}, ep::Epoch{S1}) where {S1<:TimeScale,S2<:TimeScale}
     gen_rescale(S1, S2, ep)
 end
+
