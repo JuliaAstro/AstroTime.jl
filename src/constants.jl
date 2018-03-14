@@ -28,3 +28,6 @@ const DAYS_PER_YEAR        = 365.25
 const DAYS_PER_CENTURY     = 365.25 * 100.0
 
 const YEARS_PER_CENTURY    = 100.0
+
+# ============================= ERFA CONSTANTS =========================
+const OFFSET_TT_TAI = 32.184 
