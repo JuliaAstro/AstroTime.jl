@@ -126,14 +126,12 @@ AstronomicalTime.update()
         @test tdb ≈ TDBEpoch(tt)
         @test tdb ≈ TDBEpoch(tcb)
         @test tcb ≈ TCBEpoch(tdb)
-        @test taitt(julian1(tt), julian2(tt)) ≈ eraTaitt(julian1(tt), julian2(tt))
-        @test taitt(julian2(tt), julian1(tt)) ≈ eraTaitt(julian2(tt), julian1(tt))
+
 
 
         @test tt ≈ TTEpoch(tcb)
         @test tcb ≈ TCBEpoch(tt)
         @test tt == TTEpoch(tt)
-
 
         # Reference values from Orekit
         ref = TDBEpoch(2013, 3, 18, 12)
