@@ -2,7 +2,6 @@ module Epochs
 
 using EarthOrientation
 using ERFA
-using ..Conversionfunctions
 
 import Base: +, -, ==, isapprox, isless
 

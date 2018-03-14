@@ -3,8 +3,7 @@ import Convertible: findpath, haspath
 using ..Periods
 export rescale
 
-using ..LeapSeconds, ..Conversionfunctions
-
+using ..LeapSeconds
 
 
 
@@ -111,12 +110,25 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
+<<<<<<< aeacb6edd2919cee100e9c87a80df84ee2801bb2
 <<<<<<< 56a7a738ef60532ddd337827a009c79f33aa4eeb
     date, date1 = taitt(jd1, jd2)
 =======
-    date, date1 = Taitt(jd1, jd2)   # Ported 
+    date, date1 = Taitt(jd1, jd2)   # Ported
 >>>>>>> Ported function eraTaitt
     TTEpoch(date, date1)
+=======
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+    # Result, safeguarding precision
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 = jd2 + dtat
+    else
+        jd1 = jd1 + dtat
+        jd2 = jd2
+    end
+    TTEpoch(jd1, jd2)
+>>>>>>> fixing
 end
 
 # TT <-> TCG
