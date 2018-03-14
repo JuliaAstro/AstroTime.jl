@@ -1,10 +1,20 @@
 import Convertible: findpath, haspath
 
 export rescale
-export Taitt
+export taitt
 
 using ..LeapSeconds
 
+function taitt(tai1,tai2)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
+    if tai1 > tai2
+        tt1 = tai1
+        tt2 = tai2 + dtat
+    else
+        tt1 = tai1 + dtat
+        tt2 = tai2
+    end
+end
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
@@ -79,7 +89,7 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = Taitt(jd1, jd2)
+    date, date1 = taitt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
@@ -158,13 +168,3 @@ end
     gen_rescale(S1, S2, ep)
 end
 
-function taitt(tai1,tai2)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
-    if tai1 > tai2
-        tt1 = tai1
-        tt2 = tai2 + dtat
-    else
-        tt1 = tai1 + dtat
-        tt2 = tai2
-    end
-end
