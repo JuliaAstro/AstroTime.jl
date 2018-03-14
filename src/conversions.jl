@@ -76,9 +76,9 @@ function rescale(::Type{TAIEpoch}, ep::TTEpoch)
     dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
     if jd1 > jd2
         jd1 = jd1
-        jd2 = jd2 - dtat
+        jd2 -= dtat
     else
-        jd1 = jd1 - dtat
+        jd1 -= dtat
         jd2 = jd2
     end
     
