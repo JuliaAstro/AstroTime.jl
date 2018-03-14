@@ -87,15 +87,8 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 = jd2 + dtat
-    else
-        jd1 = jd1 + dtat
-        jd2 = jd2
-    end
-    TTEpoch(jd1, jd2)
+    date, date1 = eraTaitt(jd1, jd2)
+    TTEpoch(date, date1)
 end
 
 # TT <-> TCG
