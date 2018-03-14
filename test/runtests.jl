@@ -126,7 +126,8 @@ AstronomicalTime.update()
         @test tdb ≈ TDBEpoch(tt)
         @test tdb ≈ TDBEpoch(tcb)
         @test tcb ≈ TCBEpoch(tdb)
-        @test tt ≈ TTEpoch(TAIEpoch(tt.jd2, tt.jd1))
+        @test taitt(julian1(tt), julian2(tt)) ≈ eraTaitt(julian1(tt), julian2(tt))
+        @test taitt(julian2(tt), julian1(tt)) ≈ eraTaitt(julian2(tt), julian1(tt))
 
 
         @test tt ≈ TTEpoch(tcb)
