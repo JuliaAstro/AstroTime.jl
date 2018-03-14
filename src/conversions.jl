@@ -1,21 +1,9 @@
 import Convertible: findpath, haspath
 
 export rescale
-export taitt
-export tttai
 
 using ..LeapSeconds
 
-function tttai(tt1,tt2)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
-    if tt1 > tt2
-        tai1 = tt1
-        tai2 = tt2 - dtat
-    else
-        tai1 = tt1 - dtat
-        tai2 = tt2
-    end
-end
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
