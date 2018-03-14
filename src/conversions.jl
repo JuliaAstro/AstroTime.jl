@@ -74,16 +74,8 @@ end
 # TAI <-> TT
 function rescale(::Type{TAIEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
-    # Result, safeguarding precision
-    if jd1 > jd2
-       tai = jd1
-       tai2 = jd2 - dtat
-    else
-       tai1 = jd1 - dtat
-       tai2 = jd2
-    end
-    TAIEpoch(tai1, tai2)
+    date, date1 = eraTttai(jd1, jd2)
+    TAIEpoch(date, date1)
 end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
