@@ -38,6 +38,7 @@ const DAYS_PER_CENTURY     = 365.25 * 100.0
 
 const YEARS_PER_CENTURY    = 100.0
 
+<<<<<<< cdc10b523967f6ca20cf0e65d3a45c8a322678b6
 <<<<<<< 56a7a738ef60532ddd337827a009c79f33aa4eeb
 const OFFSET_TT_TAI = 32.184
 =======
@@ -46,5 +47,7 @@ const OFFSET_TT_TAI = 32.184
 const TTMTAI = 32.184 # ERFA_TTMTAI
 >>>>>>> Ported function eraTaitt
 =======
+=======
+>>>>>>> final changes
 const OFFSET_TT_TAI = 32.184
 >>>>>>> fixing
