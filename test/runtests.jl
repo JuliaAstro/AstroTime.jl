@@ -128,10 +128,10 @@ AstronomicalTime.update()
         @test tcb ≈ TCBEpoch(tdb)
 
 
+
         @test tt ≈ TTEpoch(tcb)
         @test tcb ≈ TCBEpoch(tt)
         @test tt == TTEpoch(tt)
-
 
         # Reference values from Orekit
         ref = TDBEpoch(2013, 3, 18, 12)
@@ -148,11 +148,15 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
-
     @testset "PortedFunctions" begin
+
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
+        ut1 = UT1Epoch(2000, 1, 1, 12, 0, 0.0)
+        dat = AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1))
         @test AstronomicalTime.Epochs.taitt(julian1(tai), julian2(tai)) == ERFA.taitt(julian1(tai), julian2(tai))
         @test AstronomicalTime.Epochs.taitt(julian2(tai), julian1(tai)) == ERFA.taitt(julian2(tai), julian1(tai))
+        @test AstronomicalTime.Epochs.ut1tai(julian1(ut1), julian2(ut1), dat) == ERFA.ut1tai(julian1(ut1), julian2(ut1), dat)
+        @test AstronomicalTime.Epochs.ut1tai(julian2(ut1), julian1(ut1), dat) == ERFA.ut1tai(julian2(ut1), julian1(ut1), dat)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
