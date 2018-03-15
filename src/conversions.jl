@@ -9,6 +9,7 @@ using ..LeapSeconds
 """
     taitt(jd1, jd2)
 
+
 Transform a two-part Julia date from `TAI` to `TT`.
 
 # Example
@@ -34,6 +35,33 @@ function taitt(jd1, jd2)
     jd1, jd2
 end
 
+
+"""
+ ut1tai(jd1, jd2)
+
+Transform a two-part Julia date from `UT1` to `TAI`.
+
+# Example
+
+```jldoctest
+julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 UT1
+julia> ut1ai(ut1.jd1, ut1.jd2)
+(2.4578265e6, 0.30477440993249416)
+
+```
+"""
+function ut1tai(jd1, jd2, dta)
+    dtad = dta / SECONDS_PER_DAY
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 - dtad
+    else
+        date = jd1 - dtad
+        date1 = jd2
+    end
+    date, date1
+end
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
@@ -75,7 +103,7 @@ end
 # TAI <-> UT1
 function rescale(::Type{TAIEpoch}, ep::UT1Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraUt1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = ut1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     TAIEpoch(date, date1)
 end
 

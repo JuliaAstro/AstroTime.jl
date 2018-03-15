@@ -38,6 +38,7 @@ const DAYS_PER_CENTURY     = 365.25 * 100.0
 
 const YEARS_PER_CENTURY    = 100.0
 
+<<<<<<< e7240b131e015741152ce49f3097621a420009c6
 <<<<<<< cdc10b523967f6ca20cf0e65d3a45c8a322678b6
 <<<<<<< 56a7a738ef60532ddd337827a009c79f33aa4eeb
 const OFFSET_TT_TAI = 32.184
@@ -49,5 +50,7 @@ const TTMTAI = 32.184 # ERFA_TTMTAI
 =======
 =======
 >>>>>>> final changes
+=======
+>>>>>>> port ut1tai
 const OFFSET_TT_TAI = 32.184
 >>>>>>> fixing
