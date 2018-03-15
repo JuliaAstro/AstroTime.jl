@@ -45,7 +45,7 @@ Transform a two-part Julia date from `UT1` to `TAI`.
 ```jldoctest
 julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 UT1
-julia> ut1ai(ut1.jd1, ut1.jd2)
+julia> ut1ai(ut1.jd1, ut1.jd2, AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1)))
 (2.4578265e6, 0.30477440993249416)
 
 ```
