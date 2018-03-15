@@ -37,7 +37,7 @@ end
 
 
 """
-    ut1tai(jd1, jd2)
+    ut1tai(jd1, jd2, dta)
 
 Transform a two-part Julia date from `UT1` to `TAI`.
 
