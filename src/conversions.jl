@@ -1,15 +1,25 @@
 import Convertible: findpath, haspath
 
 using ..Periods
-export rescale,
-       taitt
+export rescale
 
 using ..LeapSeconds
 
 
 """
-taitt(jd1, jd2)
-    For converting TAI time to TT time
+ taitt(jd1, jd2)
+
+Gives required changed julian dates for conversion from TAI to TT.
+
+# Example
+
+```jldoctest
+julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TAI
+julia> taitt(tai.jd1, tai.jd2)
+(2.4578265e6, 0.30477440993249416)
+
+```
 """
 function taitt(jd1, jd2)
     dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
