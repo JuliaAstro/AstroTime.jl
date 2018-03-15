@@ -1,6 +1,6 @@
 using AstronomicalTime
 using Base.Test
-import ERFA: eraDat
+using ERFA
 
 AstronomicalTime.update()
 
@@ -127,10 +127,11 @@ AstronomicalTime.update()
         @test tdb ≈ TDBEpoch(tcb)
         @test tcb ≈ TCBEpoch(tdb)
 
+
         @test tt ≈ TTEpoch(tcb)
         @test tcb ≈ TCBEpoch(tt)
-
         @test tt == TTEpoch(tt)
+
 
         # Reference values from Orekit
         ref = TDBEpoch(2013, 3, 18, 12)
@@ -146,6 +147,12 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
+    end
+
+    @testset "PortedFunctions" begin
+        tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
+        @test AstronomicalTime.Epochs.taitt(julian1(tai), julian2(tai)) == ERFA.taitt(julian1(tai), julian2(tai))
+        @test AstronomicalTime.Epochs.taitt(julian2(tai), julian1(tai)) == ERFA.taitt(julian2(tai), julian1(tai))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0

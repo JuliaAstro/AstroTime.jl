@@ -1,8 +1,39 @@
 import Convertible: findpath, haspath
 
+using ..Periods
 export rescale
 
 using ..LeapSeconds
+
+
+"""
+ taitt(jd1, jd2)
+
+Gives required changed julian dates for conversion from TAI to TT.
+
+# Example
+
+```jldoctest
+julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TAI
+julia> taitt(tai.jd1, tai.jd2)
+(2.4578265e6, 0.30477440993249416)
+
+```
+"""
+function taitt(jd1, jd2)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+    # Result, safeguarding precision
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 = jd2 + dtat
+    else
+        jd1 = jd1 + dtat
+        jd2 = jd2
+    end
+    jd1, jd2
+end
+
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
@@ -78,7 +109,7 @@ end
 
 function rescale(::Type{TTEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTaitt(jd1, jd2)
+    date, date1 = taitt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
