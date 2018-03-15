@@ -7,7 +7,9 @@ using ..LeapSeconds
 
 
 """
- taitt(jd1, jd2)
+
+    taitt(jd1, jd2)
+
 
 Transform a two-part Julia date from `TAI` to `TT`.
 
