@@ -148,12 +148,13 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
-    # Test of Ported function
     @testset "PortedFunctions" begin
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
+        ut1 = UT1Epoch(2000, 1, 1, 12, 0, 0.0)
         @test taitt(julian1(tt), julian2(tt)) == eraTaitt(julian1(tt), julian2(tt))
         @test taitt(julian2(tt), julian1(tt)) == eraTaitt(julian2(tt), julian1(tt))
-        @test TTEpoch(taitt(julian2(tt), julian1(tt))...) ≈ TTEpoch(taitt(julian1(tt), julian2(tt))...)
+        @test ut1ai(julian1(ut1), julian2(ut1)) == eraTaitt(julian1(ut1), julian2(ut1))
+        @test ut1ai(julian2(ut1), julian1(ut1)) == eraTaitt(julian2(ut1), julian1(ut1))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
