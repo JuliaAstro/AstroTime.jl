@@ -1,6 +1,6 @@
 import Convertible: findpath, haspath
 
-include("constants.jl")
+using ..Periods
 export rescale,
        taitt
 

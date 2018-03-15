@@ -153,7 +153,7 @@ AstronomicalTime.update()
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
         @test taitt(julian1(tt), julian2(tt)) == eraTaitt(julian1(tt), julian2(tt))
         @test taitt(julian2(tt), julian1(tt)) == eraTaitt(julian2(tt), julian1(tt))
-        @test TTEpoch(taitt(julian2(tt), julian1(tt))...) == TTEpoch(taitt(julian1(tt), julian2(tt))...)
+        @test TTEpoch(taitt(julian2(tt), julian1(tt))...) ≈ TTEpoch(taitt(julian1(tt), julian2(tt))...)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
