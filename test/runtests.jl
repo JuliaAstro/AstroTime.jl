@@ -148,7 +148,6 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
-
     @testset "PortedFunctions" begin
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
         @test AstronomicalTime.Epochs.taitt(julian1(tai), julian2(tai)) == ERFA.taitt(julian1(tai), julian2(tai))
