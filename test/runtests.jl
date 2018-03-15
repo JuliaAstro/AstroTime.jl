@@ -152,6 +152,8 @@ AstronomicalTime.update()
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
         @test AstronomicalTime.Epochs.taitt(julian1(tai), julian2(tai)) == ERFA.taitt(julian1(tai), julian2(tai))
         @test AstronomicalTime.Epochs.taitt(julian2(tai), julian1(tai)) == ERFA.taitt(julian2(tai), julian1(tai))
+        @test AstronomicalTime.Epochs.ut1ai(julian1(ut1), julian2(ut1)) == ERFA.ut1tai(julian1(ut1), julian2(ut1))
+        @test AstronomicalTime.Epochs.ut1ai(julian2(ut1), julian1(ut1)) == ERFA.ut1tai(julian2(ut1), julian1(ut1))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
