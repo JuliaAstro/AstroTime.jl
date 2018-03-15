@@ -7,9 +7,16 @@ using ..LeapSeconds
 
 
 """
+<<<<<<< HEAD
 
  taitt(jd1, jd2)
 
+=======
+
+    taitt(jd1, jd2)
+
+
+>>>>>>> 70d4a900a2437ddc2a4bb2dbe7c6f1858ac5fcc0
 Transform a two-part Julia date from `TAI` to `TT`.
 
 # Example
@@ -38,6 +45,7 @@ end
 
 """
     ut1tai(jd1, jd2, dta)
+
 
 Transform a two-part Julia date from `UT1` to `TAI`.
 
