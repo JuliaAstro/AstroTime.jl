@@ -62,6 +62,33 @@ function ut1tai(jd1, jd2, dta)
     date, date1
 end
 
+"""
+    taiut1(jd1, jd2, dta)
+
+Transform a two-part Julia date from `UT1` to `TAI`.
+
+# Example
+
+```jldoctest
+julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TAI
+julia> ut1ai(tai.jd1, tai.jd2, AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai)))
+(2.4578265e6, 0.30477440993249416)
+
+```
+"""
+function taiut1(jd1, jd2, dta)
+    dtad = dta / SECONDS_PER_DAY
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 + dtad
+    else
+        date = jd1 + dtad
+        date1 = jd2
+    end
+    date, date1
+end
+
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
@@ -108,7 +135,7 @@ end
 
 function rescale(::Type{UT1Epoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTaiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = taiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     UT1Epoch(date, date1)
 end
 
