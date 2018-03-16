@@ -100,7 +100,7 @@ Transform a two-part Julia date from `TCG` to `TT`.
 julia> tcg = Epoch{TCG}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TCG
 julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
-(2.4578265e6, 0.3027549702857392)
+(2.4578265e6, 0.30440190993249416)
 
 ```
 """
@@ -115,6 +115,37 @@ function tcgtt(jd1, jd2)
        end
        date, date1
 end
+
+
+"""
+    tttcg(jd1, jd2)
+
+Transform a two-part Julia date from `TT` to `TCG`.
+
+# Example
+
+```jldoctest
+julia> tt = Epoch{TT}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TT
+julia> AstronomicalTime.Epochs.tttgc(tt.jd1, tt.jd2)
+(2.4578265e6, 0.30440190993249416)
+
+```
+"""
+function tttcg(jd1, jd2)
+    t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
+    elgg = ELG/(1.0-ELG)
+       if jd1 > jd2
+          date = jd1
+          date1 = jd2 + ((jd1 - MJD) + (jd2 - t77t)) * elgg
+       else
+          date = jd1 + ((jd2 - MJD) + (jd1 - t77t)) * elgg
+          date1 = jd2
+       end
+       date, date1
+end
+
+
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
