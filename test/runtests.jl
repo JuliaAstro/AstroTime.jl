@@ -164,7 +164,7 @@ AstronomicalTime.update()
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
         for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) == eraDat(year, 4, 1, 0.0)
+            @test leapseconds(TTEpoch(year, 4, 1)) == ERFA.dat(year, 4, 1, 0.0)
         end
     end
 end

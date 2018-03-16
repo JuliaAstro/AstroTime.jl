@@ -1,9 +1,9 @@
 module LeapSeconds
 
+using ERFA
 using OptionalData
 using RemoteFiles
 
-import ERFA: eraDat
 
 export leapseconds, LSK, LSK_FILE, LSK_DATA
 
@@ -41,7 +41,7 @@ function leapseconds(lsk::LSK, jd)
         return 0.0
     elseif jd < lsk.t[1]
         dt = Dates.julian2datetime(jd)
-        return eraDat(Dates.year(dt), Dates.month(dt), Dates.day(dt), fractionofday(dt))
+        return ERFA.dat(Dates.year(dt), Dates.month(dt), Dates.day(dt), fractionofday(dt))
     else
         return lsk.leapseconds[findlast(jd .>= lsk.t)]
     end

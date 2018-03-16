@@ -91,7 +91,7 @@ end
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
+    ERFA.dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
 end
 
 function deltat(ep::Epoch)
@@ -103,26 +103,26 @@ end
 # TAI <-> UTC
 function rescale(::Type{TAIEpoch}, ep::UTCEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraUtctai(jd1, jd2)
+    date, date1 = ERFA.utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
 function rescale(::Type{UTCEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTaiutc(jd1, jd2)
+    date, date1 = ERFA.taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
 # UTC <-> UT1
 function rescale(::Type{UTCEpoch}, ep::UT1Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraUt1utc(jd1, jd2, dut1(ep))
+    date, date1 = ERFA.ut1utc(jd1, jd2, dut1(ep))
     UTCEpoch(date, date1)
 end
 
 function rescale(::Type{UT1Epoch}, ep::UTCEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraUtcut1(jd1, jd2, dut1(ep))
+    date, date1 = ERFA.utcut1(jd1, jd2, dut1(ep))
     UT1Epoch(date, date1)
 end
 
@@ -143,21 +143,21 @@ end
 function rescale(::Type{TTEpoch}, ep::UT1Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
-    date, date1 = eraUt1tt(jd1, jd2, dt)
+    date, date1 = ERFA.ut1tt(jd1, jd2, dt)
     TTEpoch(date, date1)
 end
 
 function rescale(::Type{UT1Epoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
-    date, date1 = eraTtut1(jd1, jd2, dt)
+    date, date1 = ERFA.ttut1(jd1, jd2, dt)
     UT1Epoch(date, date1)
 end
 
 # TAI <-> TT
 function rescale(::Type{TAIEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTttai(jd1, jd2)
+    date, date1 = ERFA.tttai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
@@ -170,13 +170,13 @@ end
 # TT <-> TCG
 function rescale(::Type{TTEpoch}, ep::TCGEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTcgtt(jd1, jd2)
+    date, date1 = ERFA.tcgtt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
 function rescale(::Type{TCGEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTttcg(jd1, jd2)
+    date, date1 = ERFA.tttcg(jd1, jd2)
     TCGEpoch(date, date1)
 end
 
@@ -184,27 +184,27 @@ end
 function rescale(::Type{TTEpoch}, ep::TDBEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
-    date, date1 = eraTdbtt(jd1, jd2, Δtr)
+    date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
 function rescale(::Type{TDBEpoch}, ep::TTEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
-    date, date1 = eraTttdb(jd1, jd2, Δtr)
+    date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
 
 # TDB <-> TCB
 function rescale(::Type{TDBEpoch}, ep::TCBEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTcbtdb(jd1, jd2)
+    date, date1 = ERFA.tcbtdb(jd1, jd2)
     TDBEpoch(date, date1)
 end
 
 function rescale(::Type{TCBEpoch}, ep::TDBEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = eraTdbtcb(jd1, jd2)
+    date, date1 = ERFA.tdbtcb(jd1, jd2)
     TCBEpoch(date, date1)
 end
 

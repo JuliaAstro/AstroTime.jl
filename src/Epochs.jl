@@ -56,7 +56,7 @@ julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
 """
 function Epoch{T}(year, month, day,
     hour=0, minute=0, seconds=0, milliseconds=0) where T<:TimeScale
-    jd, jd1 = eraDtf2d(string(T.name.name),
+    jd, jd1 = ERFA.dtf2d(string(T.name.name),
     year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
 end
@@ -92,7 +92,7 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 ```
 """
 function Base.DateTime(ep::Epoch{T}) where T<:TimeScale
-    dt = eraD2dtf(string(T.name.name), 3, julian1(ep), julian2(ep))
+    dt = ERFA.d2dtf(string(T.name.name), 3, julian1(ep), julian2(ep))
     DateTime(dt...)
 end
 
