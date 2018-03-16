@@ -106,14 +106,14 @@ julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
 """
 function tcgtt(jd1, jd2)
     t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
-       if jd1 > jd2
-          date = jd1
-          date1 = jd2 - ((jd1 - MJD) + (jd2 - t77t)) * ELG
-       else
-          date = jd1 - ((jd2 - MJD) + (jd1 - t77t)) * ELG
-          date1 = jd2
-       end
-       date, date1
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 - ((jd1 - MJD) + (jd2 - t77t)) * ELG
+    else
+        date = jd1 - ((jd2 - MJD) + (jd1 - t77t)) * ELG
+        date1 = jd2
+    end
+    date, date1
 end
 
 
@@ -135,14 +135,14 @@ julia> AstronomicalTime.Epochs.tttgc(tt.jd1, tt.jd2)
 function tttcg(jd1, jd2)
     t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
     elgg = ELG/(1.0-ELG)
-       if jd1 > jd2
-          date = jd1
-          date1 = jd2 + ((jd1 - MJD) + (jd2 - t77t)) * elgg
-       else
-          date = jd1 + ((jd2 - MJD) + (jd1 - t77t)) * elgg
-          date1 = jd2
-       end
-       date, date1
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 + ((jd1 - MJD) + (jd2 - t77t)) * elgg
+    else
+        date = jd1 + ((jd2 - MJD) + (jd1 - t77t)) * elgg
+        date1 = jd2
+    end
+    date, date1
 end
 
 
