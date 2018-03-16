@@ -16,7 +16,7 @@ Transform a two-part Julia date from `TAI` to `TT`.
 ```jldoctest
 julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TAI
-julia> taitt(tai.jd1, tai.jd2)
+julia> AstronomicalTime.Epochs.taitt(tai.jd1, tai.jd2)
 (2.4578265e6, 0.30477440993249416)
 
 ```
@@ -45,8 +45,8 @@ Transform a two-part Julia date from `UT1` to `TAI`.
 ```jldoctest
 julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 UT1
-julia> ut1ai(ut1.jd1, ut1.jd2, AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1)))
-(2.4578265e6, 0.30477440993249416)
+julia> AstronomicalTime.Epochs.ut1tai(ut1.jd1, ut1.jd2, AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1)))
+(2.4578265e6, 0.3048243932182868)
 
 ```
 """
@@ -72,7 +72,7 @@ Transform a two-part Julia date from `TAI` to `UT1`.
 ```jldoctest
 julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TAI
-julia> ut1ai(tai.jd1, tai.jd2, AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai)))
+julia> AstronomicalTime.Epochs.ut1tai(tai.jd1, tai.jd2, AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai)))
 (2.4578265e6, 0.30477440993249416)
 
 ```
@@ -93,15 +93,15 @@ end
 """
     tcgtt(jd1, jd2)
 
-Transform a two-part Julia date from `TAI` to `UT1`.
+Transform a two-part Julia date from `TCG` to `TT`.
 
 # Example
 
 ```jldoctest
 julia> tcg = Epoch{TCG}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TCG
-julia> tcgtt(tcg.jd1, tcg.jd2)
-(2.4578265e6, 0.30477440993249416)
+julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
+(2.4578265e6, 0.3027549702857392)
 
 ```
 """
