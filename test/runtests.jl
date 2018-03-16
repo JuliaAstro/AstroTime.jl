@@ -1,6 +1,6 @@
 using AstronomicalTime
 using Base.Test
-import ERFA: eraDat
+using ERFA
 
 AstronomicalTime.update()
 
@@ -146,6 +146,12 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
+    end
+        @testset "Functions" begin
+        tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
+        @test AstronomicalTime.Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
+        @test AstronomicalTime.Epochs.tttai(julian2(tt), julian1(tt)) == ERFA.tttai(julian2(tt), julian1(tt))
+
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
