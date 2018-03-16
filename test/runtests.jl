@@ -161,8 +161,8 @@ AstronomicalTime.update()
         @test AstronomicalTime.Epochs.ut1tai(julian2(ut1), julian1(ut1), dat_ut1) == ERFA.ut1tai(julian2(ut1), julian1(ut1), dat_ut1)
         @test AstronomicalTime.Epochs.taiut1(julian1(tai), julian2(tai), dat_tai) == ERFA.taiut1(julian1(tai), julian2(tai), dat_tai)
         @test AstronomicalTime.Epochs.taiut1(julian2(tai), julian1(tai), dat_tai) == ERFA.taiut1(julian2(tai), julian1(tai), dat_tai)
-        @test sum(AstronomicalTime.Epochs.tcgtt(julian1(tcg), julian2(tcg))...) ≈ sum(ERFA.tcgtt(julian1(tcg), julian2(tcg))...)
-        @test sum(AstronomicalTime.Epochs.tcgtt(julian2(tcg), julian1(tcg))...) ≈ sum(ERFA.tcgtt(julian2(tcg), julian1(tcg))...)
+        @test sum(AstronomicalTime.Epochs.tcgtt(julian1(tcg), julian2(tcg))) ≈ sum(ERFA.tcgtt(julian1(tcg), julian2(tcg)))
+        @test sum(AstronomicalTime.Epochs.tcgtt(julian2(tcg), julian1(tcg))) ≈ sum(ERFA.tcgtt(julian2(tcg), julian1(tcg)))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
