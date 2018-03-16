@@ -22,8 +22,7 @@ julia> AstronomicalTime.Epochs.taitt(tai.jd1, tai.jd2)
 ```
 """
 function taitt(jd1, jd2)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
-    # Result, safeguarding precision
+    dtat = OFFSET_TT_TAI / SECONDS_PER_DAY
     if jd1 > jd2
         jd1 = jd1
         jd2 = jd2 + dtat
@@ -106,12 +105,12 @@ julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
 ```
 """
 function tcgtt(jd1, jd2)
-    t77t = MOD_JD_77 + OFFSET_TT_TAI/ SECONDS_PER_DAY
+    t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
        if jd1 > jd2
           date = jd1
-          date1 = jd2 - ( ( jd1 - MOD_JD00 ) + ( jd2 - t77t ) ) * ELG
+          date1 = jd2 - ((jd1 - MOD_JD00) + (jd2 - t77t)) * ELG
        else
-          date = jd1 - ( ( jd2 - MOD_JD00 ) + ( jd1 - t77t ) ) * ELG
+          date = jd1 - ((jd2 - MOD_JD00) + (jd1 - t77t)) * ELG
           date1 = jd2
        end
        date, date1
