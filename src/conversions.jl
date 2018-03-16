@@ -89,6 +89,34 @@ function taiut1(jd1, jd2, dta)
     date, date1
 end
 
+
+"""
+    tcgtt(jd1, jd2)
+
+Transform a two-part Julia date from `TAI` to `UT1`.
+
+# Example
+
+```jldoctest
+julia> tcg = Epoch{TCG}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TCG
+julia> tcgtt(tcg.jd1, tcg.jd2)
+(2.4578265e6, 0.30477440993249416)
+
+```
+"""
+function tcgtt(jd1, jd2)
+    t77t = MOD_JD_77 + OFFSET_TT_TAI/ SECONDS_PER_DAY
+       if jd1 > jd2
+          date = jd1
+          date1 = jd2 - ( ( jd1 - MOD_JD00 ) + ( jd2 - t77t ) ) * ELG
+       else
+          date = jd1 - ( ( jd2 - MOD_JD00 ) + ( jd1 - t77t ) ) * ELG
+          date1 = jd2
+       end
+       date, date1
+end
+
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     eraDtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
