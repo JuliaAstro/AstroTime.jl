@@ -7,8 +7,11 @@ using ..LeapSeconds
 
 """
     tttai(jd1, jd2)
+
 Transform a two-part Julia date from `TT` to `TAI`.
+
 # Example
+
 ```jldoctest
 julia> tt  = Epoch{TT}(2.4578265e6, 0.30477440993249416)
 2017-03-14T07:18:20.325 TT 
@@ -41,7 +44,6 @@ julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TAI
 julia> AstronomicalTime.Epochs.taitt(tai.jd1, tai.jd2)
 (2.4578265e6, 0.30477440993249416)
-
 ```
 """
 function taitt(jd1, jd2)
@@ -69,7 +71,6 @@ julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 UT1
 julia> AstronomicalTime.Epochs.ut1tai(ut1.jd1, ut1.jd2, AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1)))
 (2.4578265e6, 0.3048243932182868)
-
 ```
 """
 function ut1tai(jd1, jd2, dta)
@@ -96,7 +97,6 @@ julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TAI
 julia> AstronomicalTime.Epochs.ut1tai(tai.jd1, tai.jd2, AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai)))
 (2.4578265e6, 0.30477440993249416)
-
 ```
 """
 function taiut1(jd1, jd2, dta)
@@ -124,7 +124,6 @@ julia> tcg = Epoch{TCG}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TCG
 julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
 (2.4578265e6, 0.30440190993249416)
-
 ```
 """
 function tcgtt(jd1, jd2)
@@ -152,7 +151,6 @@ julia> tt = Epoch{TT}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TT
 julia> AstronomicalTime.Epochs.tttgc(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
-
 ```
 """
 function tttcg(jd1, jd2)
@@ -167,8 +165,6 @@ function tttcg(jd1, jd2)
     end
     date, date1
 end
-
-
 
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
