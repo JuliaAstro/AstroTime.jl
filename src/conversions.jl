@@ -14,13 +14,13 @@ Transform a two-part Julia date from `TT` to `TAI`.
 
 ```jldoctest
 julia> tt  = Epoch{TT}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:20.325 TT 
+2017-03-14T07:18:20.325 TT
 julia> AstronomicalTime.Epochs.tttai(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
 function tttai(jd1, jd2)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
     if jd1 > jd2
         jd1 = jd1
         jd2 -= dtat
@@ -166,9 +166,132 @@ function tttcg(jd1, jd2)
     date, date1
 end
 
+"""
+    tdbtt(jd1, jd2, dtr)
+
+Transform a two-part Julia date from `TT` to `TCG`.
+
+# Example
+
+```jldoctest
+julia> tdb = Epoch{TDB}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TDB
+julia> AstronomicalTime.Epochs.tdbgc(tdb.jd1, tdb.jd2, )
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+function tdbtt(jd1, jd2, dtr)
+    dtrd = dtr / SECONDS_PER_DAY
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 - dtrd
+    else
+        date = jd1 - dtrd
+        date1 = jd2
+    end
+    date, date1
+end
+
+
+function dtdb(jd1, jd2, ut, elong, u, v)
+
+    t = ((jd1 - DJ00) + jd2) / DJM
+
+    # =================
+    # Topocentric terms
+    # =================
+
+    # Convert UT to local solar time in radians.
+     tsol = mod(ut, 1.0) * 2π  + elong
+
+    # FUNDAMENTAL ARGUMENTS:  Simon et al. 1994.
+
+    # Combine time argument (millennia) with deg/arcsec factor.
+     w = t / 3600.0
+
+    # Sun Mean Longitude.
+     elsun = mod(280.46645683 + 1296027711.03429 * w, 360.0) * DEG_2R
+
+    # Sun Mean Anomaly.
+     emsun = mod(357.52910918 + 1295965810.481 * w, 360.0) * DEG_2R
+
+    # Mean Elongation of Moon from Sun.
+     d = mod(297.85019547 + 16029616012.090 * w, 360.0) * DEG_2R
+
+    # Mean Longitude of Jupiter.
+     elj = mod(34.35151874 + 109306899.89453 * w, 360.0) * DEG_2R
+
+    # Mean Longitude of Saturn.
+     els = mod(50.07744430 + 44046398.47038 * w, 360.0) * DEG_2R
+
+    # TOPOCENTRIC TERMS:  Moyer 1981 and Murray 1983.
+     wt =   +  0.00029e-10 * u * sin(tsol + elsun - els)
+            +  0.00100e-10 * u * sin(tsol - 2.0 * emsun)
+            +  0.00133e-10 * u * sin(tsol - d)
+            +  0.00133e-10 * u * sin(tsol + elsun - elj)
+            -  0.00229e-10 * u * sin(tsol + 2.0 * elsun + emsun)
+            -  0.02200e-10 * v * cos(elsun + emsun)
+            +  0.05312e-10 * u * sin(tsol - emsun)
+            -  0.13677e-10 * u * sin(tsol + 2.0 * elsun)
+            -  1.31840e-10 * v * cos(elsun)
+            +  3.17679e-10 * u * sin(tsol)
+
+    # =====================
+    # Fairhead et al. model
+    # =====================
+
+    # T**0
+     w0 = 0
+     for j in 474:1:-1
+        w0 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+    end
+
+    # T**1
+     w1 = 0
+     for j in 679:1:-1
+        w1 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+    end
+
+    # T**2
+     w2 = 0
+     for j in 764:1:-1
+        w2 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+    end
+
+    # T**3
+     w3 = 0
+     for j in 784:1:-1
+        w3 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+    end
+
+    # T**4
+     w4 = 0
+     for j in 787:1:-1
+        w4 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+    end
+
+    # Multiply by powers of T and combine.
+     wf = t * (t * (t * (t * w4 + w3) + w2) + w1) + w0
+
+    # Adjustments to use JPL planetary masses instead of IAU.
+     wj =   0.00065e-6 * sin(6069.776754 * t + 4.021194) +
+            0.00033e-6 * sin( 213.299095 * t + 5.543132) +
+          (-0.00196e-6 * sin(6208.294251 * t + 5.696701)) +
+          (-0.00173e-6 * sin(  74.781599 * t + 2.435900)) +
+            0.03638e-6 * t * t
+
+    # ============
+    # Final result
+    # ============
+
+    # TDB-TT in seconds.
+     w = wt + wf + wj
+end
+
+
 function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    ERFA.dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
+    dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
 end
 
 function deltat(ep::Epoch)
