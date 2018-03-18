@@ -14,13 +14,14 @@ Transform a two-part Julia date from `TAI` to `UTC`.
 
 ```jldoctest
 julia> tai  = Epoch{TAI}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:20.325 TAI 
+2017-03-14T07:18:52.509 TAI
 julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
 (2.4578265e6, 0.30434616919175345)
 ```
 """
 function taiutc(jd1, jd2)
-    LS = LeapSeconds.leapseconds(2.4578245e6)
+    jd3 = jd1 + jd2
+    LS = leapseconds(jd3)
     dtat = LS/SECONDS_PER_DAY;
     if jd1 > jd2
         jd1 = jd1
