@@ -151,6 +151,7 @@ AstronomicalTime.update()
     @testset "PortedFunctions" begin
 
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
+        utc = UTCEpoch(2000, 1, 1, 12, 0, 0.0)
         ut1 = UT1Epoch(2000, 1, 1, 12, 0, 0.0)
         tcg = TCGEpoch(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
@@ -170,6 +171,8 @@ AstronomicalTime.update()
         @test AstronomicalTime.Epochs.tttcg(julian2(tt), julian1(tt)) == ERFA.tttcg(julian2(tt), julian1(tt))
         @test AstronomicalTime.Epochs.taiutc(julian1(tai), julian2(tai)) == ERFA.taiutc(julian1(tai), julian2(tai))
         @test AstronomicalTime.Epochs.taiutc(julian2(tai), julian1(tai)) == ERFA.taiutc(julian2(tai), julian1(tai))
+        @test AstronomicalTime.Epochs.utctai(julian1(utc), julian2(utc)) == ERFA.utctai(julian1(utc), julian2(utc))
+        @test AstronomicalTime.Epochs.utctai(julian2(utc), julian1(utc)) == ERFA.utctai(julian2(utc), julian1(utc))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
