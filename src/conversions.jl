@@ -197,14 +197,14 @@ end
 """
     tdbtt(jd1, jd2, dtr)
 
-Transform a two-part Julia date from `TT` to `TCG`.
+Transform a two-part Julia date from `TDB` to `TT`.
 
 # Example
 
 ```jldoctest
 julia> tdb = Epoch{TDB}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TDB
-julia> AstronomicalTime.Epochs.tdbgc(tdb.jd1, tdb.jd2, )
+julia> AstronomicalTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstronomicalTime.Epochs.deltatr(tdb))
 (2.4578265e6, 0.30440190993249416)
 ```
 """
