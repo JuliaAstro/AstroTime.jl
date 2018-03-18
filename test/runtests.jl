@@ -165,6 +165,8 @@ AstronomicalTime.update()
         @test AstronomicalTime.Epochs.tcgtt(julian2(tcg), julian1(tcg)) == ERFA.tcgtt(julian2(tcg), julian1(tcg))
         @test AstronomicalTime.Epochs.tttcg(julian1(tt), julian2(tt)) == ERFA.tttcg(julian1(tt), julian2(tt))
         @test AstronomicalTime.Epochs.tttcg(julian2(tt), julian1(tt)) == ERFA.tttcg(julian2(tt), julian1(tt))
+        @test AstronomicalTime.Epochs.taiutc(julian1(tai), julian2(tai)) == ERFA.taiutc(julian1(tai), julian2(tai))
+        @test AstronomicalTime.Epochs.taiutc(julian2(tai), julian1(tai)) == ERFA.taiutc(julian2(tai), julian1(tai))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
