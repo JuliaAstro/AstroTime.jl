@@ -5,6 +5,34 @@ export rescale
 
 using ..LeapSeconds
 
+
+"""
+   taiutc(jd1, jd2)
+
+Transform a two-part Julia date from `TAI` to `UTC`.
+
+# Example
+
+```jldoctest
+julia> tai  = Epoch{TAI}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 TAI
+julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
+(2.4578265e6, 0.30434616919175345)
+```
+"""
+function taiutc(jd1, jd2)
+    ls = leapseconds(jd1 + jd2)
+    dtat = ls/SECONDS_PER_DAY;
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 -= dtat
+    else
+        jd1 -= dtat
+        jd2 = jd2
+    end
+    jd1, jd2
+end
+
 """
     tttai(jd1, jd2)
 
@@ -186,7 +214,7 @@ end
 
 function rescale(::Type{UTCEpoch}, ep::TAIEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.taiutc(jd1, jd2)
+    date, date1 = taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
