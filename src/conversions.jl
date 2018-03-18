@@ -6,6 +6,33 @@ export rescale
 using ..LeapSeconds
 
 """
+   taiutc(jd1, jd2)
+
+Transform a two-part Julia date from `TAI` to `UTC`.
+
+# Example
+
+```jldoctest
+julia> tai  = Epoch{TAI}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:20.325 TAI 
+julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
+(2.4578265e6, 0.30434616919175345)
+```
+"""
+function taiutc(jd1, jd2)
+    LS = LeapSeconds.leapseconds(2.4578245e6)
+    dtat = LS/SECONDS_PER_DAY;
+    if jd1 > jd2
+        jd1 = jd1
+        jd2 -= dtat
+    else
+        jd1 -= dtat
+        jd2 = jd2
+    end
+    jd1, jd2
+end
+
+"""
     tttai(jd1, jd2)
 
 Transform a two-part Julia date from `TT` to `TAI`.
