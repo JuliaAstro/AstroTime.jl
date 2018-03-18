@@ -231,15 +231,15 @@ function dtdb(jd1, jd2, ut, elong, u, v)
     # Combine time argument (millennia) with deg/arcsec factor.
      w = t / 3600.0
     # Sun Mean Longitude.
-     elsun = mod(280.46645683 + 1296027711.03429 * w, 360.0) * DEG_2R
+     elsun = deg2rad(mod(280.46645683 + 1296027711.03429 * w, 360.0))
     # Sun Mean Anomaly.
-     emsun = mod(357.52910918 + 1295965810.481 * w, 360.0) * DEG_2R
+     emsun = deg2rad(mod(357.52910918 + 1295965810.481 * w, 360.0))
     # Mean Elongation of Moon from Sun.
-     d = mod(297.85019547 + 16029616012.090 * w, 360.0) * DEG_2R
+     d = deg2rad(mod(297.85019547 + 16029616012.090 * w, 360.0))
     # Mean Longitude of Jupiter.
-     elj = mod(34.35151874 + 109306899.89453 * w, 360.0) * DEG_2R
+     elj = deg2rad(mod(34.35151874 + 109306899.89453 * w, 360.0))
     # Mean Longitude of Saturn.
-     els = mod(50.07744430 + 44046398.47038 * w, 360.0) * DEG_2R
+     els = deg2rad(mod(50.07744430 + 44046398.47038 * w, 360.0))
     # TOPOCENTRIC TERMS:  Moyer 1981 and Murray 1983.
      wt =   +  0.00029e-10 * u * sin(tsol + elsun - els)
             +  0.00100e-10 * u * sin(tsol - 2.0 * emsun)
@@ -262,22 +262,22 @@ function dtdb(jd1, jd2, ut, elong, u, v)
     end
     # T**1
      w1 = 0
-     for j in 679:-1:1
+     for j in 679:-1:475
         w1 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
     end
     # T**2
      w2 = 0
-     for j in 764:-1:1
+     for j in 764:-1:680
         w2 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
     end
     # T**3
      w3 = 0
-     for j in 784:-1:1
+     for j in 784:-1:765
         w3 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
     end
     # T**4
      w4 = 0
-     for j in 787:-1:1
+     for j in 787:-1:785
         w4 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
     end
     # Multiply by powers of T and combine.

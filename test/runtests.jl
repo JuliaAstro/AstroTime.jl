@@ -135,18 +135,18 @@ AstronomicalTime.update()
 
         # Reference values from Orekit
         ref = TDBEpoch(2013, 3, 18, 12)
-        @test UT1Epoch(ref) ≈ UT1Epoch("2013-03-18T11:58:52.994")
-        @test UTCEpoch(ref) ≈ UTCEpoch("2013-03-18T11:58:52.814")
-        @test TAIEpoch(ref) ≈ TAIEpoch("2013-03-18T11:59:27.814")
-        @test TTEpoch(ref) ≈ TTEpoch("2013-03-18T11:59:59.998")
-        @test TCBEpoch(ref) ≈ TCBEpoch("2013-03-18T12:00:17.718")
-        @test TCGEpoch(ref) ≈ TCGEpoch("2013-03-18T12:00:00.795")
-        @test ref ≈ TDBEpoch(UT1Epoch("2013-03-18T11:58:52.994"))
-        @test ref ≈ TDBEpoch(UTCEpoch("2013-03-18T11:58:52.814"))
-        @test ref ≈ TDBEpoch(TAIEpoch("2013-03-18T11:59:27.814"))
-        @test ref ≈ TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
-        @test ref ≈ TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
-        @test ref ≈ TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
+        @test UT1Epoch(ref) == UT1Epoch("2013-03-18T11:58:52.994")
+        @test UTCEpoch(ref) == UTCEpoch("2013-03-18T11:58:52.814")
+        @test TAIEpoch(ref) == TAIEpoch("2013-03-18T11:59:27.814")
+        @test TTEpoch(ref) == TTEpoch("2013-03-18T11:59:59.998")
+        @test TCBEpoch(ref) == TCBEpoch("2013-03-18T12:00:17.718")
+        @test TCGEpoch(ref) == TCGEpoch("2013-03-18T12:00:00.795")
+        @test ref == TDBEpoch(UT1Epoch("2013-03-18T11:58:52.994"))
+        @test ref == TDBEpoch(UTCEpoch("2013-03-18T11:58:52.814"))
+        @test ref == TDBEpoch(TAIEpoch("2013-03-18T11:59:27.814"))
+        @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
+        @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
+        @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
     @testset "PortedFunctions" begin
 
@@ -173,8 +173,8 @@ AstronomicalTime.update()
         @test AstronomicalTime.Epochs.taiutc(julian1(tai), julian2(tai)) == ERFA.taiutc(julian1(tai), julian2(tai))
         @test AstronomicalTime.Epochs.taiutc(julian2(tai), julian1(tai)) == ERFA.taiutc(julian2(tai), julian1(tai))
         @test AstronomicalTime.Epochs.dtdb(julian1(tdb), julian2(tdb), 0.0, 0.0, 0.0, 0.0) ≈ ERFA.dtdb(julian1(tdb), julian2(tdb), 0.0, 0.0, 0.0, 0.0)
-@test sum(AstronomicalTime.Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))) ≈ sum(ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)))
-@test sum(AstronomicalTime.Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))) ≈ sum(ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)))
+        @test AstronomicalTime.Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
+        @test AstronomicalTime.Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)) == ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
