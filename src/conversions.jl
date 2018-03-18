@@ -21,8 +21,8 @@ julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
 """
 function taiutc(jd1, jd2)
     jd3 = jd1 + jd2
-    LS = leapseconds(jd3)
-    dtat = LS/SECONDS_PER_DAY;
+    ls = leapseconds(jd3)
+    dtat = ls/SECONDS_PER_DAY;
     if jd1 > jd2
         jd1 = jd1
         jd2 -= dtat
