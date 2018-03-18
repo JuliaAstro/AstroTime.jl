@@ -234,7 +234,7 @@ end
 # TAI <-> UTC
 function rescale(::Type{TAIEpoch}, ep::UTCEpoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.utctai(jd1, jd2)
+    date, date1 = utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
