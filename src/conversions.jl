@@ -1,9 +1,24 @@
-import Convertible: findpath, haspath
+using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
 using ..Periods
-export rescale
+export @transform
 
 using ..LeapSeconds
+
+abstract type Transformation end
+
+const registry = ItemGraph{TimeScale, Transformation}()
+
+macro transform(from::Symbol, to::Symbol, body::Expr)
+    trans = Symbol(from, "to", to)
+    quote
+        struct $trans <: Transformation end
+        add_edge!(registry, $from, $to, $(esc(trans))())
+        @inline function (::$(esc(trans)))(ep::Epoch{$from})::Epoch{$to}
+            $body
+        end
+    end
+end
 
 """
     tttai(jd1, jd2)
@@ -14,12 +29,12 @@ Transform a two-part Julia date from `TT` to `TAI`.
 
 ```jldoctest
 julia> tt  = Epoch{TT}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:20.325 TT 
+2017-03-14T07:18:20.325 TT
 julia> AstronomicalTime.Epochs.tttai(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
-function tttai(jd1, jd2)
+@inline function tttai(jd1, jd2)
     dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
     if jd1 > jd2
         jd1 = jd1
@@ -46,7 +61,7 @@ julia> AstronomicalTime.Epochs.taitt(tai.jd1, tai.jd2)
 (2.4578265e6, 0.30477440993249416)
 ```
 """
-function taitt(jd1, jd2)
+@inline function taitt(jd1, jd2)
     dtat = OFFSET_TT_TAI / SECONDS_PER_DAY
     if jd1 > jd2
         jd1 = jd1
@@ -73,7 +88,7 @@ julia> AstronomicalTime.Epochs.ut1tai(ut1.jd1, ut1.jd2, AstronomicalTime.Epochs.
 (2.4578265e6, 0.3048243932182868)
 ```
 """
-function ut1tai(jd1, jd2, dta)
+@inline function ut1tai(jd1, jd2, dta)
     dtad = dta / SECONDS_PER_DAY
     if jd1 > jd2
         date = jd1
@@ -99,7 +114,7 @@ julia> AstronomicalTime.Epochs.ut1tai(tai.jd1, tai.jd2, AstronomicalTime.Epochs.
 (2.4578265e6, 0.30477440993249416)
 ```
 """
-function taiut1(jd1, jd2, dta)
+@inline function taiut1(jd1, jd2, dta)
     dtad = dta / SECONDS_PER_DAY
     if jd1 > jd2
         date = jd1
@@ -126,7 +141,7 @@ julia> AstronomicalTime.Epochs.tcgtt(tcg.jd1, tcg.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
-function tcgtt(jd1, jd2)
+@inline function tcgtt(jd1, jd2)
     t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
     if jd1 > jd2
         date = jd1
@@ -153,7 +168,7 @@ julia> AstronomicalTime.Epochs.tttgc(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
-function tttcg(jd1, jd2)
+@inline function tttcg(jd1, jd2)
     t77t = MOD_JD_77 + OFFSET_TT_TAI / SECONDS_PER_DAY
     elgg = ELG/(1.0-ELG)
     if jd1 > jd2
@@ -166,65 +181,65 @@ function tttcg(jd1, jd2)
     date, date1
 end
 
-function deltatr(ep::Epoch)
+@inline function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     ERFA.dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
 end
 
-function deltat(ep::Epoch)
+@inline function deltat(ep::Epoch)
     leapsec = leapseconds(julian(ep))
     ΔUT1 = dut1(ep)
     32.184 + leapsec - ΔUT1
 end
 
 # TAI <-> UTC
-function rescale(::Type{TAIEpoch}, ep::UTCEpoch)
+@transform UTC TAI begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
-function rescale(::Type{UTCEpoch}, ep::TAIEpoch)
+@transform TAI UTC begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
 # UTC <-> UT1
-function rescale(::Type{UTCEpoch}, ep::UT1Epoch)
+@transform UT1 UTC begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.ut1utc(jd1, jd2, dut1(ep))
     UTCEpoch(date, date1)
 end
 
-function rescale(::Type{UT1Epoch}, ep::UTCEpoch)
+@transform UTC UT1 begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.utcut1(jd1, jd2, dut1(ep))
     UT1Epoch(date, date1)
 end
 
 # TAI <-> UT1
-function rescale(::Type{TAIEpoch}, ep::UT1Epoch)
+@transform UT1 TAI begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ut1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     TAIEpoch(date, date1)
 end
 
-function rescale(::Type{UT1Epoch}, ep::TAIEpoch)
+@transform TAI UT1 begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = taiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     UT1Epoch(date, date1)
 end
 
 # TT <-> UT1
-function rescale(::Type{TTEpoch}, ep::UT1Epoch)
+@transform UT1 TT begin
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
     date, date1 = ERFA.ut1tt(jd1, jd2, dt)
     TTEpoch(date, date1)
 end
 
-function rescale(::Type{UT1Epoch}, ep::TTEpoch)
+@transform TT UT1 begin
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
     date, date1 = ERFA.ttut1(jd1, jd2, dt)
@@ -232,40 +247,40 @@ function rescale(::Type{UT1Epoch}, ep::TTEpoch)
 end
 
 # TAI <-> TT
-function rescale(::Type{TAIEpoch}, ep::TTEpoch)
+@transform TT TAI begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = tttai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
-function rescale(::Type{TTEpoch}, ep::TAIEpoch)
+@transform TAI TT begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = taitt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
 # TT <-> TCG
-function rescale(::Type{TTEpoch}, ep::TCGEpoch)
+@transform TCG TT begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tcgtt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
-function rescale(::Type{TCGEpoch}, ep::TTEpoch)
+@transform TT TCG begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tttcg(jd1, jd2)
     TCGEpoch(date, date1)
 end
 
 # TT <-> TDB
-function rescale(::Type{TTEpoch}, ep::TDBEpoch)
+@transform TDB TT begin
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-function rescale(::Type{TDBEpoch}, ep::TTEpoch)
+@transform TT TDB begin
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
@@ -273,48 +288,42 @@ function rescale(::Type{TDBEpoch}, ep::TTEpoch)
 end
 
 # TDB <-> TCB
-function rescale(::Type{TDBEpoch}, ep::TCBEpoch)
+@transform TCB TDB begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tcbtdb(jd1, jd2)
     TDBEpoch(date, date1)
 end
 
-function rescale(::Type{TCBEpoch}, ep::TDBEpoch)
+@transform TDB TCB begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tdbtcb(jd1, jd2)
     TCBEpoch(date, date1)
 end
 
-function getgraph()
-    graph = Dict{DataType,Set{DataType}}()
-    for m in methods(rescale)
-        from = Base.unwrap_unionall(m.sig.parameters[3]).parameters[1]
-        to = Base.unwrap_unionall(m.sig.parameters[2].parameters[1]).parameters[1]
+"""
+    Epoch{T}(ep::Epoch{S}) where {T}, S}
 
-        if !haskey(graph, from)
-            merge!(graph, Dict(from=>Set{DataType}()))
-        end
-        if !haskey(graph, to)
-            merge!(graph, Dict(to=>Set{DataType}()))
-        end
-        push!(graph[from], to)
-    end
-    graph
+Convert an `Epoch` with timescale `S` to an `Epoch` with timescale `T`.
+
+# Example
+
+```jldoctest
+julia> Epoch{TT}(Epoch{TAI}(2000, 1, 1))
+2000-01-01T00:00:32.184 TT
+```
+"""
+function Epoch{T}(ep::Epoch{S}) where {T,S}
+    transformations = edgeitems(registry, S, T)
+    rescale(ep, transformations...)
 end
 
-function gen_rescale(S1, S2, ep)
-    graph = getgraph()
-    if !haspath(graph, S1, S2)
-        error("No conversion path '$S1' -> '$S2' found.")
+Epoch{T}(ep::Epoch{T}) where {T} = ep
+
+@generated function rescale(ep, transformations...)
+    ex = :(ep)
+    for trans in transformations
+        ex = :($trans()($ex))
     end
-    path = findpath(graph, S1, S2)
-    ex = :(rescale(Epoch{$(path[1])}, ep))
-    for scale in path[2:end]
-        ex = :(rescale(Epoch{$scale}, $ex))
-    end
-    return ex
+    ex
 end
 
-@generated function _rescale(::Type{Epoch{S2}}, ep::Epoch{S1}) where {S1<:TimeScale,S2<:TimeScale}
-    gen_rescale(S1, S2, ep)
-end

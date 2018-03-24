@@ -102,7 +102,6 @@ AstronomicalTime.update()
         @test jd1950(TTEpoch(1950, 1, 1, 12)) == 0
         @test mjd(TTEpoch(1858, 11, 17)) == 0
 
-
         @test seconds(tt + 1seconds, J2000) ≈ 1.0seconds
         @test minutes(tt + 1minutes, J2000) ≈ 1.0minutes
         @test hours(tt + 1hours, J2000) ≈ 1.0hours
@@ -126,8 +125,6 @@ AstronomicalTime.update()
         @test tdb ≈ TDBEpoch(tt)
         @test tdb ≈ TDBEpoch(tcb)
         @test tcb ≈ TCBEpoch(tdb)
-
-
 
         @test tt ≈ TTEpoch(tcb)
         @test tcb ≈ TCBEpoch(tt)
