@@ -6,7 +6,6 @@ export @transform
 
 using ..LeapSeconds
 
-<<<<<<< HEAD
 abstract type Transformation end
 
 const registry = ItemGraph{TimeScale, Transformation}()
@@ -20,7 +19,8 @@ macro transform(from::Symbol, to::Symbol, ep::Symbol, body::Expr)
             $body
         end
     end
-=======
+end
+
 """
    utctai(jd1, jd2)
 
@@ -47,7 +47,6 @@ function utctai(jd1, jd2)
     end
     jd1, jd2
 end
->>>>>>> Replacing the calls to ERFA by pure Julia functions for eraUtctai (#15)
 
 """
    taiutc(jd1, jd2)
@@ -90,13 +89,8 @@ julia> AstronomicalTime.Epochs.tttai(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
-<<<<<<< HEAD
 @inline function tttai(jd1, jd2)
     dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
-=======
-function tttai(jd1, jd2)
-    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
->>>>>>> Ported Tdbtt (#14)
     if jd1 > jd2
         jd1 = jd1
         jd2 -= dtat
@@ -256,7 +250,7 @@ julia> AstronomicalTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstronomicalTime.Epochs.d
 (2.4578265e6, 0.30440190993249416)
 ```
 """
-function tdbtt(jd1, jd2, dtr)
+@inline function tdbtt(jd1, jd2, dtr)
     dtrd = dtr / SECONDS_PER_DAY
     if jd1 > jd2
         date = jd1
@@ -344,7 +338,7 @@ function dtdb(jd1, jd2, ut, elong, u, v)
 end
 
 
-function deltatr(ep::Epoch)
+@inline function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
     dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
 end
