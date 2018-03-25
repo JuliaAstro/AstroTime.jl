@@ -36,13 +36,13 @@ const days = Day()
 const years = Year()
 const centuries = Century()
 
-struct Period{U<:TimeUnit,T<:Number}
-    unit::Type{U}
+struct Period{U, T<:Number}
     Δt::T
-    Period{U}(Δt::T) where {U<:TimeUnit,T<:Number} = new{U,T}(U, Δt)
+    Period{U}(Δt::T) where {U, T<:Number} = new{U::TimeUnit, T}(Δt)
 end
 
 get(p::Period) = p.Δt
+unit(p::Period{U}) where {U} = U
 
 show(io::IO, p::Period{Second}) = print(io, "$(get(p)) seconds")
 show(io::IO, p::Period{Minute}) = print(io, "$(get(p)) minutes")
@@ -53,10 +53,10 @@ show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
 
 (*)(Δt::T, ::U) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
 
-(*)(x::T, p::Period) where {T<:Number} = Period{p.unit}(p.Δt * x)
-(*)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt * x)
-(/)(x::T, p::Period) where {T<:Number} = Period{p.unit}(x / p.Δ)
-(/)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt / x)
+(*)(x::T, p::Period) where {T<:Number} = Period{unit(p)}(p.Δt * x)
+(*)(p::Period, x::T) where {T<:Number} = Period{unit(p)}(p.Δt * x)
+(/)(x::T, p::Period) where {T<:Number} = Period{unit(p)}(x / p.Δ)
+(/)(p::Period, x::T) where {T<:Number} = Period{unit(p)}(p.Δt / x)
 
 isapprox(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit} = get(p1) ≈ get(p2)
 
