@@ -56,7 +56,7 @@ julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
 function Epoch{T}(year, month, day,
     hour=0, minute=0, seconds=0, milliseconds=0) where {T}
     jd, jd1 = ERFA.dtf2d(string(T),
-        year, month, day, hour, minute, seconds + milliseconds/1000)
+    year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
 end
 
