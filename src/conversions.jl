@@ -9,12 +9,12 @@ abstract type Transformation end
 
 const registry = ItemGraph{TimeScale, Transformation}()
 
-macro transform(from::Symbol, to::Symbol, body::Expr)
+macro transform(from::Symbol, to::Symbol, ep::Symbol, body::Expr)
     trans = Symbol(from, "to", to)
     quote
         struct $trans <: Transformation end
         add_edge!(registry, $from, $to, $(esc(trans))())
-        @inline function (::$(esc(trans)))(ep::Epoch{$from})::Epoch{$to}
+        @inline function (::$(esc(trans)))($ep::Epoch{$from})::Epoch{$to}
             $body
         end
     end
@@ -193,53 +193,53 @@ end
 end
 
 # TAI <-> UTC
-@transform UTC TAI begin
+@transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
-@transform TAI UTC begin
+@transform TAI UTC ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
 # UTC <-> UT1
-@transform UT1 UTC begin
+@transform UT1 UTC ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.ut1utc(jd1, jd2, dut1(ep))
     UTCEpoch(date, date1)
 end
 
-@transform UTC UT1 begin
+@transform UTC UT1 ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.utcut1(jd1, jd2, dut1(ep))
     UT1Epoch(date, date1)
 end
 
 # TAI <-> UT1
-@transform UT1 TAI begin
+@transform UT1 TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ut1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     TAIEpoch(date, date1)
 end
 
-@transform TAI UT1 begin
+@transform TAI UT1 ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = taiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
     UT1Epoch(date, date1)
 end
 
 # TT <-> UT1
-@transform UT1 TT begin
+@transform UT1 TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
     date, date1 = ERFA.ut1tt(jd1, jd2, dt)
     TTEpoch(date, date1)
 end
 
-@transform TT UT1 begin
+@transform TT UT1 ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     dt = deltat(ep)
     date, date1 = ERFA.ttut1(jd1, jd2, dt)
@@ -247,40 +247,40 @@ end
 end
 
 # TAI <-> TT
-@transform TT TAI begin
+@transform TT TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = tttai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
-@transform TAI TT begin
+@transform TAI TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = taitt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
 # TT <-> TCG
-@transform TCG TT begin
+@transform TCG TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tcgtt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
-@transform TT TCG begin
+@transform TT TCG ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tttcg(jd1, jd2)
     TCGEpoch(date, date1)
 end
 
 # TT <-> TDB
-@transform TDB TT begin
+@transform TDB TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-@transform TT TDB begin
+@transform TT TDB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     Δtr = deltatr(ep)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
@@ -288,13 +288,13 @@ end
 end
 
 # TDB <-> TCB
-@transform TCB TDB begin
+@transform TCB TDB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tcbtdb(jd1, jd2)
     TDBEpoch(date, date1)
 end
 
-@transform TDB TCB begin
+@transform TDB TCB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ERFA.tdbtcb(jd1, jd2)
     TCBEpoch(date, date1)
