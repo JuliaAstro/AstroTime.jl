@@ -155,6 +155,8 @@ AstronomicalTime.update()
         ut1 = UT1Epoch(2000, 1, 1, 12, 0, 0.0)
         tcg = TCGEpoch(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
+        tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
+        Δtr(ep) = AstronomicalTime.Epochs.deltatr(ep)
         dat_ut1 = AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1))
         dat_tai = AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai))
         @test AstronomicalTime.Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
@@ -173,6 +175,9 @@ AstronomicalTime.update()
         @test AstronomicalTime.Epochs.taiutc(julian2(tai), julian1(tai)) == ERFA.taiutc(julian2(tai), julian1(tai))
         @test AstronomicalTime.Epochs.utctai(julian1(utc), julian2(utc)) == ERFA.utctai(julian1(utc), julian2(utc))
         @test AstronomicalTime.Epochs.utctai(julian2(utc), julian1(utc)) == ERFA.utctai(julian2(utc), julian1(utc))
+        @test AstronomicalTime.Epochs.dtdb(julian1(tdb), julian2(tdb), 0.0, 0.0, 0.0, 0.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 0.0, 0.0, 0.0, 0.0)
+        @test AstronomicalTime.Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
+        @test AstronomicalTime.Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)) == ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0

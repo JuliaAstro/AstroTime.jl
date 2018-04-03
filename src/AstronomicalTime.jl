@@ -4,7 +4,6 @@ module AstronomicalTime
 
 using EarthOrientation
 using Reexport
-
 import RemoteFiles: path, isfile
 
 export @timescale
