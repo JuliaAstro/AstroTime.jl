@@ -2,6 +2,7 @@ import Convertible: findpath, haspath
 
 using ..Periods
 export rescale
+using MuladdMacro
 
 using ..LeapSeconds
 
@@ -249,7 +250,7 @@ end
 
 function dtdb(jd1, jd2, ut, elong, u, v)
 
-    t = ((jd1 - DJ00) + jd2) / DJM
+    t = ((jd1 - DJ00) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
      tsol = mod(ut, 1.0) * 2π  + elong
 
@@ -282,32 +283,32 @@ function dtdb(jd1, jd2, ut, elong, u, v)
     # =====================
 
     # T**0
-     w0 = 0
-     for j in 474:-1:1
-        w0 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+     w0 = 0.0
+     for j in reverse(eachindex(fairhd0_4))
+        @muladd w0 += fairhd0_4[j][1] * sin(fairhd0_4[j][2] * t + fairhd0_4[j][3])
     end
     # T**1
-     w1 = 0
-     for j in 679:-1:475
-        w1 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+     w1 = 0.0
+     for j in reverse(eachindex(fairhd1_4))
+        @muladd w1 += fairhd1_4[j][1] * sin(fairhd1_4[j][2] * t + fairhd1_4[j][3])
     end
     # T**2
-     w2 = 0
-     for j in 764:-1:680
-        w2 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+     w2 = 0.0
+     for j in reverse(eachindex(fairhd2_4))
+        @muladd w2 += fairhd2_4[j][1] * sin(fairhd2_4[j][2] * t + fairhd2_4[j][3])
     end
     # T**3
-     w3 = 0
-     for j in 784:-1:765
-        w3 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+     w3 = 0.0
+     for j in reverse(eachindex(fairhd3_4))
+        @muladd w3 += fairhd3_4[j][1] * sin(fairhd3_4[j][2] * t + fairhd3_4[j][3])
     end
     # T**4
-     w4 = 0
-     for j in 787:-1:785
-        w4 += fairhd[j][1] * sin(fairhd[j][2] * t + fairhd[j][3])
+     w4 = 0.0
+     for j in reverse(eachindex(fairhd4_4))
+        @muladd w4 += fairhd4_4[j][1] * sin(fairhd4_4[j][2] * t + fairhd4_4[j][3])
     end
     # Multiply by powers of T and combine.
-     wf = t * (t * (t * (t * w4 + w3) + w2) + w1) + w0
+     wf = @evalpoly t w0 w1 w2 w3 w4
     # Adjustments to use JPL planetary masses instead of IAU.
      wj =   0.00065e-6 * sin(6069.776754 * t + 4.021194) +
             0.00033e-6 * sin( 213.299095 * t + 5.543132) +
