@@ -1,8 +1,8 @@
 import Convertible: findpath, haspath
 
+using MuladdMacro
 using ..Periods
 export rescale
-using MuladdMacro
 
 using ..LeapSeconds
 
@@ -250,7 +250,7 @@ end
 
 function dtdb(jd1, jd2, ut, elong, u, v)
 
-    t = ((jd1 - DJ00) + jd2) / DAYS_PER_MILLENNIUM
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
      tsol = mod(ut, 1.0) * 2π  + elong
 
