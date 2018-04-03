@@ -284,27 +284,27 @@ function dtdb(jd1, jd2, ut, elong, u, v)
 
     # T**0
      w0 = 0.0
-     for j in reverse(eachindex(fairhd0_4))
+     for j in eachindex(fairhd0_4)
         @muladd w0 += fairhd0_4[j][1] * sin(fairhd0_4[j][2] * t + fairhd0_4[j][3])
     end
     # T**1
      w1 = 0.0
-     for j in reverse(eachindex(fairhd1_4))
+     for j in eachindex(fairhd1_4)
         @muladd w1 += fairhd1_4[j][1] * sin(fairhd1_4[j][2] * t + fairhd1_4[j][3])
     end
     # T**2
      w2 = 0.0
-     for j in reverse(eachindex(fairhd2_4))
+     for j in eachindex(fairhd2_4)
         @muladd w2 += fairhd2_4[j][1] * sin(fairhd2_4[j][2] * t + fairhd2_4[j][3])
     end
     # T**3
      w3 = 0.0
-     for j in reverse(eachindex(fairhd3_4))
+     for j in eachindex(fairhd3_4)
         @muladd w3 += fairhd3_4[j][1] * sin(fairhd3_4[j][2] * t + fairhd3_4[j][3])
     end
     # T**4
      w4 = 0.0
-     for j in reverse(eachindex(fairhd4_4))
+     for j in eachindex(fairhd4_4)
         @muladd w4 += fairhd4_4[j][1] * sin(fairhd4_4[j][2] * t + fairhd4_4[j][3])
     end
     # Multiply by powers of T and combine.
