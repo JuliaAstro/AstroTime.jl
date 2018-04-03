@@ -1,6 +1,7 @@
 julia 0.6
 ItemGraphs 0.2.0
 ERFA 0.2.2
+MuladdMacro 0.0.2
 EarthOrientation 0.2.0
 OptionalData 0.1.0
 RemoteFiles 0.1.0

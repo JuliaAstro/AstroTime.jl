@@ -1,5 +1,6 @@
 using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
+using MuladdMacro
 using ..Periods
 export @transform
 
@@ -89,8 +90,13 @@ julia> AstronomicalTime.Epochs.tttai(tt.jd1, tt.jd2)
 (2.4578265e6, 0.30440190993249416)
 ```
 """
+<<<<<<< HEAD
 @inline function tttai(jd1, jd2)
     dtat = OFFSET_TT_TAI/SECONDS_PER_DAY;
+=======
+function tttai(jd1, jd2)
+    dtat = OFFSET_TT_TAI/SECONDS_PER_DAY
+>>>>>>> Ported Tdbtt (#14)
     if jd1 > jd2
         jd1 = jd1
         jd2 -= dtat
@@ -236,9 +242,111 @@ julia> AstronomicalTime.Epochs.tttgc(tt.jd1, tt.jd2)
     date, date1
 end
 
-@inline function deltatr(ep::Epoch)
+"""
+    tdbtt(jd1, jd2, dtr)
+
+Transform a two-part Julia date from `TDB` to `TT`.
+
+# Example
+
+```jldoctest
+julia> tdb = Epoch{TDB}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TDB
+julia> AstronomicalTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstronomicalTime.Epochs.deltatr(tdb))
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+function tdbtt(jd1, jd2, dtr)
+    dtrd = dtr / SECONDS_PER_DAY
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 - dtrd
+    else
+        date = jd1 - dtrd
+        date1 = jd2
+    end
+    date, date1
+end
+
+
+function dtdb(jd1, jd2, ut, elong, u, v)
+
+    t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
+    # Convert UT to local solar time in radians.
+     tsol = mod(ut, 1.0) * 2π  + elong
+
+    # FUNDAMENTAL ARGUMENTS:  Simon et al. 1994.
+    # Combine time argument (millennia) with deg/arcsec factor.
+     w = t / 3600.0
+    # Sun Mean Longitude.
+     elsun = deg2rad(mod(280.46645683 + 1296027711.03429 * w, 360.0))
+    # Sun Mean Anomaly.
+     emsun = deg2rad(mod(357.52910918 + 1295965810.481 * w, 360.0))
+    # Mean Elongation of Moon from Sun.
+     d = deg2rad(mod(297.85019547 + 16029616012.090 * w, 360.0))
+    # Mean Longitude of Jupiter.
+     elj = deg2rad(mod(34.35151874 + 109306899.89453 * w, 360.0))
+    # Mean Longitude of Saturn.
+     els = deg2rad(mod(50.07744430 + 44046398.47038 * w, 360.0))
+    # TOPOCENTRIC TERMS:  Moyer 1981 and Murray 1983.
+     wt =   +  0.00029e-10 * u * sin(tsol + elsun - els)
+            +  0.00100e-10 * u * sin(tsol - 2.0 * emsun)
+            +  0.00133e-10 * u * sin(tsol - d)
+            +  0.00133e-10 * u * sin(tsol + elsun - elj)
+            -  0.00229e-10 * u * sin(tsol + 2.0 * elsun + emsun)
+            -  0.02200e-10 * v * cos(elsun + emsun)
+            +  0.05312e-10 * u * sin(tsol - emsun)
+            -  0.13677e-10 * u * sin(tsol + 2.0 * elsun)
+            -  1.31840e-10 * v * cos(elsun)
+            +  3.17679e-10 * u * sin(tsol)
+    # =====================
+    # Fairhead et al. model
+    # =====================
+
+    # T**0
+     w0 = 0.0
+     for j in eachindex(fairhd0_4)
+        @muladd w0 += fairhd0_4[j][1] * sin(fairhd0_4[j][2] * t + fairhd0_4[j][3])
+    end
+    # T**1
+     w1 = 0.0
+     for j in eachindex(fairhd1_4)
+        @muladd w1 += fairhd1_4[j][1] * sin(fairhd1_4[j][2] * t + fairhd1_4[j][3])
+    end
+    # T**2
+     w2 = 0.0
+     for j in eachindex(fairhd2_4)
+        @muladd w2 += fairhd2_4[j][1] * sin(fairhd2_4[j][2] * t + fairhd2_4[j][3])
+    end
+    # T**3
+     w3 = 0.0
+     for j in eachindex(fairhd3_4)
+        @muladd w3 += fairhd3_4[j][1] * sin(fairhd3_4[j][2] * t + fairhd3_4[j][3])
+    end
+    # T**4
+     w4 = 0.0
+     for j in eachindex(fairhd4_4)
+        @muladd w4 += fairhd4_4[j][1] * sin(fairhd4_4[j][2] * t + fairhd4_4[j][3])
+    end
+    # Multiply by powers of T and combine.
+     wf = @evalpoly t w0 w1 w2 w3 w4
+    # Adjustments to use JPL planetary masses instead of IAU.
+     wj =   0.00065e-6 * sin(6069.776754 * t + 4.021194) +
+            0.00033e-6 * sin( 213.299095 * t + 5.543132) +
+          (-0.00196e-6 * sin(6208.294251 * t + 5.696701)) +
+          (-0.00173e-6 * sin(  74.781599 * t + 2.435900)) +
+            0.03638e-6 * t * t
+    # ============
+    # Final result
+    # ============
+    # TDB-TT in seconds.
+     w = wt + wf + wj
+end
+
+
+function deltatr(ep::Epoch)
     jd1, jd2 = julian1(ep), julian2(ep)
-    ERFA.dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
+    dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
 end
 
 @inline function deltat(ep::Epoch)
