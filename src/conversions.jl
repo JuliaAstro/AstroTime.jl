@@ -10,14 +10,25 @@ abstract type Transformation end
 
 const registry = ItemGraph{TimeScale, Transformation}()
 
-macro transform(from::Symbol, to::Symbol, ep::Symbol, body::Expr)
+macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
     trans = Symbol(from, "to", to)
+    func = quote
+        @inline function (::$(esc(trans)))($ep::Epoch{$from})::Epoch{$to}
+            $(args[end])
+        end
+    end
+    for a in args[1:end-1]
+        if a isa Expr && a.head == :(=)
+            arg = Expr(:kw, Expr(:escape, a.args[1]), a.args[2:end]...)
+        else
+            arg = Expr(:escape, a)
+        end
+        push!(ex.args[2].args[2].args[1].args, arg)
+    end
     quote
         struct $trans <: Transformation end
         add_edge!(registry, $from, $to, $(esc(trans))())
-        @inline function (::$(esc(trans)))($ep::Epoch{$from})::Epoch{$to}
-            $body
-        end
+        $func
     end
 end
 
