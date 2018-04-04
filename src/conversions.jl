@@ -360,13 +360,13 @@ end
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = utctai(jd1, jd2)
+    date, date1 = ERFA.utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
 @transform TAI UTC ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = taiutc(jd1, jd2)
+    date, date1 = ERFA.taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
