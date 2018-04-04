@@ -313,28 +313,28 @@ function dtdb(jd1, jd2, ut, elong, u, v)
 
     # T**0
      w0 = 0.0
-     for j in eachindex(fairhd0_4)
-        @muladd w0 += fairhd0_4[j][1] * sin(fairhd0_4[j][2] * t + fairhd0_4[j][3])
+     for j in eachindex(fairhd0)
+        @muladd w0 += fairhd0[j][1] * sin(fairhd0[j][2] * t + fairhd0[j][3])
     end
     # T**1
      w1 = 0.0
-     for j in eachindex(fairhd1_4)
-        @muladd w1 += fairhd1_4[j][1] * sin(fairhd1_4[j][2] * t + fairhd1_4[j][3])
+     for j in eachindex(fairhd1)
+        @muladd w1 += fairhd1[j][1] * sin(fairhd1[j][2] * t + fairhd1[j][3])
     end
     # T**2
      w2 = 0.0
-     for j in eachindex(fairhd2_4)
-        @muladd w2 += fairhd2_4[j][1] * sin(fairhd2_4[j][2] * t + fairhd2_4[j][3])
+     for j in eachindex(fairhd2)
+        @muladd w2 += fairhd2[j][1] * sin(fairhd2[j][2] * t + fairhd2[j][3])
     end
     # T**3
      w3 = 0.0
-     for j in eachindex(fairhd3_4)
-        @muladd w3 += fairhd3_4[j][1] * sin(fairhd3_4[j][2] * t + fairhd3_4[j][3])
+     for j in eachindex(fairhd3)
+        @muladd w3 += fairhd3[j][1] * sin(fairhd3[j][2] * t + fairhd3[j][3])
     end
     # T**4
      w4 = 0.0
-     for j in eachindex(fairhd4_4)
-        @muladd w4 += fairhd4_4[j][1] * sin(fairhd4_4[j][2] * t + fairhd4_4[j][3])
+     for j in eachindex(fairhd4)
+        @muladd w4 += fairhd4[j][1] * sin(fairhd4[j][2] * t + fairhd4[j][3])
     end
     # Multiply by powers of T and combine.
      wf = @evalpoly t w0 w1 w2 w3 w4
