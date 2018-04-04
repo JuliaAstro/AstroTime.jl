@@ -1,4 +1,4 @@
-export fairhd0_4, fairhd1_4, fairhd2_4, fairhd3_4, fairhd4_4
+export fairhd0, fairhd1, fairhd2, fairhd3, fairhd4
 
 const fairhd = [
 # 1, 10
@@ -877,8 +877,8 @@ const fairhd = [
 [    0.000209e-6,      155.420399434,  1.989815753 ]
 ]
 
-const fairhd0_4 = Tuple(reverse(Tuple.(fairhd[1:474])))
-const fairhd1_4 = Tuple(reverse(Tuple.(fairhd[475:679])))
-const fairhd2_4 = Tuple(reverse(Tuple.(fairhd[680:764])))
-const fairhd3_4 = Tuple(reverse(Tuple.(fairhd[765:784])))
-const fairhd4_4 = Tuple(reverse(Tuple.(fairhd[785:end])))
+const fairhd0 = Tuple(reverse(Tuple.(fairhd[1:474])))
+const fairhd1 = Tuple(reverse(Tuple.(fairhd[475:679])))
+const fairhd2 = Tuple(reverse(Tuple.(fairhd[680:764])))
+const fairhd3 = Tuple(reverse(Tuple.(fairhd[765:784])))
+const fairhd4 = Tuple(reverse(Tuple.(fairhd[785:end])))

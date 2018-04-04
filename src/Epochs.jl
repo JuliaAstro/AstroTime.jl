@@ -6,7 +6,7 @@ using ERFA
 import Base: +, -, ==, isapprox, isless
 
 using ..TimeScales, ..Periods
-import ..TimeScales: scales
+import ..TimeScales: acronyms
 import ..LeapSeconds: leapseconds
 
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
@@ -14,12 +14,11 @@ export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
 
 const date_fmt = dateformat"yyyy-mm-ddTHH:MM:SS.sss"
 
-struct Epoch{S<:TimeScale,T<:Number}
-    scale::Type{S}
+struct Epoch{S,T<:Number}
     jd1::T
     jd2::T
     """
-        Epoch{T}(jd1, jd2=0.0) where T<:TimeScale
+        Epoch{T}(jd1, jd2=0.0) where {T}
 
     Construct an `Epoch` with timescale `T` from a two-part Julian date.
 
@@ -30,20 +29,20 @@ struct Epoch{S<:TimeScale,T<:Number}
     2017-03-14T07:18:20.325 TT
     ```
     """
-    function Epoch{S}(jd1::T, jd2::T=zero(T)) where {S<:TimeScale, T<:Number}
-        new{S,T}(S, jd1, jd2)
+    function Epoch{S}(jd1::T, jd2::T=zero(T)) where {S, T<:Number}
+        new{S::TimeScale,T}(jd1, jd2)
     end
 end
 
-function Base.show(io::IO, ep::Epoch{S}) where S<:TimeScale
-    print(io, "$(Dates.format(DateTime(ep), date_fmt)) $(S.name.name)")
+function Base.show(io::IO, ep::Epoch)
+    print(io, "$(Dates.format(DateTime(ep), date_fmt)) $(timescale(ep))")
 end
 
-timescale(ep::Epoch{S}) where S<:TimeScale = S
+timescale(ep::Epoch{S}) where {S} = S
 
 """
     Epoch{T}(year, month, day,
-        hour=0, minute=0, seconds=0, milliseconds=0) where T<:TimeScale
+        hour=0, minute=0, seconds=0, milliseconds=0) where {T}
 
 Construct an `Epoch` with timescale `T` at the given date and time.
 
@@ -55,14 +54,14 @@ julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
 ```
 """
 function Epoch{T}(year, month, day,
-    hour=0, minute=0, seconds=0, milliseconds=0) where T<:TimeScale
-    jd, jd1 = ERFA.dtf2d(string(T.name.name),
+    hour=0, minute=0, seconds=0, milliseconds=0) where {T}
+    jd, jd1 = ERFA.dtf2d(string(T),
     year, month, day, hour, minute, seconds + milliseconds/1000)
     Epoch{T}(jd, jd1)
 end
 
 """
-    Epoch{T}(dt::DateTime) where T<:TimeScale
+    Epoch{T}(dt::DateTime) where {T}
 
 Convert a `DateTime` object to an `Epoch` with timescale `T`.
 
@@ -73,14 +72,14 @@ julia> Epoch{TT}(DateTime(2017, 3, 14, 7, 18, 20, 325))
 2017-03-14T07:18:20.325 TT
 ```
 """
-function Epoch{T}(dt::DateTime) where T<:TimeScale
+function Epoch{T}(dt::DateTime) where {T}
     Epoch{T}(Dates.year(dt), Dates.month(dt), Dates.day(dt),
         Dates.hour(dt), Dates.minute(dt),
         Dates.second(dt) + Dates.millisecond(dt)/1000)
 end
 
 """
-    DateTime{T<:TimeScale}(ep::Epoch{T})
+    DateTime(ep::Epoch{T}) where T
 
 Convert an `Epoch` with timescale `T` to a `DateTime` object.
 
@@ -91,31 +90,14 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 2017-03-14T07:18:20.325
 ```
 """
-function Base.DateTime(ep::Epoch{T}) where T<:TimeScale
-    dt = ERFA.d2dtf(string(T.name.name), 3, julian1(ep), julian2(ep))
+function Base.DateTime(ep::Epoch{T}) where {T}
+    dt = ERFA.d2dtf(string(T), 3, julian1(ep), julian2(ep))
     DateTime(dt...)
 end
 
 """
-    Epoch{T}(ep::Epoch{S}) where {T<:TimeScale, S<:TimeScale}
-
-Convert an `Epoch` with timescale `S` to an `Epoch` with timescale `T`.
-
-# Example
-
-```jldoctest
-julia> Epoch{TT}(Epoch{TAI}(2000, 1, 1))
-2000-01-01T00:00:32.184 TT
-```
-"""
-function Epoch{T}(ep::Epoch{S}) where {T<:TimeScale,S<:TimeScale}
-    _rescale(Epoch{T}, ep)
-end
-Epoch{T}(ep::Epoch{T}) where T<:TimeScale = ep
-
-"""
     Epoch{T}(timestamp::AbstractString,
-        fmt::DateFormat=dateformat"yyyy-mm-ddTHH:MM:SS.sss") where T<:TimeScale
+        fmt::DateFormat=dateformat"yyyy-mm-ddTHH:MM:SS.sss") where {T}
 
 Construct an `Epoch` with timescale `T` from a timestamp. Optionally a `DateFormat`
 object can be passed which improves performance if many date strings need to be
@@ -128,9 +110,9 @@ julia> Epoch{TT}("2017-03-14T07:18:20.325")
 2017-03-14T07:18:20.325 TT
 ```
 """
-Epoch{T}(str::AbstractString, fmt=date_fmt) where T<:TimeScale = Epoch{T}(DateTime(str, fmt))
+Epoch{T}(str::AbstractString, fmt=date_fmt) where {T} = Epoch{T}(DateTime(str, fmt))
 
-for scale in scales
+for scale in acronyms
     epoch = Symbol(scale, "Epoch")
     @eval begin
         const $epoch = Epoch{$scale}
@@ -155,17 +137,17 @@ jd1950(ep) = julian(ep) - J1950
 dut1(ep::Epoch) = getΔUT1(julian(ep))
 leapseconds(ep::Epoch) = leapseconds(julian(ep))
 
-function isapprox(a::Epoch{T}, b::Epoch{T}) where T<:TimeScale
+function isapprox(a::Epoch{T}, b::Epoch{T}) where {T}
     return julian(a) ≈ julian(b)
 end
 
-function (==)(a::Epoch{T}, b::Epoch{T}) where T<:TimeScale
+function (==)(a::Epoch{T}, b::Epoch{T}) where {T}
     return DateTime(a) == DateTime(b)
 end
 
-isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T<:TimeScale} = julian(ep1) < julian(ep2)
+isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T} = julian(ep1) < julian(ep2)
 
-function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
+function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S,U<:TimeUnit}
     delta = get(days(p))
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) + delta, julian2(ep))
@@ -174,7 +156,7 @@ function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:Time
     end
 end
 
-function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:TimeUnit}
+function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S,U<:TimeUnit}
     delta = get(days(p))
     if delta >= oneunit(T2)
         ep1 = Epoch{S}(julian1(ep) - delta, julian2(ep))
@@ -183,7 +165,7 @@ function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S<:TimeScale,U<:Time
     end
 end
 
-function (-)(ep1::Epoch{T}, ep2::Epoch{T}) where T<:TimeScale
+function (-)(ep1::Epoch{T}, ep2::Epoch{T}) where {T}
     ((julian1(ep1) - julian1(ep2)) + (julian2(ep1) - julian2(ep2))) * days
 end
 

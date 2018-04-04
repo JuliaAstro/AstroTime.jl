@@ -17,19 +17,32 @@ The following timescales are defined:
 abstract type TimeScale end
 
 const scales = (
-    :TAI,
-    :TT,
+    :CoordinatedUniversalTime,
+    :UniversalTime,
+    :InternationalAtomicTime,
+    :TerrestrialTime,
+    :GeocentricCoordinateTime,
+    :BarycentricCoordinateTime,
+    :BarycentricDynamicalTime,
+)
+
+const acronyms = (
     :UTC,
     :UT1,
+    :TAI,
+    :TT,
     :TCG,
     :TCB,
     :TDB,
 )
 
-for scale in scales
+for (acronym, scale) in zip(acronyms, scales)
+    name = String(acronym)
     @eval begin
         struct $scale <: TimeScale end
-        export $scale
+        const $acronym = $scale()
+        Base.show(io::IO, ::$scale) = print(io, $name)
+        export $scale, $acronym
     end
 end
 

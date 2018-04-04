@@ -102,7 +102,6 @@ AstronomicalTime.update()
         @test jd1950(TTEpoch(1950, 1, 1, 12)) == 0
         @test mjd(TTEpoch(1858, 11, 17)) == 0
 
-
         @test seconds(tt + 1seconds, J2000) ≈ 1.0seconds
         @test minutes(tt + 1minutes, J2000) ≈ 1.0minutes
         @test hours(tt + 1hours, J2000) ≈ 1.0hours
@@ -127,8 +126,6 @@ AstronomicalTime.update()
         @test tdb ≈ TDBEpoch(tcb)
         @test tcb ≈ TCBEpoch(tdb)
 
-
-
         @test tt ≈ TTEpoch(tcb)
         @test tcb ≈ TCBEpoch(tt)
         @test tt == TTEpoch(tt)
@@ -148,15 +145,14 @@ AstronomicalTime.update()
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
     end
-    @testset "PortedFunctions" begin
-
+    @testset "Ported Functions" begin
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
         utc = UTCEpoch(2000, 1, 1, 12, 0, 0.0)
         ut1 = UT1Epoch(2000, 1, 1, 12, 0, 0.0)
         tcg = TCGEpoch(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
         tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
-        Δtr(ep) = AstronomicalTime.Epochs.deltatr(ep)
+        Δtr(ep) = AstronomicalTime.Epochs.dtdb(julian1(ep), julian2(ep), 0.0, 0.0, 0.0, 0.0)
         dat_ut1 = AstronomicalTime.Epochs.dut1(ut1)-AstronomicalTime.Epochs.leapseconds(julian(ut1))
         dat_tai = AstronomicalTime.Epochs.dut1(tai)-AstronomicalTime.Epochs.leapseconds(julian(tai))
         @test AstronomicalTime.Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
