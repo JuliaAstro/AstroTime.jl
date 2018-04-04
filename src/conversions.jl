@@ -12,19 +12,23 @@ const registry = ItemGraph{TimeScale, Transformation}()
 
 macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
     trans = Symbol(from, "to", to)
+    epoch = Expr(:escape, ep)
     func = quote
-        @inline function (::$(esc(trans)))($ep::Epoch{$from})::Epoch{$to}
+        @inline function (::$(esc(trans)))($epoch::Epoch{$from})::Epoch{$to}
             $(args[end])
         end
     end
+
+    arglist = func.args[end].args[end].args[1].args[1].args
     for a in args[1:end-1]
         if a isa Expr && a.head == :(=)
             arg = Expr(:kw, Expr(:escape, a.args[1]), a.args[2:end]...)
         else
             arg = Expr(:escape, a)
         end
-        push!(ex.args[2].args[2].args[1].args, arg)
+        push!(arglist, arg)
     end
+
     quote
         struct $trans <: Transformation end
         add_edge!(registry, $from, $to, $(esc(trans))())
@@ -35,7 +39,7 @@ end
 """
    utctai(jd1, jd2)
 
-Transform a two-part Julia date from `UTC` to `TAI`.
+Transform a two-part Julian date from `UTC` to `TAI`.
 
 # Example
 
@@ -46,7 +50,7 @@ julia> AstronomicalTime.Epochs.utctai(utc.jd1, utc.jd2)
 (2.4578265e6, 0.3052026506732349)
 ```
 """
-function utctai(jd1, jd2)
+@inline function utctai(jd1, jd2)
     ls = leapseconds(jd1 + jd2)
     dtat = ls/SECONDS_PER_DAY;
     if jd1 > jd2
@@ -62,7 +66,7 @@ end
 """
    taiutc(jd1, jd2)
 
-Transform a two-part Julia date from `TAI` to `UTC`.
+Transform a two-part Julian date from `TAI` to `UTC`.
 
 # Example
 
@@ -73,7 +77,7 @@ julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
 (2.4578265e6, 0.30434616919175345)
 ```
 """
-function taiutc(jd1, jd2)
+@inline function taiutc(jd1, jd2)
     ls = leapseconds(jd1 + jd2)
     dtat = ls/SECONDS_PER_DAY;
     if jd1 > jd2
@@ -86,64 +90,11 @@ function taiutc(jd1, jd2)
     jd1, jd2
 end
 
-"""
-   utctai(jd1, jd2)
-
-Transform a two-part Julia date from `UTC` to `TAI`.
-
-# Example
-
-```jldoctest
-julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:52.509 UTC
-julia> AstronomicalTime.Epochs.utctai(utc.jd1, utc.jd2)
-(2.4578265e6, 0.3052026506732349)
-```
-"""
-function utctai(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 += dtat
-    else
-        jd1 += dtat
-        jd2 = jd2
-    end
-    jd1, jd2
-end
-
-"""
-   taiutc(jd1, jd2)
-
-Transform a two-part Julia date from `TAI` to `UTC`.
-
-# Example
-
-```jldoctest
-julia> tai  = Epoch{TAI}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:52.509 TAI
-julia> AstronomicalTime.Epochs.taiutc(tai.jd1, tai.jd2)
-(2.4578265e6, 0.30434616919175345)
-```
-"""
-function taiutc(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 -= dtat
-    else
-        jd1 -= dtat
-        jd2 = jd2
-    end
-    jd1, jd2
-end
 
 """
     tttai(jd1, jd2)
 
-Transform a two-part Julia date from `TT` to `TAI`.
+Transform a two-part Julian date from `TT` to `TAI`.
 
 # Example
 
@@ -170,7 +121,7 @@ end
 """
     taitt(jd1, jd2)
 
-Transform a two-part Julia date from `TAI` to `TT`.
+Transform a two-part Julian date from `TAI` to `TT`.
 
 # Example
 
@@ -197,7 +148,7 @@ end
 """
     ut1tai(jd1, jd2, dta)
 
-Transform a two-part Julia date from `UT1` to `TAI`.
+Transform a two-part Julian date from `UT1` to `TAI`.
 
 # Example
 
@@ -223,7 +174,7 @@ end
 """
     taiut1(jd1, jd2, dta)
 
-Transform a two-part Julia date from `TAI` to `UT1`.
+Transform a two-part Julian date from `TAI` to `UT1`.
 
 # Example
 
@@ -250,7 +201,7 @@ end
 """
     tcgtt(jd1, jd2)
 
-Transform a two-part Julia date from `TCG` to `TT`.
+Transform a two-part Julian date from `TCG` to `TT`.
 
 # Example
 
@@ -277,7 +228,7 @@ end
 """
     tttcg(jd1, jd2)
 
-Transform a two-part Julia date from `TT` to `TCG`.
+Transform a two-part Julian date from `TT` to `TCG`.
 
 # Example
 
@@ -304,7 +255,7 @@ end
 """
     tdbtt(jd1, jd2, dtr)
 
-Transform a two-part Julia date from `TDB` to `TT`.
+Transform a two-part Julian date from `TDB` to `TT`.
 
 # Example
 
@@ -400,11 +351,6 @@ function dtdb(jd1, jd2, ut, elong, u, v)
      w = wt + wf + wj
 end
 
-@inline function deltatr(ep::Epoch)
-    jd1, jd2 = julian1(ep), julian2(ep)
-    dtdb(jd1, jd2, 0.0, 0.0, 0.0, 0.0)
-end
-
 @inline function deltat(ep::Epoch)
     leapsec = leapseconds(julian(ep))
     ΔUT1 = dut1(ep)
@@ -492,16 +438,16 @@ end
 end
 
 # TT <-> TDB
-@transform TDB TT ep begin
+@transform TDB TT ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = deltatr(ep)
+    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-@transform TT TDB ep begin
+@transform TT TDB ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = deltatr(ep)
+    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
