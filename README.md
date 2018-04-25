@@ -33,7 +33,7 @@ information.
 [travis-badge]: https://travis-ci.org/JuliaAstro/AstroTime.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/JuliaAstro/AstroTime.jl
 [av-badge]: https://ci.appveyor.com/api/projects/status/13l2bwswxbl1g8cq?svg=true
-[av-url]: https://ci.appveyor.com/project/helgee/AstroTime-jl
+[av-url]: https://ci.appveyor.com/project/helgee/astronomicaltime-jl
 [coveralls-badge]: https://coveralls.io/repos/github/JuliaAstro/AstroTime.jl/badge.svg?branch=master
 [coveralls-url]: https://coveralls.io/github/JuliaAstro/AstroTime.jl?branch=master
 [codecov-badge]: http://codecov.io/github/JuliaAstro/AstroTime.jl/coverage.svg?branch=master
