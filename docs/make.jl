@@ -1,8 +1,8 @@
-using Documenter, AstronomicalTime
+using Documenter, AstroTime
 
 makedocs(
     format = :html,
-    sitename = "AstronomicalTime.jl",
+    sitename = "AstroTime.jl",
     authors = "Helge Eichhorn",
     pages = [
         "Home" => "index.md",
@@ -12,7 +12,7 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/JuliaAstro/AstronomicalTime.jl.git",
+    repo = "github.com/JuliaAstro/AstroTime.jl.git",
     target = "build",
     deps = nothing,
     make = nothing,

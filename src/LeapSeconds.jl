@@ -29,7 +29,7 @@ function LSK(file)
 end
 
 @RemoteFile LSK_FILE "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls"
-@OptionalData LSK_DATA LSK "Run 'AstronomicalTime.update()' to load it."
+@OptionalData LSK_DATA LSK "Run 'AstroTime.update()' to load it."
 
 function fractionofday(dt)
     Dates.hour(dt)/24 + Dates.minute(dt)/(24*60) + Dates.second(dt)/86400 + Dates.millisecond(dt)/8.64e7

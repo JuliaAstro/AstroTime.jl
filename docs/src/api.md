@@ -2,11 +2,11 @@
 
 ```@meta
 DocTestSetup = quote
-    using AstronomicalTime
+    using AstroTime
 end
 ```
 
 ```@autodocs
-Modules = [AstronomicalTime, AstronomicalTime.Epochs]
+Modules = [AstroTime, AstroTime.Epochs]
 Private = false
 ```

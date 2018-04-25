@@ -1,4 +1,4 @@
-# AstronomicalTime
+# AstroTime
 
 *Astronomical time keeping in Julia*
 
@@ -7,7 +7,7 @@
 The package can be installed through Julia's package manager:
 
 ```julia
-Pkg.clone("https://github.com/JuliaAstro/AstronomicalTime.jl")
+Pkg.clone("https://github.com/JuliaAstro/AstroTime.jl")
 ```
 
 ## Quickstart

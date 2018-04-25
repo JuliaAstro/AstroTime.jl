@@ -1,11 +1,11 @@
-using AstronomicalTime
-using AstronomicalTime.Epochs
+using AstroTime
+using AstroTime.Epochs
 using Base.Test
 using ERFA
 
-AstronomicalTime.update()
+AstroTime.update()
 
-@testset "AstronomicalTime" begin
+@testset "AstroTime" begin
     @testset "Periods" begin
         s = 1.0seconds
         m = 1.0minutes
