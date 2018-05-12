@@ -365,9 +365,9 @@ Transform a two-part Julian date from `TT` to `TDB`.
 # Example
 
 ```jldoctest
-julia> tdb = Epoch{TT}(2.4578265e6, 0.30440190993249416)
+julia> tt = Epoch{TT}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TT
-julia> AstroTime.Epochs.tttdb(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tt))
+julia> AstroTime.Epochs.tttdb(tt.jd1, tt.jd2, AstroTime.Epochs.deltatr(tdb))
 (2.4578265e6, 0.30440190993249416)
 ```
 """
