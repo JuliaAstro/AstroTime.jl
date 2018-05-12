@@ -356,7 +356,33 @@ end
     ΔUT1 = dut1(ep)
     32.184 + leapsec - ΔUT1
 end
-sjnsj
+
+"""
+    tttdb(jd1, jd2, dtr)
+
+Transform a two-part Julian date from `TT` to `TDB`.
+
+# Example
+
+```jldoctest
+julia> tdb = Epoch{TT}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TT
+julia> AstroTime.Epochs.tttdb(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tt))
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+@inline function tttdb(jd1, jd2, dtr)
+    dtrd = dtr / SECONDS_PER_DAY
+        if jd1 > jd2
+            date = jd1
+            date1 = jd2 + dtrd
+        else
+            date = jd1 + dtrd
+            date1 = jd2
+        end
+        date, date1
+end
+
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
