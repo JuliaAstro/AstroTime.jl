@@ -357,6 +357,33 @@ end
     32.184 + leapsec - ΔUT1
 end
 
+
+"""
+    ttut1(jd1, jd2, dt)
+
+Transform a two-part Julian date from `TT` to `UT1`.
+
+# Example
+
+```jldoctest
+julia> tt = Epoch{tt}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TT
+julia> AstroTime.Epochs.ttut1(tt.jd1, tt.jd2, AstroTime.Epochs.deltat(tt))
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+@inline function ttut1(jd1, jd2, dt)
+     dtd = dt / SECONDS_PER_DAY
+     if jd1 > jd2
+        date = jd1
+        date1 = jd2 - dtd
+     else
+        date = jd1 - dtd
+        date1 = jd2
+    end
+    date, date1
+end
+
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
@@ -491,4 +518,3 @@ Epoch{T}(ep::Epoch{T}) where {T} = ep
     end
     ex
 end
-
