@@ -189,7 +189,6 @@ AstroTime.update()
         @test Epochs.ttut1(julian1(tt), julian2(tt), dt(tt)) == ERFA.ttut1(julian1(tt), julian2(tt), dt(tt))
         @test Epochs.ttut1(julian2(tt), julian1(tt), dt(tt)) == ERFA.ttut1(julian2(tt), julian1(tt), dt(tt))
 
-    end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
         for year = 1960:Dates.year(now())
