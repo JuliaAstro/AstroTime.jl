@@ -373,14 +373,14 @@ julia> AstroTime.Epochs.tttdb(tt.jd1, tt.jd2, AstroTime.Epochs.deltatr(tdb))
 """
 @inline function tttdb(jd1, jd2, dtr)
     dtrd = dtr / SECONDS_PER_DAY
-        if jd1 > jd2
-            date = jd1
-            date1 = jd2 + dtrd
-        else
-            date = jd1 + dtrd
-            date1 = jd2
-        end
-        date, date1
+    if jd1 > jd2
+        date = jd1
+        date1 = jd2 + dtrd
+    else
+        date = jd1 + dtrd
+        date1 = jd2
+    end
+    date, date1
 end
 
 # TAI <-> UTC
