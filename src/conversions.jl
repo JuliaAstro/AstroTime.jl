@@ -383,6 +383,33 @@ julia> AstroTime.Epochs.tttdb(tt.jd1, tt.jd2, AstroTime.Epochs.deltatr(tdb))
     date, date1
 end
 
+
+"""
+    ut1tt(jd1, jd2, dt)
+
+Transform a two-part Julian date from `UT1` to `TT`.
+
+# Example
+
+```jldoctest
+julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 UT1
+julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+@inline function ut1tt(jd1, jd2, dt)
+     dtd = dt / SECONDS_PER_DAY
+     if jd1 > jd2
+        date = jd1
+        date1 = jd2 + dtd
+     else
+        date = jd1 + dtd
+        date1 = jd2
+     end
+     date, date1
+end
+
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
