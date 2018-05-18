@@ -449,10 +449,10 @@ julia> AstroTime.Epochs.tdbtcb(tdb.jd1, tdb.jd2)
 ```
 """
 @inline function tdbtcb(jd1, jd2)
-    const t77td = MJD + MOD_JD_77
-    const t77tf = OFFSET_TT_TAI/SECONDS_PER_DAY
-    const jd0 = TDB0/SECONDS_PER_DAY
-    const elbb = ELB/(1.0-ELB)
+    t77td = MJD + MOD_JD_77
+    t77tf = OFFSET_TT_TAI/SECONDS_PER_DAY
+    jd0 = TDB0/SECONDS_PER_DAY
+    elbb = ELB/(1.0-ELB)
     if jd1 > jd2
         d = t77td - jd1
         f  = jd2 - jd0
