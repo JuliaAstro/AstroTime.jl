@@ -461,6 +461,7 @@ julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
 end
 
 
+
 """
     tcbtdb(jd1, jd2)
 
@@ -488,6 +489,45 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
         date1 = jd2
     end
     date, date1
+
+@inline function jd2cal(jd1, jd2)
+    dj = jd1 + jd2
+    if dj < JD_MIN || dj > JD_MAX
+        error("Date is not acceptable")
+    end
+
+    if jd1 >= jd2
+        date = jd1
+        date1 = jd2
+    else
+        date = jd2
+        date1 = jd1
+    end
+
+    date1 -= 0.5
+
+    f1 = mod(date, 1.0)
+    f2 = mod(date1, 1.0)
+    f = mod(f1 + f2, 1.0)
+    if f < 0.0
+        f += 1.0
+    end
+    d = round(date-f1) + round(date1-f2) + round(f1+f2-f)
+    jd = round(d) + 1.
+
+    l = jd + 68569.
+    n = (4. * l) / 146097.
+    l -= (146097. * n + 3.) / 4.
+    i = (4000. * (l + 1.)) / 1461001.
+    l -= (1461. * i) / 4. - 31.
+    k = (80. * l) / 2447.
+    id = Int(floor((l - (2447. * k) / 80.)))
+    l = k / 11.
+    im = Int(floor((k + 2. - 12. * l)))
+    iy = Int(floor((100. * (n - 49.) + i + l)))
+
+    iy, im, id, f
+
 end
 
 
