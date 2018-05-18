@@ -4,7 +4,7 @@ export MJD, J2000, J1950,
     HOURS_PER_DAY, HOURS_PER_YEAR, HOURS_PER_CENTURY,
     DAYS_PER_YEAR, DAYS_PER_CENTURY,
     YEARS_PER_CENTURY,
-    OFFSET_TT_TAI, MOD_JD_77, ELG, fairhd, DAYS_PER_MILLENNIUM
+    OFFSET_TT_TAI, MOD_JD_77, ELG, fairhd, DAYS_PER_MILLENNIUM, JD_MAX, JD_MIN
 
 const MJD = 2400000.5
 const J2000 = Dates.datetime2julian(DateTime(2000, 1, 1, 12, 0, 0))
@@ -36,5 +36,7 @@ const MOD_JD_77 = 43144.0
 const ELG = 6.969290134e-10
 const DAYS_PER_MILLENNIUM = 365250.0
 
+const JD_MIN = -68569.5
+const JD_MAX = 1e9
 
 include("fairhd.jl")
