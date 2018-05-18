@@ -193,6 +193,10 @@ AstroTime.update()
         @test Epochs.ut1tt(julian1(ut1), julian2(ut1), dt(ut1)) == ERFA.tttdb(julian1(ut1), julian2(ut1), dt(ut1))
         @test Epochs.ut1tt(julian2(ut1), julian1(ut1), dt(ut1)) == ERFA.tttdb(julian2(ut1), julian1(ut1), dt(ut1))
 
+        @test Epochs.tdbtcb(julian1(tdb), julian2(tdb)) == ERFA.tdbtcb(julian1(tdb), julian2(tdb))
+        @test Epochs.tdbtcb(julian2(tdb), julian1(tdb)) == ERFA.tdbtcb(julian2(tdb), julian1(tdb))
+
+
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
