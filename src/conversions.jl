@@ -436,7 +436,7 @@ end
 
 
 """
-    tdbtcb(jd1, jd2, dt)
+    tdbtcb(jd1, jd2)
 
 Transform a two-part Julian date from `TDB` to `TCB`.
 
