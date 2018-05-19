@@ -153,6 +153,7 @@ AstroTime.update()
         tcg = TCGEpoch(2000, 1, 1, 12, 0, 0.0)
         tt = TTEpoch(2000, 1, 1, 12, 0, 0.0)
         tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
+        tcb = TCBEpoch(2000, 1, 1, 12, 0, 0.0)
         Δtr(ep) = Epochs.dtdb(julian1(ep), julian2(ep), 0.0, 0.0, 0.0, 0.0)
         dat(ep) = Epochs.dut1(ep)-Epochs.leapseconds(julian(ep))
 
@@ -195,8 +196,8 @@ AstroTime.update()
 
         @test Epochs.tdbtcb(julian1(tdb), julian2(tdb)) == ERFA.tdbtcb(julian1(tdb), julian2(tdb))
         @test Epochs.tdbtcb(julian2(tdb), julian1(tdb)) == ERFA.tdbtcb(julian2(tdb), julian1(tdb))
-
-
+        @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
+        @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
