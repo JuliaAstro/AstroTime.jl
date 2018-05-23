@@ -282,7 +282,7 @@ end
 Computes difference TDB-TT in seconds at time JD (julian days)
 The timescale for the input JD can be either TDB or TT.
 
-The accuracy of this routine is approx 30 microseconds in interval 1900-2100 AD.
+The accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD.
 Note that an accurate transformation betweem TDB and TT depends on the
 trajectory of the observer. For two observers fixed on the earth surface
 the quantity TDB-TT can differ by as much as about 4 microseconds.

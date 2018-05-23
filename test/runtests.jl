@@ -145,6 +145,11 @@ AstroTime.update()
         @test ref == TDBEpoch(TTEpoch("2013-03-18T11:59:59.998"))
         @test ref == TDBEpoch(TCBEpoch("2013-03-18T12:00:17.718"))
         @test ref == TDBEpoch(TCGEpoch("2013-03-18T12:00:00.795"))
+
+
+
+
+
     end
     @testset "Ported Functions" begin
         tai = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
@@ -198,6 +203,9 @@ AstroTime.update()
         @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
         @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
 
+        for jd in 2414105.0:10.1:2488985.0
+                @test Epochs.dtdb(jd) ≈ Epochs.dtdb(jd,0.0,0.0,0.0,0.0,0.0) atol = 40e-6
+        end
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
