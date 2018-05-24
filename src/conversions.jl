@@ -278,6 +278,25 @@ julia> AstroTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tdb))
     date, date1
 end
 
+"""
+Computes difference TDB-TT in seconds at time JD (julian days)
+The timescale for the input JD can be either TDB or TT.
+
+The accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD.
+Note that an accurate transformation betweem TDB and TT depends on the
+trajectory of the observer. For two observers fixed on the earth surface
+the quantity TDB-TT can differ by as much as about 4 microseconds.
+
+References:
+[1] https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB
+[2] https://github.com/JuliaAstro/AstroTime.jl/issues/26
+
+"""
+function dtdb(JD)
+    g = 357.53 + 0.9856003( JD - 2451545 )
+    0.001658sind( g ) + 0.000014sind( 2g )
+end
+
 function dtdb(jd1, jd2, ut, elong, u, v)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
@@ -307,7 +326,7 @@ function dtdb(jd1, jd2, ut, elong, u, v)
         0.13677e-10 * u * sin(tsol + 2.0 * elsun) -
         1.31840e-10 * v * cos(elsun) +
         3.17679e-10 * u * sin(tsol)
-    
+
     # =====================
     # Fairhead et al. model
     # =====================
