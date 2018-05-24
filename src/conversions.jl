@@ -279,6 +279,8 @@ julia> AstroTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tdb))
 end
 
 """
+    difference_tdb_tt(jd1, jd2)
+
 Computes difference TDB-TT in seconds at time JD (julian days)
 The timescale for the input JD can be either TDB or TT.
 
@@ -287,17 +289,18 @@ Note that an accurate transformation betweem TDB and TT depends on the
 trajectory of the observer. For two observers fixed on the earth surface
 the quantity TDB-TT can differ by as much as about 4 microseconds.
 
-References:
-[1] https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB
-[2] https://github.com/JuliaAstro/AstroTime.jl/issues/26
+### References ###
+
+1. [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
+2. [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
-function dtdb(JD)
-    g = 357.53 + 0.9856003( JD - 2451545 )
-    0.001658sind( g ) + 0.000014sind( 2g )
+function difference_tdb_tt(jd1, jd2)
+    g = 357.53 + 0.9856003((jd1 - J2000) + jd2)
+    0.001658sind(g) + 0.000014sind(2g)
 end
 
-function dtdb(jd1, jd2, ut, elong, u, v)
+function difference_tdb_tt(jd1, jd2, ut, elong, u, v)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
@@ -374,7 +377,7 @@ end
 @inline function deltat(ep::Epoch)
     leapsec = leapseconds(julian(ep))
     ΔUT1 = dut1(ep)
-    32.184 + leapsec - ΔUT1
+    OFFSET_TT_TAI + leapsec - ΔUT1
 end
 
 """
@@ -566,16 +569,16 @@ end
 end
 
 # TT <-> TDB
-@transform TDB TT ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
+@transform TDB TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
+    Δtr = difference_tdb_tt(jd1, jd2)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-@transform TT TDB ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
+@transform TT TDB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
+    Δtr = difference_tdb_tt(jd1, jd2)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
