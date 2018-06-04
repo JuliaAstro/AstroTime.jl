@@ -8,6 +8,8 @@ import RemoteFiles: path, isfile
 
 export @timescale
 
+include("utils.jl")
+
 include("LeapSeconds.jl")
 include("TimeScales.jl")
 include("Periods.jl")
