@@ -33,6 +33,7 @@ macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
         struct $trans <: Transformation end
         add_edge!(registry, $from, $to, $(esc(trans))())
         $func
+        $(esc(Epoch)){$(esc(to))}(ep::Epoch{$from, T}, args...) where {T} = $trans()(ep, args...)
     end
 end
 
@@ -279,7 +280,7 @@ julia> AstroTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tdb))
 end
 
 """
-    difference_tdb_tt(jd1, jd2)
+    diff_tdb_tt(jd1, jd2)
 
 Computes difference TDB-TT in seconds at time JD (julian days)
 The timescale for the input JD can be either TDB or TT.
@@ -295,12 +296,14 @@ the quantity TDB-TT can differ by as much as about 4 microseconds.
 2. [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
-function difference_tdb_tt(jd1, jd2)
+function diff_tdb_tt(jd1, jd2)
     g = 357.53 + 0.9856003((jd1 - J2000) + jd2)
     0.001658sind(g) + 0.000014sind(2g)
 end
 
-function difference_tdb_tt(jd1, jd2, ut, elong, u, v)
+diff_tdb_tt(ep::Epoch) = diff_tdb_tt(julian1(ep), julian2(ep))
+
+function diff_tdb_tt(jd1, jd2, ut, elong, u, v)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
@@ -374,7 +377,7 @@ function difference_tdb_tt(jd1, jd2, ut, elong, u, v)
     w = wt + wf + wj
 end
 
-@inline function deltat(ep::Epoch)
+@inline function diff_ut1_tt(ep::Epoch)
     leapsec = leapseconds(julian(ep))
     ΔUT1 = dut1(ep)
     OFFSET_TT_TAI + leapsec - ΔUT1
@@ -515,30 +518,28 @@ end
 end
 
 # TAI <-> UT1
-@transform UT1 TAI ep begin
+@transform UT1 TAI ep Δt=dut1(ep)-leapseconds(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ut1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = ut1tai(jd1, jd2, Δt)
     TAIEpoch(date, date1)
 end
 
-@transform TAI UT1 ep begin
+@transform TAI UT1 ep Δt=dut1(ep)-leapseconds(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = taiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = taiut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)
 end
 
 # TT <-> UT1
-@transform UT1 TT ep begin
+@transform UT1 TT ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    dt = deltat(ep)
-    date, date1 = ERFA.ut1tt(jd1, jd2, dt)
+    date, date1 = ERFA.ut1tt(jd1, jd2, Δt)
     TTEpoch(date, date1)
 end
 
-@transform TT UT1 ep begin
+@transform TT UT1 ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    dt = deltat(ep)
-    date, date1 = ERFA.ttut1(jd1, jd2, dt)
+    date, date1 = ERFA.ttut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)
 end
 
@@ -569,16 +570,14 @@ end
 end
 
 # TT <-> TDB
-@transform TDB TT ep begin
+@transform TDB TT ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = difference_tdb_tt(jd1, jd2)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-@transform TT TDB ep begin
+@transform TT TDB ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = difference_tdb_tt(jd1, jd2)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
