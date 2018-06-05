@@ -182,8 +182,7 @@ AstroTime.update()
         @test_broken Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
         @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
 
-        @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) ==
-            ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
+        @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
         @test Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)) == ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))
         @test Epochs.tttdb(julian1(tt), julian2(tt), Δtr(tdb)) == ERFA.tttdb(julian1(tt), julian2(tt), Δtr(tdb))
@@ -195,10 +194,22 @@ AstroTime.update()
         @test Epochs.ut1tt(julian1(ut1), julian2(ut1), dt(ut1)) == ERFA.tttdb(julian1(ut1), julian2(ut1), dt(ut1))
         @test Epochs.ut1tt(julian2(ut1), julian1(ut1), dt(ut1)) == ERFA.tttdb(julian2(ut1), julian1(ut1), dt(ut1))
 
-        @test Epochs.tdbtcb(julian1(tdb), julian2(tdb)) == ERFA.tdbtcb(julian1(tdb), julian2(tdb))
-        @test Epochs.tdbtcb(julian2(tdb), julian1(tdb)) == ERFA.tdbtcb(julian2(tdb), julian1(tdb))
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
+        let (jd1, jd2) = Epochs.tdbtcb(julian1(tdb), julian2(tdb))
+            erfa_jd1, erfa_jd2 = ERFA.tdbtcb(julian1(tdb), julian2(tdb))
+            @test jd1 ≈ erfa_jd1
+            @test jd2 == erfa_jd2
+        end
+
+        let (jd2, jd1) = Epochs.tdbtcb(julian2(tdb), julian1(tdb))
+            erfa_jd2, erfa_jd1 = ERFA.tdbtcb(julian2(tdb), julian1(tdb))
+            @test jd2 ≈ erfa_jd2
+            @test jd1 == erfa_jd1
+        end
+
         @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
         @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
+
 
         for jd in 2414105.0:10.0:2488985.0
             @test Epochs.diff_tdb_tt(jd, 0.5) ≈ Epochs.diff_tdb_tt(jd,0.5,0.0,0.0,0.0,0.0) atol=40e-6
