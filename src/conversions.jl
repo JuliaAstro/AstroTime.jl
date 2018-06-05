@@ -460,8 +460,6 @@ julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
      date, date1
 end
 
-
-
 """
     tcbtdb(jd1, jd2)
 
