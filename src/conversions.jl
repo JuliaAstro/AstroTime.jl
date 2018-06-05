@@ -33,6 +33,7 @@ macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
         struct $trans <: Transformation end
         add_edge!(registry, $from, $to, $(esc(trans))())
         $func
+        $(esc(Epoch)){$(esc(to))}(ep::Epoch{$from, T}, args...) where {T} = $trans()(ep, args...)
     end
 end
 
@@ -278,83 +279,108 @@ julia> AstroTime.Epochs.tdbtt(tdb.jd1, tdb.jd2, AstroTime.Epochs.deltatr(tdb))
     date, date1
 end
 
-function dtdb(jd1, jd2, ut, elong, u, v)
+"""
+    diff_tdb_tt(jd1, jd2)
+
+Computes difference TDB-TT in seconds at time JD (julian days)
+The timescale for the input JD can be either TDB or TT.
+
+The accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD.
+Note that an accurate transformation betweem TDB and TT depends on the
+trajectory of the observer. For two observers fixed on the earth surface
+the quantity TDB-TT can differ by as much as about 4 microseconds.
+
+### References ###
+
+1. [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
+2. [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
+
+"""
+function diff_tdb_tt(jd1, jd2)
+    g = 357.53 + 0.9856003((jd1 - J2000) + jd2)
+    0.001658sind(g) + 0.000014sind(2g)
+end
+
+diff_tdb_tt(ep::Epoch) = diff_tdb_tt(julian1(ep), julian2(ep))
+
+function diff_tdb_tt(jd1, jd2, ut, elong, u, v)
     t = ((jd1 - J2000) + jd2) / DAYS_PER_MILLENNIUM
     # Convert UT to local solar time in radians.
-     tsol = mod(ut, 1.0) * 2π  + elong
+    tsol = mod(ut, 1.0) * 2π  + elong
 
     # FUNDAMENTAL ARGUMENTS:  Simon et al. 1994.
     # Combine time argument (millennia) with deg/arcsec factor.
-     w = t / 3600.0
+    w = t / 3600.0
     # Sun Mean Longitude.
-     elsun = deg2rad(mod(280.46645683 + 1296027711.03429 * w, 360.0))
+    elsun = deg2rad(mod(280.46645683 + 1296027711.03429 * w, 360.0))
     # Sun Mean Anomaly.
-     emsun = deg2rad(mod(357.52910918 + 1295965810.481 * w, 360.0))
+    emsun = deg2rad(mod(357.52910918 + 1295965810.481 * w, 360.0))
     # Mean Elongation of Moon from Sun.
-     d = deg2rad(mod(297.85019547 + 16029616012.090 * w, 360.0))
+    d = deg2rad(mod(297.85019547 + 16029616012.090 * w, 360.0))
     # Mean Longitude of Jupiter.
-     elj = deg2rad(mod(34.35151874 + 109306899.89453 * w, 360.0))
+    elj = deg2rad(mod(34.35151874 + 109306899.89453 * w, 360.0))
     # Mean Longitude of Saturn.
-     els = deg2rad(mod(50.07744430 + 44046398.47038 * w, 360.0))
+    els = deg2rad(mod(50.07744430 + 44046398.47038 * w, 360.0))
     # TOPOCENTRIC TERMS:  Moyer 1981 and Murray 1983.
-     wt =   +  0.00029e-10 * u * sin(tsol + elsun - els)
-            +  0.00100e-10 * u * sin(tsol - 2.0 * emsun)
-            +  0.00133e-10 * u * sin(tsol - d)
-            +  0.00133e-10 * u * sin(tsol + elsun - elj)
-            -  0.00229e-10 * u * sin(tsol + 2.0 * elsun + emsun)
-            -  0.02200e-10 * v * cos(elsun + emsun)
-            +  0.05312e-10 * u * sin(tsol - emsun)
-            -  0.13677e-10 * u * sin(tsol + 2.0 * elsun)
-            -  1.31840e-10 * v * cos(elsun)
-            +  3.17679e-10 * u * sin(tsol)
+    wt = 0.00029e-10 * u * sin(tsol + elsun - els) +
+        0.00100e-10 * u * sin(tsol - 2.0 * emsun) +
+        0.00133e-10 * u * sin(tsol - d) +
+        0.00133e-10 * u * sin(tsol + elsun - elj) -
+        0.00229e-10 * u * sin(tsol + 2.0 * elsun + emsun) -
+        0.02200e-10 * v * cos(elsun + emsun) +
+        0.05312e-10 * u * sin(tsol - emsun) -
+        0.13677e-10 * u * sin(tsol + 2.0 * elsun) -
+        1.31840e-10 * v * cos(elsun) +
+        3.17679e-10 * u * sin(tsol)
+
     # =====================
     # Fairhead et al. model
     # =====================
 
     # T**0
-     w0 = 0.0
-     for j in eachindex(fairhd0)
+    w0 = 0.0
+    for j in eachindex(fairhd0)
         @muladd w0 += fairhd0[j][1] * sin(fairhd0[j][2] * t + fairhd0[j][3])
     end
     # T**1
-     w1 = 0.0
-     for j in eachindex(fairhd1)
+    w1 = 0.0
+    for j in eachindex(fairhd1)
         @muladd w1 += fairhd1[j][1] * sin(fairhd1[j][2] * t + fairhd1[j][3])
     end
     # T**2
-     w2 = 0.0
-     for j in eachindex(fairhd2)
+    w2 = 0.0
+    for j in eachindex(fairhd2)
         @muladd w2 += fairhd2[j][1] * sin(fairhd2[j][2] * t + fairhd2[j][3])
     end
     # T**3
-     w3 = 0.0
-     for j in eachindex(fairhd3)
+    w3 = 0.0
+    for j in eachindex(fairhd3)
         @muladd w3 += fairhd3[j][1] * sin(fairhd3[j][2] * t + fairhd3[j][3])
     end
     # T**4
-     w4 = 0.0
-     for j in eachindex(fairhd4)
+    w4 = 0.0
+    for j in eachindex(fairhd4)
         @muladd w4 += fairhd4[j][1] * sin(fairhd4[j][2] * t + fairhd4[j][3])
     end
     # Multiply by powers of T and combine.
-     wf = @evalpoly t w0 w1 w2 w3 w4
+    wf = @evalpoly t w0 w1 w2 w3 w4
     # Adjustments to use JPL planetary masses instead of IAU.
-     wj =   0.00065e-6 * sin(6069.776754 * t + 4.021194) +
-            0.00033e-6 * sin( 213.299095 * t + 5.543132) +
-          (-0.00196e-6 * sin(6208.294251 * t + 5.696701)) +
-          (-0.00173e-6 * sin(  74.781599 * t + 2.435900)) +
-            0.03638e-6 * t * t
+    wj = 0.00065e-6 * sin(6069.776754 * t + 4.021194) +
+        0.00033e-6 * sin( 213.299095 * t + 5.543132) +
+        (-0.00196e-6 * sin(6208.294251 * t + 5.696701)) +
+        (-0.00173e-6 * sin(  74.781599 * t + 2.435900)) +
+        0.03638e-6 * t * t
     # ============
     # Final result
     # ============
     # TDB-TT in seconds.
-     w = wt + wf + wj
+    w = wt + wf + wj
 end
 
-@inline function deltat(ep::Epoch)
+@inline function diff_ut1_tt(ep::Epoch)
     leapsec = leapseconds(julian(ep))
     ΔUT1 = dut1(ep)
-    32.184 + leapsec - ΔUT1
+    OFFSET_TT_TAI + leapsec - ΔUT1
 end
 
 """
@@ -523,30 +549,28 @@ end
 end
 
 # TAI <-> UT1
-@transform UT1 TAI ep begin
+@transform UT1 TAI ep Δt=dut1(ep)-leapseconds(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ut1tai(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = ut1tai(jd1, jd2, Δt)
     TAIEpoch(date, date1)
 end
 
-@transform TAI UT1 ep begin
+@transform TAI UT1 ep Δt=dut1(ep)-leapseconds(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = taiut1(jd1, jd2, dut1(ep)-leapseconds(julian(ep)))
+    date, date1 = taiut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)
 end
 
 # TT <-> UT1
-@transform UT1 TT ep begin
+@transform UT1 TT ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    dt = deltat(ep)
-    date, date1 = ERFA.ut1tt(jd1, jd2, dt)
+    date, date1 = ERFA.ut1tt(jd1, jd2, Δt)
     TTEpoch(date, date1)
 end
 
-@transform TT UT1 ep begin
+@transform TT UT1 ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    dt = deltat(ep)
-    date, date1 = ERFA.ttut1(jd1, jd2, dt)
+    date, date1 = ERFA.ttut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)
 end
 
@@ -577,16 +601,14 @@ end
 end
 
 # TT <-> TDB
-@transform TDB TT ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
+@transform TDB TT ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
     date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
-@transform TT TDB ep ut=0.0 elong=0.0 u=0.0 v=0.0 begin
+@transform TT TDB ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    Δtr = dtdb(jd1, jd2, ut, elong, u, v)
     date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
