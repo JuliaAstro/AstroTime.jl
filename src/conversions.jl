@@ -561,6 +561,37 @@ end
 
 end
 
+function cal2jd(iy, im, id)
+    EYEAR_ALLOWED = -4799
+    MON_LENGTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    if iy < EYEAR_ALLOWED
+        throw(ArgumentError("Year is outside of the representable range (< $EYEAR_ALLOWED)"))
+    end
+
+    if im < 1 || im > 12
+        throw(ArgumentError("Month is outside of the range (1,12)"))
+    end
+
+    ly = ((im == 2 ) && !Bool(iy % 4!=0) && (Bool(iy % 100!=0) || !Bool(iy % 400!=0)))? 1:0 #check if leap year
+
+    if ((id < 1) || (id > (MON_LENGTH[im] + ly)))
+        throw(ArgumentError("Day is outside of permissible range (1, $(MON_LENGTH[im]))"))
+    end
+
+    my = (im - 14) ÷ 12
+    iypmy = trunc(Int,(iy + my))
+    jd = MJD
+    jd1 = float((((1461 * (iypmy + 4800)) ÷ 4)
+          + (367 * trunc(Int,(im - 2 - 12 * my))) ÷ 12
+          - (3 * ((iypmy + 4900) ÷ 100)) ÷ 4
+          + trunc(Int,id) - 2432076))
+
+    jd, jd1
+end
+
+
+
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)

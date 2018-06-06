@@ -214,6 +214,13 @@ AstroTime.update()
             @test Epochs.diff_tdb_tt(jd, 0.5) ≈ Epochs.diff_tdb_tt(jd,0.5,0.0,0.0,0.0,0.0) atol=40e-6
         end
 
+        @test Epochs.cal2jd(2000, 1, 1) == ERFA.cal2jd(2000, 1, 1)
+        @test Epochs.cal2jd(2016, 2, 29) == ERFA.cal2jd(2016, 2, 29)
+        @test TTEpoch(Epochs.cal2jd(2000, 1, 1)...) == TTEpoch(2000, 1, 1)
+        @test_throws ArgumentError Epochs.cal2jd(-4800, 1, 1)
+        @test_throws ArgumentError Epochs.cal2jd(2000, 15, 1)
+        @test_throws ArgumentError Epochs.cal2jd(2000, 1, 40)
+    
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
     end
