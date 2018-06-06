@@ -210,10 +210,12 @@ AstroTime.update()
         @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
         @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
 
-
         for jd in 2414105.0:10.0:2488985.0
             @test Epochs.diff_tdb_tt(jd, 0.5) ≈ Epochs.diff_tdb_tt(jd,0.5,0.0,0.0,0.0,0.0) atol=40e-6
         end
+
+        @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
+        @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
