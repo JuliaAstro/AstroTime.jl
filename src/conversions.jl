@@ -460,6 +460,37 @@ julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
      date, date1
 end
 
+"""
+    tdbtcb(jd1, jd2)
+
+Transform a two-part Julian date from `TDB` to `TCB`.
+
+# Example
+
+julia> tdb = Epoch{TDB}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TDB
+julia> AstroTime.Epochs.tdbtcb(tdb.jd1, tdb.jd2)
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+@inline function tdbtcb(jd1, jd2)
+    t77td = MJD + MOD_JD_77
+    t77tf = OFFSET_TT_TAI/SECONDS_PER_DAY
+    jd0 = TDB0/SECONDS_PER_DAY
+    elbb = ELB/(1.0-ELB)
+    if jd1 > jd2
+        d = t77td - jd1
+        f  = jd2 - jd0
+        date = jd1
+        date1 = f - ( d - ( f - t77tf ) ) * elbb
+    else
+        d = t77td - jd2
+        f  = jd1 - jd0
+        date = f + ( d - ( f - t77tf ) ) * elbb
+        date1 = jd2
+    end
+    date, date1
+end
 
 """
     tcbtdb(jd1, jd2)
@@ -490,6 +521,45 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
     date, date1
 end
 
+@inline function jd2cal(jd1, jd2)
+    dj = jd1 + jd2
+    if dj < JD_MIN || dj > JD_MAX
+        throw(ArgumentError("Julian date is outside of the representable range ($JD_MIN, $JD_MAX)."))
+    end
+
+    if jd1 >= jd2
+        date = jd1
+        date1 = jd2
+    else
+        date = jd2
+        date1 = jd1
+    end
+
+    date1 -= 0.5
+
+    f1 = mod(date, 1.0)
+    f2 = mod(date1, 1.0)
+    f = mod(f1 + f2, 1.0)
+    if f < 0.0
+        f += 1.0
+    end
+    d = round(date-f1) + round(date1-f2) + round(f1+f2-f)
+    jd = round(d) + 1
+
+    l = jd + 68569
+    n = (4 * l) ÷ 146097
+    l -= (146097 * n + 3) ÷ 4
+    i = (4000 * (l + 1)) ÷ 1461001
+    l -= (1461 * i) ÷ 4 - 31
+    k = (80 * l) ÷ 2447.
+    id = Int(floor((l - (2447 * k) ÷ 80)))
+    l = k / 11
+    im = Int(floor((k + 2 - 12 * l)))
+    iy = Int(floor((100 * (n - 49) + i + l)))
+
+    iy, im, id, f
+
+end
 
 function cal2jd(iy, im, id)
     EYEAR_ALLOWED = -4799

@@ -182,8 +182,7 @@ AstroTime.update()
         @test_broken Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
         @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
 
-        @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) ==
-            ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
+        @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
         @test Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)) == ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))
         @test Epochs.tttdb(julian1(tt), julian2(tt), Δtr(tdb)) == ERFA.tttdb(julian1(tt), julian2(tt), Δtr(tdb))
@@ -195,6 +194,18 @@ AstroTime.update()
         @test Epochs.ut1tt(julian1(ut1), julian2(ut1), dt(ut1)) == ERFA.tttdb(julian1(ut1), julian2(ut1), dt(ut1))
         @test Epochs.ut1tt(julian2(ut1), julian1(ut1), dt(ut1)) == ERFA.tttdb(julian2(ut1), julian1(ut1), dt(ut1))
 
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
+        let (jd1, jd2) = Epochs.tdbtcb(julian1(tdb), julian2(tdb))
+            erfa_jd1, erfa_jd2 = ERFA.tdbtcb(julian1(tdb), julian2(tdb))
+            @test jd1 ≈ erfa_jd1
+            @test jd2 == erfa_jd2
+        end
+
+        let (jd2, jd1) = Epochs.tdbtcb(julian2(tdb), julian1(tdb))
+            erfa_jd2, erfa_jd1 = ERFA.tdbtcb(julian2(tdb), julian1(tdb))
+            @test jd2 ≈ erfa_jd2
+            @test jd1 == erfa_jd1
+        end
 
         @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
         @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
@@ -209,6 +220,9 @@ AstroTime.update()
         @test_throws ArgumentError Epochs.cal2jd(-4800, 1, 1)
         @test_throws ArgumentError Epochs.cal2jd(2000, 15, 1)
         @test_throws ArgumentError Epochs.cal2jd(2000, 1, 40)
+    
+        @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
+        @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
