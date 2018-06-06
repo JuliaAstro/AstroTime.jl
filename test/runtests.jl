@@ -194,8 +194,22 @@ AstroTime.update()
         @test Epochs.ut1tt(julian1(ut1), julian2(ut1), dt(ut1)) == ERFA.tttdb(julian1(ut1), julian2(ut1), dt(ut1))
         @test Epochs.ut1tt(julian2(ut1), julian1(ut1), dt(ut1)) == ERFA.tttdb(julian2(ut1), julian1(ut1), dt(ut1))
 
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
+        let (jd1, jd2) = Epochs.tdbtcb(julian1(tdb), julian2(tdb))
+            erfa_jd1, erfa_jd2 = ERFA.tdbtcb(julian1(tdb), julian2(tdb))
+            @test jd1 ≈ erfa_jd1
+            @test jd2 == erfa_jd2
+        end
+
+        let (jd2, jd1) = Epochs.tdbtcb(julian2(tdb), julian1(tdb))
+            erfa_jd2, erfa_jd1 = ERFA.tdbtcb(julian2(tdb), julian1(tdb))
+            @test jd2 ≈ erfa_jd2
+            @test jd1 == erfa_jd1
+        end
+
         @test Epochs.tcbtdb(julian1(tcb), julian2(tcb)) == ERFA.tcbtdb(julian1(tcb), julian2(tcb))
         @test Epochs.tcbtdb(julian2(tcb), julian1(tcb)) == ERFA.tcbtdb(julian2(tcb), julian1(tcb))
+
         for jd in 2414105.0:10.0:2488985.0
             @test Epochs.diff_tdb_tt(jd, 0.5) ≈ Epochs.diff_tdb_tt(jd,0.5,0.0,0.0,0.0,0.0) atol=40e-6
         end

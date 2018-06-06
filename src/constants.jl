@@ -36,8 +36,8 @@ const MOD_JD_77 = 43144.0
 const ELG = 6.969290134e-10
 const DAYS_PER_MILLENNIUM = 365250.0
 
-const ELB = 1.550519768e-8
 const TDB0 = -6.55e-5
+const ELB = 1.550519768e-8
 
 const JD_MIN = -68569.5
 const JD_MAX = 1e9

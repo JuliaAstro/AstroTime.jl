@@ -461,6 +461,38 @@ julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
 end
 
 """
+    tdbtcb(jd1, jd2)
+
+Transform a two-part Julian date from `TDB` to `TCB`.
+
+# Example
+
+julia> tdb = Epoch{TDB}(2.4578265e6, 0.30440190993249416)
+2017-03-14T07:18:20.325 TDB
+julia> AstroTime.Epochs.tdbtcb(tdb.jd1, tdb.jd2)
+(2.4578265e6, 0.30440190993249416)
+```
+"""
+@inline function tdbtcb(jd1, jd2)
+    t77td = MJD + MOD_JD_77
+    t77tf = OFFSET_TT_TAI/SECONDS_PER_DAY
+    jd0 = TDB0/SECONDS_PER_DAY
+    elbb = ELB/(1.0-ELB)
+    if jd1 > jd2
+        d = t77td - jd1
+        f  = jd2 - jd0
+        date = jd1
+        date1 = f - ( d - ( f - t77tf ) ) * elbb
+    else
+        d = t77td - jd2
+        f  = jd1 - jd0
+        date = f + ( d - ( f - t77tf ) ) * elbb
+        date1 = jd2
+    end
+    date, date1
+end
+
+"""
     tcbtdb(jd1, jd2)
 
 Transform a two-part Julian date from `TCB` to `TDB`.
@@ -528,7 +560,6 @@ end
     iy, im, id, f
 
 end
-
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
