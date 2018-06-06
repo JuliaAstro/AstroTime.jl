@@ -205,6 +205,10 @@ AstroTime.update()
 
         @test Epochs.cal2jd(2000, 1, 1) == ERFA.cal2jd(2000, 1, 1)
         @test Epochs.cal2jd(2016, 2, 29) == ERFA.cal2jd(2016, 2, 29)
+        @test TTEpoch(Epochs.cal2jd(2000, 1, 1)...) == TTEpoch(2000, 1, 1)
+        @test_throws ArgumentError Epochs.cal2jd(-4800, 1, 1)
+        @test_throws ArgumentError Epochs.cal2jd(2000, 15, 1)
+        @test_throws ArgumentError Epochs.cal2jd(2000, 1, 40)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0

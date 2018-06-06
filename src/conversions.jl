@@ -496,17 +496,17 @@ function cal2jd(iy, im, id)
     MON_LENGTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     if iy < EYEAR_ALLOWED
-        throw(ArugumentError("Year is outside of the representable range (< $EYEAR_ALLOWED)"))
+        throw(ArgumentError("Year is outside of the representable range (< $EYEAR_ALLOWED)"))
     end
 
     if im < 1 || im > 12
-        throw(ArugumentError("Month is outside of the range (1,12)"))
+        throw(ArgumentError("Month is outside of the range (1,12)"))
     end
 
     ly = ((im == 2 ) && !Bool(iy % 4!=0) && (Bool(iy % 100!=0) || !Bool(iy % 400!=0)))? 1:0 #check if leap year
 
     if ((id < 1) || (id > (MON_LENGTH[im] + ly)))
-         println("Day is outside of permissible range (1, $(MON_LENGTH[im]))")
+        throw(ArgumentError("Day is outside of permissible range (1, $(MON_LENGTH[im]))"))
     end
 
     my = (im - 14) ÷ 12
