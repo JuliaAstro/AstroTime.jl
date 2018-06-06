@@ -202,6 +202,9 @@ AstroTime.update()
         for jd in 2414105.0:10.0:2488985.0
             @test Epochs.diff_tdb_tt(jd, 0.5) ≈ Epochs.diff_tdb_tt(jd,0.5,0.0,0.0,0.0,0.0) atol=40e-6
         end
+
+        @test Epochs.cal2jd(2000, 1, 1) == ERFA.cal2jd(2000, 1, 1)
+        @test Epochs.cal2jd(2016, 2, 29) == ERFA.cal2jd(2016, 2, 29)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0

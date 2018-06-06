@@ -503,19 +503,19 @@ function cal2jd(iy, im, id)
         throw(ArugumentError("Month is outside of the range (1,12)"))
     end
 
-    ly = ((im == 2 ) && !(iy % 4) && (iy % 100 || !(iy % 400))) #check if leap year
+    ly = ((im == 2 ) && !Bool(iy % 4!=0) && (Bool(iy % 100!=0) || !Bool(iy % 400!=0)))? 1:0 #check if leap year
 
-    if ((id < 1) || (id > MON_LENGTH[im] + ly)))
-         throw(ArugumentError("Day is outside of permissible range (1, $(MON_LENGTH[im]))"))
+    if ((id < 1) || (id > (MON_LENGTH[im] + ly)))
+         println("Day is outside of permissible range (1, $(MON_LENGTH[im]))")
     end
 
-    my = (im - 14)/12
-    iypmy = iy + my
+    my = (im - 14) ÷ 12
+    iypmy = trunc(Int,(iy + my))
     jd = MJD
-    jd1 = ((1461 * (iypmy + 4800))/ 4)
-          + (367 * Int(floor(im - 2 - 12 * my))) / 12
-          - (3 * ((iypmy + 4900) / 100)) / 4
-          + Int(floor(id - 2432076))
+    jd1 = float((((1461 * (iypmy + 4800)) ÷ 4)
+          + (367 * trunc(Int,(im - 2 - 12 * my))) ÷ 12
+          - (3 * ((iypmy + 4900) ÷ 100)) ÷ 4
+          + trunc(Int,id) - 2432076))
 
     jd, jd1
 end
