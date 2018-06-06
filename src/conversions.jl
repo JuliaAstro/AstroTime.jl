@@ -521,7 +521,6 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
     date, date1
 end
 
-<<<<<<< 3799faec3da5d0073b35cf3e17153e09138a8d2a
 @inline function jd2cal(jd1, jd2)
     dj = jd1 + jd2
     if dj < JD_MIN || dj > JD_MAX
@@ -592,10 +591,8 @@ function cal2jd(iy, im, id)
 end
 
 
-=======
-function d2tf(ndp, days)
+@inline function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
-
     a = SECONDS_PER_DAY * abs(days)
 
     if ndp < 0
@@ -603,7 +600,6 @@ function d2tf(ndp, days)
         for n in range(1,-ndp)
             nrs *= (n == 2 || n == 4) ? 6 : 10
         end
-        rs = float(nrs)
         w = a / nrs
         a = nrs * round(w)
     end
@@ -612,32 +608,26 @@ function d2tf(ndp, days)
     for n in range(1,ndp)
         nrs *= 10
     end
-    rs = float(nrs)
     rm = nrs * 60.0
     rh = rm * 60.0
 
     a = round(nrs * a)
-
-    ah = a / rh
-    ah = floor(ah)
+    ah = floor(a / rh)
     a -= ah * rh
-    am = a / rm
-    am = floor(am)
+    am = floor(a / rm)
     a -= am * rm
-    as = a / rs
-    as = floor(as)
-    af = a - as * rs
-    ihmsf = zeros(Int,4)
+    as = floor(a / nrs)
+    af = floor(a - as * nrs)
 
-    ihmsf[1] = trunc(Int, ah)
-    ihmsf[2] = trunc(Int, am)
-    ihmsf[3] = trunc(Int, as)
-    ihmsf[4] = trunc(Int, af)
+    ihmsf = zeros(Int,4)
+    ihmsf[1] = Int(ah)
+    ihmsf[2] = Int(am)
+    ihmsf[3] = Int(as)
+    ihmsf[4] = Int(af)
 
     sign, ihmsf[1], ihmsf[2], ihmsf[3], ihmsf[4]
 
 end
->>>>>>> d2tf added
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
