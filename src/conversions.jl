@@ -561,7 +561,7 @@ end
 
 end
 
-function cal2jd(iy, im, id)
+@inline function cal2jd(iy, im, id)
     EYEAR_ALLOWED = -4799
     MON_LENGTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
@@ -590,6 +590,60 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+@inline function dat(iy, im, id, fd)
+    deltat = da = 0.0;
+    VER_YEAR = 2016
+    changes= (
+    ( 1960,  1,  1.4178180 ),
+    ( 1961,  1,  1.4228180 ),
+    ( 1961,  8,  1.3728180 ),
+    ( 1962,  1,  1.8458580 ),
+    ( 1963, 11,  1.9458580 ),
+    ( 1964,  1,  3.2401300 ),
+    ( 1964,  4,  3.3401300 ),
+    ( 1964,  9,  3.4401300 ),
+    ( 1965,  1,  3.5401300 ),
+    ( 1965,  3,  3.6401300 ),
+    ( 1965,  7,  3.7401300 ),
+    ( 1965,  9,  3.8401300 ),
+    ( 1966,  1,  4.3131700 ),
+    ( 1968,  2,  4.2131700 ))
+    if (fd < 0.0 || fd > 1.0)
+        throw(ArgumentError("Bad fraction of day"))
+    end
+
+    jd, jd1 = cal2jd(iy, im, id)
+
+    if (iy < changes[0].iyear)
+        throw(ArgumentError("The year is dubious. Range not defined"))
+    end
+    if (iy > IYV + 5)
+        warn("Dubious year, version used is $VER_YEAR")
+    end
+    m = 12*iy + im;
+
+    for i in range(size(LSK_DATA.data.value.t), 1, -1)
+        {
+    if (m >= (12 * changes[i].iyear + changes[i].month))
+        break;
+    end
+    }
+    end
+
+    if (i < 0)
+        throw(UndefinedError("sorry"))
+    end
+    # Get the Delta(AT)
+    da = changes[i].delat;
+
+    if (i < NERA1)
+        da += (djm + fd - drift[i][0]) * drift[i][1];
+    end
+    # Return the Delta(AT) value. */
+    deltat = da;
+    deltat
+
+end
 
 
 # TAI <-> UTC
