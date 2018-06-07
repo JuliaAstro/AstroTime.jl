@@ -591,6 +591,45 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+@inline function utctai(jd1, jd2)
+    big1 = ( utc1 >= utc2 )
+    if big1
+        u1 = jd1
+        u2 = jd2
+    else
+        u1 = jd2
+        u2 = jd1
+    end
+
+    iy, im, id, fd = jd2cal(u1, u2)
+    dat0 = dat(iy, im, id, 0.0)
+
+    dat12 = dat(iy, im, id, 0.5)
+
+    iyt, imt, idt, w = jd2cal(u1+1.5, u2-fd)
+    dat24 = dat(iyt, imt, idt, 0.0)
+
+    dlod = 2.0 * (dat12 - dat0)
+    dleap = dat24 - (dat0 + dlod)
+
+    fd *= (SECONDS_PER_DAY + dleap)/SECONDS_PER_DAY
+
+    fd *= (SECONDS_PER_DAY + dlod)/SECONDS_PER_DAY
+
+    z1, z2 = cal2jd(iy, im, id)
+
+    a2 = z1 - u1
+    a2 += z2
+    a2 += fd + dat0 / SECONDS_PER_DAY
+    if ( big1 )
+        date = u1
+        date1 = a2
+    else
+        date = a2
+        date1 = u1
+    end
+    date, date1
+end
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
