@@ -38,32 +38,6 @@ macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
     end
 end
 
-"""
-   utctai(jd1, jd2)
-
-Transform a two-part Julian date from `UTC` to `TAI`.
-
-# Example
-
-```jldoctest
-julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:52.509 UTC
-julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
-(2.4578265e6, 0.3052026506732349)
-```
-"""
-@inline function utctai(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 += dtat
-    else
-        jd1 += dtat
-        jd2 = jd2
-    end
-    jd1, jd2
-end
 
 """
    taiutc(jd1, jd2)
@@ -591,6 +565,20 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+"""
+   utctai(jd1, jd2)
+
+Transform a two-part Julian date from `UTC` to `TAI`.
+
+# Example
+
+```jldoctest
+julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UTC
+julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
+(2.4578265e6, 0.3052026506732349)
+```
+"""
 @inline function utctai(jd1, jd2)
     big1 = ( utc1 >= utc2 )
     if big1
