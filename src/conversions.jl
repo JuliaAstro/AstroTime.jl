@@ -1,10 +1,11 @@
 using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
 using MuladdMacro
+using ..LeapSeconds
 using ..Periods
 export @transform
 
-using ..LeapSeconds
+
 
 abstract type Transformation end
 
@@ -591,58 +592,40 @@ end
 end
 
 @inline function dat(iy, im, id, fd)
-    deltat = da = 0.0;
+    deltat = da = 0.0
     VER_YEAR = 2016
-    changes= (
-    ( 1960,  1,  1.4178180 ),
-    ( 1961,  1,  1.4228180 ),
-    ( 1961,  8,  1.3728180 ),
-    ( 1962,  1,  1.8458580 ),
-    ( 1963, 11,  1.9458580 ),
-    ( 1964,  1,  3.2401300 ),
-    ( 1964,  4,  3.3401300 ),
-    ( 1964,  9,  3.4401300 ),
-    ( 1965,  1,  3.5401300 ),
-    ( 1965,  3,  3.6401300 ),
-    ( 1965,  7,  3.7401300 ),
-    ( 1965,  9,  3.8401300 ),
-    ( 1966,  1,  4.3131700 ),
-    ( 1968,  2,  4.2131700 ))
+    NERA1 = size(DRIFT)[1]
     if (fd < 0.0 || fd > 1.0)
         throw(ArgumentError("Bad fraction of day"))
     end
 
-    jd, jd1 = cal2jd(iy, im, id)
+    jd0, jdm = cal2jd(iy, im, id)
 
-    if (iy < changes[0].iyear)
+    if (iy < CHANGE[1].year)
         throw(ArgumentError("The year is dubious. Range not defined"))
     end
-    if (iy > IYV + 5)
+    if (iy > VER_YEAR + 5)
         warn("Dubious year, version used is $VER_YEAR")
     end
-    m = 12*iy + im;
-
-    for i in range(size(LSK_DATA.data.value.t), 1, -1)
-        {
-    if (m >= (12 * changes[i].iyear + changes[i].month))
-        break;
+    m = 12*iy + im
+    index = -1
+    for i in reverse(range(1,size(CHANGE)...))
+        if (m >= (12 * CHANGE[i].year + CHANGE[i].month))
+            index = i
+            break
+        end
     end
-    }
-    end
 
-    if (i < 0)
-        throw(UndefinedError("sorry"))
+    if (index < 0)
+        throw(UnderflowError())
     end
     # Get the Delta(AT)
-    da = changes[i].delat;
+    deltat = CHANGE[index].delat
 
-    if (i < NERA1)
-        da += (djm + fd - drift[i][0]) * drift[i][1];
+    if (index < NERA1)
+        deltat += (jdm + fd - DRIFT[index][1]) * DRIFT[index][2]
     end
-    # Return the Delta(AT) value. */
-    deltat = da;
     deltat
-
 end
 
 

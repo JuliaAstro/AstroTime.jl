@@ -7,6 +7,10 @@ using RemoteFiles
 
 export leapseconds, LSK, LSK_FILE, LSK_DATA
 
+function fetch()
+    isfile(LSK_FILE) && push!(LSK_DATA, path(LSK_FILE))
+end
+
 struct LSK
     t::Vector{Float64}
     leapseconds::Vector{Float64}
@@ -47,5 +51,5 @@ function leapseconds(lsk::LSK, jd)
     end
 end
 leapseconds(jd) = leapseconds(get(LSK_DATA), jd)
-
+fetch()
 end
