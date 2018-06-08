@@ -590,19 +590,13 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
     end
 
     iy, im, id, fd = jd2cal(u1, u2)
-    dat0 = dat(iy, im, id, 0.0)
+    dat0 = leapseconds(jd1 + jd2)
 
-    dat12 = dat(iy, im, id, 0.5)
+    dat24 = leapseconds(u1+1.5, u2-fd)
 
-    iyt, imt, idt, w = jd2cal(u1+1.5, u2-fd)
-    dat24 = dat(iyt, imt, idt, 0.0)
-
-    dlod = 2.0 * (dat12 - dat0)
-    dleap = dat24 - (dat0 + dlod)
+    dleap = dat24 - dat0
 
     fd *= (SECONDS_PER_DAY + dleap)/SECONDS_PER_DAY
-
-    fd *= (SECONDS_PER_DAY + dlod)/SECONDS_PER_DAY
 
     z1, z2 = cal2jd(iy, im, id)
 
