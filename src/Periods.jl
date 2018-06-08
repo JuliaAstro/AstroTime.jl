@@ -1,7 +1,6 @@
 module Periods
 
 import Base: *, /, get, isapprox, show
-import ..LeapSeconds:LSK_DATA
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     J2000, J1950, MJD,
     seconds, minutes, hours, days, years, centuries,

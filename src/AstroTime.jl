@@ -20,6 +20,9 @@ include("Epochs.jl")
 @reexport using .LeapSeconds
 @reexport using .Epochs
 
+function __init__()
+    isfile(LSK_FILE) && push!(LSK_DATA, path(LSK_FILE))
+end
 
 """
     @timescale scale

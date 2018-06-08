@@ -591,43 +591,6 @@ end
     jd, jd1
 end
 
-@inline function dat(iy, im, id, fd)
-    deltat = da = 0.0
-    VER_YEAR = 2016
-    NERA1 = size(DRIFT)[1]
-    if (fd < 0.0 || fd > 1.0)
-        throw(ArgumentError("Bad fraction of day"))
-    end
-
-    jd0, jdm = cal2jd(iy, im, id)
-
-    if (iy < CHANGE[1].year)
-        throw(ArgumentError("The year is dubious. Range not defined"))
-    end
-    if (iy > VER_YEAR + 5)
-        warn("Dubious year, version used is $VER_YEAR")
-    end
-    m = 12*iy + im
-    index = -1
-    for i in reverse(range(1,size(CHANGE)...))
-        if (m >= (12 * CHANGE[i].year + CHANGE[i].month))
-            index = i
-            break
-        end
-    end
-
-    if (index < 0)
-        throw(UnderflowError())
-    end
-    # Get the Delta(AT)
-    deltat = CHANGE[index].delat
-
-    if (index < NERA1)
-        deltat += (jdm + fd - DRIFT[index][1]) * DRIFT[index][2]
-    end
-    deltat
-end
-
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
