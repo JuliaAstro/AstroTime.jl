@@ -5,10 +5,10 @@ using ERFA
 
 import Base: +, -, ==, isapprox, isless
 
-using ..TimeScales
+using ..TimeScales, ..Periods
 import ..TimeScales: acronyms
 import ..LeapSeconds: leapseconds, LSK_DATA
-using ..Periods
+
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
     leapseconds, jd2000, jd1950, mjd, timescale
 

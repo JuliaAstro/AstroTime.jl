@@ -3,31 +3,17 @@ module LeapSeconds
 using ERFA
 using OptionalData
 using RemoteFiles
-include("Periods.jl")
-using .Periods:MJD, LS_1972, DRIFT
+
 
 export leapseconds, LSK, LSK_FILE, LSK_DATA, fractionofday
 
+const DRIFT_EPOCHS = ( 2.4373005e6, 2.4376655e6 , 2.4387615e6, 2.4391265e6)
+const DRIFT_RATE = ( 0.0012960, 0.0011232, 0.0012960, 0.0025920)
 
-struct changes
-    t ::Vector{Float64}
-    leapseconds ::Vector{Float64}
-    drift :: Vector{Tuple}
-end
-function changes(date, drift_dat)
-    t = Vector{Float64}()
-    leapseconds = Vector{Float64}()
-    drift = Vector{Tuple}()
-    for i in range(1,size(date)[1])
-        push!(t, Dates.datetime2julian(DateTime(date[i][1], date[i][2], 1)))
-        push!(leapseconds, date[i][3])
-        push!(drift,drift_dat[i])
-    end
-    changes(t,leapseconds,drift)
-end
-
-CHANGE = changes(LS_1972, DRIFT)
-
+const LS_1972 = [(2.4369345e6, 2.4373005e6, 2.4375125e6, 2.4376655e6, 2.4383345e6, 2.4383955e6, 2.4384865e6,
+ 2.4386395e6, 2.4387615e6, 2.4388205e6, 2.4389425e6, 2.4390045e6, 2.4391265e6, 2.4398875e6),
+ (1.417818, 1.422818, 1.372818, 1.845858, 1.945858, 3.240130, 3.340130, 3.440130, 3.540130,
+ 3.640130, 3.740130, 3.840130, 4.313170,4.213170)]
 
 struct LSK
     t::Vector{Float64}
@@ -62,11 +48,11 @@ function leapseconds(lsk::LSK, jd)
     if jd < 2.4369345e6
         return 0.0
     elseif jd < lsk.t[1]
-        dt = Dates.julian2datetime(jd)
-        fd =  fractionofday(dt)
-        index = findlast(jd .>= CHANGE.t)
-        deltat = CHANGE.leapseconds[index]
-        deltat += ((jd- MJD- CHANGE.drift[index][1]) * CHANGE.drift[index][2])
+        idx = findlast(jd .>= LS_1972[1])
+        a = [ abs(i) for i in jd .- DRIFT_EPOCHS]
+        i_drift = find(x -> x==min(a...), a)[1]
+        deltat = LS_1972[2][idx]
+        deltat += (jd - DRIFT_EPOCHS[i_drift]) * DRIFT_RATE[i_drift]
         return deltat
     else
         return lsk.leapseconds[findlast(jd .>= lsk.t)]

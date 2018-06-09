@@ -522,7 +522,7 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
     date, date1
 end
 
-@inline function jd2cal(jd1, jd2)
+function jd2cal(jd1, jd2)
     dj = jd1 + jd2
     if dj < JD_MIN || dj > JD_MAX
         throw(ArgumentError("Julian date is outside of the representable range ($JD_MIN, $JD_MAX)."))
@@ -562,7 +562,7 @@ end
 
 end
 
-@inline function cal2jd(iy, im, id)
+function cal2jd(iy, im, id)
     EYEAR_ALLOWED = -4799
     MON_LENGTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 

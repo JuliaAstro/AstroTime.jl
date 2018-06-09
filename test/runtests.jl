@@ -223,12 +223,6 @@ AstroTime.update()
 
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
-
-        dt = DateTime(1963, 04, 01, 15, 30, 33)
-        jd_dt = Dates.datetime2julian(dt)
-        fraction_day = fractionofday(dt)
-        @test ERFA.dat(Dates.year(dt), Dates.month(dt), Dates.day(dt),fraction_day) ≈ leapseconds(jd_dt)
-
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
