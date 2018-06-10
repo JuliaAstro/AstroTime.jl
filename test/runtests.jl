@@ -220,14 +220,16 @@ AstroTime.update()
         @test_throws ArgumentError Epochs.cal2jd(-4800, 1, 1)
         @test_throws ArgumentError Epochs.cal2jd(2000, 15, 1)
         @test_throws ArgumentError Epochs.cal2jd(2000, 1, 40)
-    
+
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
+        @test fractionofday(DateTime(1959,1,1)) == 0.0
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
         for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) == ERFA.dat(year, 4, 1, 0.0)
+            @test leapseconds(TTEpoch(year, 4, 1)) ≈ ERFA.dat(year, 4, 1, 0.0)
         end
     end
 end

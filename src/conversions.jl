@@ -1,10 +1,11 @@
 using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
 using MuladdMacro
+using ..LeapSeconds
 using ..Periods
 export @transform
 
-using ..LeapSeconds
+
 
 abstract type Transformation end
 
@@ -521,7 +522,7 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
     date, date1
 end
 
-@inline function jd2cal(jd1, jd2)
+function jd2cal(jd1, jd2)
     dj = jd1 + jd2
     if dj < JD_MIN || dj > JD_MAX
         throw(ArgumentError("Julian date is outside of the representable range ($JD_MIN, $JD_MAX)."))
@@ -589,7 +590,6 @@ function cal2jd(iy, im, id)
 
     jd, jd1
 end
-
 
 
 # TAI <-> UTC
