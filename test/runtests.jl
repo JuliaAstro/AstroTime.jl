@@ -226,8 +226,10 @@ AstroTime.update()
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
+        @test fractionofday(DateTime(1959,1,1)) == 0.0
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
         for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) == ERFA.dat(year, 4, 1, 0.0)
+            @test leapseconds(TTEpoch(year, 4, 1)) ≈ ERFA.dat(year, 4, 1, 0.0)
         end
     end
 end
