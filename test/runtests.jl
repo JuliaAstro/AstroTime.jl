@@ -5,6 +5,10 @@ using ERFA
 
 AstroTime.update()
 
+function fractionofday(dt)
+    Dates.hour(dt)/24 + Dates.minute(dt)/(24*60) + Dates.second(dt)/86400 + Dates.millisecond(dt)/8.64e7
+end
+
 @testset "AstroTime" begin
     @testset "Periods" begin
         s = 1.0seconds
