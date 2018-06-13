@@ -580,7 +580,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
 ```
 """
 @inline function utctai(jd1, jd2)
-    big1 = ( utc1 >= utc2 )
+    big1 = ( jd1 >= jd2 )
     if big1
         u1 = jd1
         u2 = jd2
@@ -592,7 +592,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
     iy, im, id, fd = jd2cal(u1, u2)
     dat0 = leapseconds(jd1 + jd2)
 
-    dat24 = leapseconds(u1+1.5, u2-fd)
+    dat24 = leapseconds(u1+1.5 + u2-fd)
 
     dleap = dat24 - dat0
 
