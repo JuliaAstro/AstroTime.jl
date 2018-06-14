@@ -615,17 +615,19 @@ function utctai(jd1, jd2)
         date1 = u1
     end
     date, date1
+end
 
-function dtfield2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
+
+function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
 
     jd = sum(cal2jd(year, month, date))
     seclim = 60.0
     adjusted_seconds_per_day = SECONDS_PER_DAY
     if hour < 0 || hour > 23
-        throw(ArgumentError("The input hour value should be greater than 0"))
+        throw(ArgumentError("The input hour value should be between 0 and 23"))
     end
     if min < 0 || min > 59
-        throw(ArgumentError("The input minute value should be greater than 0"))
+        throw(ArgumentError("The input minute value should be between 0 and 59"))
     end
 
     if scale == UTC
@@ -640,13 +642,14 @@ function dtfield2julian(scale::T, year, month, date, hour, min, sec) where {T <:
         end
     end
 
-    if sec >= 0
-        if sec >= seclim
-            throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
-        end
-    else
+    if sec < 0
         throw(ArgumentError("The input second value should be greater than 0"))
     end
+
+    if sec >= seclim
+            throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
+    end
+
     time  = ( 60.0 * ( 60.0 * hour + min )  + sec ) / adjusted_seconds_per_day
     jd, time
 end
