@@ -591,6 +591,43 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+function dtf2d(scale, iy, im, id, ihr, imn, sec)
+    jd, w = cal2jd(iy, im, id)
+    jd += w
+    seclim = 60.0
+
+    if scale == "UTC"
+        dat0 = leapseconds(jd)
+        dat12 = leapseconds(jd + 0.5)
+        dat24 = leapseconds(jd + 1.5)
+
+        dleap = dat24 - (2.0 * dat12 - dat0)
+        adjusted_seconds_per_day = SECONDS_PER_DAY + dleap
+
+        if ihr == 23 && imn == 59
+            seclim += dleap
+        end
+    end
+
+    if ihr >= 0 && ihr <= 23
+        if imn >= 0 && imn <= 59
+                if sec >= 0
+                    if sec >= seclim
+                        throw(ArgumentError("Time exceeds the maximum seconds in $(iy)-$(im)-$(id)"))
+                    end
+                else
+                    throw(ArgumentError("The input second value should be greater than 0"))
+                end
+            else
+                throw(ArgumentError("The input minute value should be greater than 0"))
+            end
+        else
+            throw(ArgumentError("The input hour value should be greater than 0"))
+        end
+    time  = ( 60.0 * ( 60.0 * ihr + imn )  + sec ) / adjusted_seconds_per_day
+
+    jd, time
+end
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
