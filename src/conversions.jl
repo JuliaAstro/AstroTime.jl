@@ -580,7 +580,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
 ```
 """
 function utctai(jd1, jd2)
-    big1 = ( jd1 >= jd2 )
+    big1 = jd1 >= jd2 
     if big1
         u1 = jd1
         u2 = jd2
@@ -606,7 +606,7 @@ function utctai(jd1, jd2)
     a2 = z1 - u1
     a2 += z2
     a2 += fd + drift0 / SECONDS_PER_DAY
-    if ( big1 )
+    if big1
         date = u1
         date1 = a2
     else
