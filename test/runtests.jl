@@ -224,12 +224,12 @@ AstroTime.update()
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
 
-        @test Epochs.dtfield2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
-        @test Epochs.dtfield2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
-        @test_throws ArgumentError Epochs.dtfield2julian(TT, 2016, 12, 31, 23, 59, 60)
-        @test_throws ArgumentError Epochs.dtfield2julian(UTC, 2016, 12, 31, 25, 59, 60)
-        @test_throws ArgumentError Epochs.dtfield2julian(UTC, 2016, 12, 31, 23, 61, 60)
-        @test_throws ArgumentError Epochs.dtfield2julian(UTC, 2016, 12, 31, 23, 59, 61)
+        @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
+        @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
+        @test_throws ArgumentError Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 25, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 61, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 61)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
