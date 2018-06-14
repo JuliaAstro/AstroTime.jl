@@ -519,16 +519,16 @@ function jd2cal(jd1, jd2)
         f += 1.0
     end
     d = round(date-f1) + round(date1-f2) + round(f1+f2-f)
-    jd = round(d) + 1
+    jd = Int(round(d) + 1)
 
     l = jd + 68569
     n = (4 * l) ÷ 146097
     l -= (146097 * n + 3) ÷ 4
     i = (4000 * (l + 1)) ÷ 1461001
     l -= (1461 * i) ÷ 4 - 31
-    k = (80 * l) ÷ 2447.
+    k = (80 * l) ÷ 2447
     id = Int(floor((l - (2447 * k) ÷ 80)))
-    l = k / 11
+    l = k ÷ 11
     im = Int(floor((k + 2 - 12 * l)))
     iy = Int(floor((100 * (n - 49) + i + l)))
 
@@ -579,7 +579,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
 (2.4578265e6, 0.3052026506732349)
 ```
 """
-@inline function utctai(jd1, jd2)
+function utctai(jd1, jd2)
     big1 = ( jd1 >= jd2 )
     if big1
         u1 = jd1
@@ -590,18 +590,15 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
     end
 
     iy, im, id, fd = jd2cal(u1, u2)
-    drift0 = leapseconds(u1 + u2)
-
+    u2 -= fd
+    drift0 = leapseconds(u1 +  u2)
     drift12 = leapseconds(u1 + u2 + 0.5)
-
-    drift24 = leapseconds(u1+1.5 + u2-fd)
+    drift24 = leapseconds(u1 + u2 + 1.5)
 
     dlod = 2.0 * (drift12 - drift0)
-
-    dleap = drift24 - drift0
+    dleap = drift24 - (drift0 + dlod)
 
     fd *= (SECONDS_PER_DAY + dleap)/SECONDS_PER_DAY
-
     fd *= (SECONDS_PER_DAY + dlod)/SECONDS_PER_DAY
 
     z1, z2 = cal2jd(iy, im, id)
