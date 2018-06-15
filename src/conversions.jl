@@ -617,7 +617,20 @@ function utctai(jd1, jd2)
     date, date1
 end
 
+"""
+    datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
 
+Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
+
+# Example
+
+```jldoctest
+julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
+(2.4577535e6, 0.9999884260598836)
+julia> AstroTime.Epochs.datetime2julian(TT, 2017, 2, 1, 23, 59, 59)
+(2.4577855e6, 0.999988425925926)
+```
+"""
 function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
 
     jd = sum(cal2jd(year, month, date))
