@@ -565,7 +565,6 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
-
 """
    utctai(jd1, jd2)
 
