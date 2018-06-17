@@ -580,7 +580,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
 ```
 """
 function utctai(jd1, jd2)
-    big1 = jd1 >= jd2 
+    big1 = jd1 >= jd2
     if big1
         u1 = jd1
         u2 = jd2
@@ -613,6 +613,29 @@ function utctai(jd1, jd2)
         date = a2
         date1 = u1
     end
+    date, date1
+end
+
+"""
+   utcut1(jd1, jd2)
+
+Transform a two-part Julian date from `UTC` to `UT1`.
+
+# Example
+
+```jldoctest
+julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UTC
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
+(2.4578265e6, 0.30477440993249416)
+```
+"""
+@inline function utcut1(jd1, jd2, dut1)
+    jd = +(jd1, jd2)
+    dat = leapseconds(jd)
+    dta = dut1 - dat
+    tai1, tai2 = utctai(jd1, jd2)
+    date, date1 = taiut1(tai1, tai2, dta)
     date, date1
 end
 
