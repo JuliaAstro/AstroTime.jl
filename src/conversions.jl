@@ -666,7 +666,7 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
 end
 
 """
-   utcut1(jd1, jd2)
+   utcut1(jd1, jd2, dut1, dat)
 
 Transform a two-part Julian date from `UTC` to `UT1`.
 
@@ -675,7 +675,7 @@ Transform a two-part Julian date from `UTC` to `UT1`.
 ```jldoctest
 julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
 2017-03-14T07:18:52.509 UTC
-julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2, Epochs.dut1(utc), leapseconds(julian(utc)))
 (2.4578265e6, 0.30477440993249416)
 ```
 """
@@ -687,7 +687,20 @@ julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
     date, date1
 end
 
+"""
+   ut1utc(jd1, jd2, dut1)
 
+Transform a two-part Julian date from `UT1` to `UTC`.
+
+# Example
+
+```jldoctest
+julia> ut1  = Epoch{UT1}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UT1
+julia> AstroTime.Epochs.ut1utc(ut1.jd1, ut1.jd2, Epochs.dut1(ut1))
+(2.4578265e6, 0.3047686523910154)
+```
+"""
 function ut1utc(jd1, jd2, dut1)
     duts = dut1
     big1 = jd1 >= jd2
