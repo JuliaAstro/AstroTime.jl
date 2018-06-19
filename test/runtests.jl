@@ -181,7 +181,11 @@ AstroTime.update()
         leap = UTCEpoch(2016, 12, 31, 23, 59, 60)
         tai1, tai2 = ERFA.utctai(julian1(leap), julian2(leap))
         @test Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
-        @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
+        let (jd2, jd1) = Epochs.taiutc(tai1, tai2)
+            erfa_jd2, erfa_jd1 =  ERFA.taiutc(tai1, tai2)
+            @test jd2 ≈ erfa_jd2
+            @test jd1 ≈ erfa_jd1
+        end
 
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
