@@ -693,14 +693,7 @@ end
     a -= am * rm
     as = floor(a / nrs)
     af = floor(a - as * nrs)
-
-    ihmsf = zeros(Int,4)
-    ihmsf[1] = Int(ah)
-    ihmsf[2] = Int(am)
-    ihmsf[3] = Int(as)
-    ihmsf[4] = Int(af)
-
-    sign, ihmsf[1], ihmsf[2], ihmsf[3], ihmsf[4]
+    sign, Int(ah), Int(am), Int(as), Int(af)
 end
 
 # TAI <-> UTC
