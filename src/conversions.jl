@@ -669,6 +669,7 @@ end
    utcut1(jd1, jd2)
 
 Transform a two-part Julian date from `UTC` to `UT1`.
+
 # Example
 
 ```jldoctest
