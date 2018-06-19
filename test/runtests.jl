@@ -227,6 +227,8 @@ AstroTime.update()
 
         @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
         @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
+        @test Epochs.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1)) == ERFA.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1))
+        @test Epochs.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1)) == ERFA.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1))
 
         @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
         @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)

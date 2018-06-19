@@ -687,6 +687,55 @@ julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
     date, date1
 end
 
+
+function ut1utc(jd1, jd2, dut1)
+    duts = dut1
+    big1 = jd1 >= jd2
+    if big1
+        u1 = jd1
+        u2 = jd2
+    else
+        u1 = jd2
+        u2 = jd1
+    end
+    d1 = u1
+    dats1 = 0
+    for i in -1:3
+        d2 = u2 + float(i)
+        year, month, day, frac = jd2cal(d1, d2)
+        dats2 = leapseconds(d1 + d2 - frac)
+        if i == - 1
+            dats1 = dats2
+        end
+        ddats = dats2 - dats1
+        if abs(ddats) >= 0.5
+            if ddats * duts >= 0
+                duts -= ddats
+            end
+            d1, d2 = cal2jd(year, month, day)
+            us1 = d1
+            us2 = d2 - 1.0 + duts / SECONDS_PER_DAY
+            du = u1 - us1
+            du += u2 - us2
+            if  du > 0
+                fd = du * SECONDS_PER_DAY / ( SECONDS_PER_DAY + ddats )
+                duts += ddats * ( frac <= 1.0 ? frac : 1.0 )
+            end
+            break
+        end
+        dats1 = dats2
+    end
+    u2 -= duts / SECONDS_PER_DAY
+    if big1
+        date = u1
+        date1 = u2
+    else
+        date = u2
+        date1 = u1
+    end
+    date, date1
+end
+
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
