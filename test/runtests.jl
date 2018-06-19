@@ -184,7 +184,7 @@ AstroTime.update()
         let (jd2, jd1) = Epochs.taiutc(tai1, tai2)
             erfa_jd2, erfa_jd1 =  ERFA.taiutc(tai1, tai2)
             @test jd2 ≈ erfa_jd2
-            @test jd1 == erfa_jd1
+            @test jd1 ≈ erfa_jd1
         end
 
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
