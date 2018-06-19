@@ -54,16 +54,31 @@ julia> AstroTime.Epochs.taiutc(tai.jd1, tai.jd2)
 ```
 """
 @inline function taiutc(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 -= dtat
+    big1 = jd1 >= jd2
+    if  big1
+        a1 = jd1
+        a2 = jd2
     else
-        jd1 -= dtat
-        jd2 = jd2
+        a1 = jd2
+        a2 = jd1
     end
-    jd1, jd2
+
+    u1 = a1
+    u2 = a2
+    for i in range(1,3)
+        tai1, tai2 = utctai(u1, u2)
+        u2 += a1 - tai1
+        u2 += a2 - tai2
+    end
+
+    if  big1
+        date = u1
+        date1 = u2
+    else
+        date = u2
+        date1 = u1
+    end
+    date, date1
 end
 
 
@@ -615,6 +630,7 @@ function utctai(jd1, jd2)
     end
     date, date1
 end
+
 
 """
     datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
