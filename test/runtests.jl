@@ -155,7 +155,8 @@ AstroTime.update()
         tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
         tcb = TCBEpoch(2000, 1, 1, 12, 0, 0.0)
         Δtr(ep) = Epochs.diff_tdb_tt(julian1(ep), julian2(ep))
-        dat(ep) = Epochs.dut1(ep)-Epochs.leapseconds(julian(ep))
+        dut1(ep) = Epochs.dut1(ep)
+        dat(ep) = dut1(ep) - Epochs.leapseconds(julian(ep))
 
         @test Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
         @test Epochs.tttai(julian2(tt), julian1(tt)) == ERFA.tttai(julian2(tt), julian1(tt))
@@ -180,7 +181,11 @@ AstroTime.update()
         leap = UTCEpoch(2016, 12, 31, 23, 59, 60)
         tai1, tai2 = ERFA.utctai(julian1(leap), julian2(leap))
         @test Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
-        @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
+        let (jd2, jd1) = Epochs.taiutc(tai1, tai2)
+            erfa_jd2, erfa_jd1 =  ERFA.taiutc(tai1, tai2)
+            @test jd2 ≈ erfa_jd2
+            @test jd1 ≈ erfa_jd1
+        end
 
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
@@ -227,6 +232,9 @@ AstroTime.update()
 
         @test Epochs.d2tf(1, -1.7) == ERFA.d2tf(1, -1.7)
         @test Epochs.d2tf(-1, 1.7) == ERFA.d2tf(-1, 1.7)
+
+        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
+        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
 
         @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
         @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)

@@ -54,16 +54,31 @@ julia> AstroTime.Epochs.taiutc(tai.jd1, tai.jd2)
 ```
 """
 @inline function taiutc(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 -= dtat
+    big1 = jd1 >= jd2
+    if  big1
+        a1 = jd1
+        a2 = jd2
     else
-        jd1 -= dtat
-        jd2 = jd2
+        a1 = jd2
+        a2 = jd1
     end
-    jd1, jd2
+
+    u1 = a1
+    u2 = a2
+    for i in range(1,3)
+        tai1, tai2 = utctai(u1, u2)
+        u2 += a1 - tai1
+        u2 += a2 - tai2
+    end
+
+    if  big1
+        date = u1
+        date1 = u2
+    else
+        date = u2
+        date1 = u1
+    end
+    date, date1
 end
 
 
@@ -616,13 +631,13 @@ function utctai(jd1, jd2)
     date, date1
 end
 
+
 """
     datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
 
 Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
 
-# Example
-
+#Example
 ```jldoctest
 julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
 (2.4577535e6, 0.9999884260598836)
@@ -666,6 +681,7 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     jd, time
 end
 
+<<<<<<< HEAD
 @inline function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
     a = SECONDS_PER_DAY * abs(days)
@@ -695,6 +711,29 @@ end
     af = floor(a - as * nrs)
     sign, Int(ah), Int(am), Int(as), Int(af)
 end
+
+"""
+   utcut1(jd1, jd2)
+
+Transform a two-part Julian date from `UTC` to `UT1`.
+
+# Example
+
+```jldoctest
+julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UTC
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
+(2.4578265e6, 0.30477440993249416)
+```
+"""
+@inline function utcut1(jd1, jd2, dut1, dat)
+    jd = +(jd1, jd2)
+    dta = dut1 - dat
+    tai1, tai2 = utctai(jd1, jd2)
+    date, date1 = taiut1(tai1, tai2, dta)
+    date, date1
+end
+
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
