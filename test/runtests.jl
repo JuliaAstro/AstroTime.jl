@@ -179,7 +179,7 @@ AstroTime.update()
 
         leap = UTCEpoch(2016, 12, 31, 23, 59, 60)
         tai1, tai2 = ERFA.utctai(julian1(leap), julian2(leap))
-        @test_broken Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
+        @test Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
         @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
 
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
@@ -224,13 +224,23 @@ AstroTime.update()
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
 
+
         @test Epochs.d2tf(1, -1.7) == ERFA.d2tf(1, -1.7)
         @test Epochs.d2tf(-1, 1.7) == ERFA.d2tf(-1, 1.7)
+
+        @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
+        @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
+        @test_throws ArgumentError Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 25, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 61, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 61)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
+        @test fractionofday(DateTime(1959,1,1)) == 0.0
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
         for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) == ERFA.dat(year, 4, 1, 0.0)
+            @test leapseconds(TTEpoch(year, 4, 1)) ≈ ERFA.dat(year, 4, 1, 0.0)
         end
     end
 end

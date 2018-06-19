@@ -1,10 +1,11 @@
 using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
 using MuladdMacro
+using ..LeapSeconds
 using ..Periods
 export @transform
 
-using ..LeapSeconds
+
 
 abstract type Transformation end
 
@@ -37,32 +38,6 @@ macro transform(from::Symbol, to::Symbol, ep::Symbol, args...)
     end
 end
 
-"""
-   utctai(jd1, jd2)
-
-Transform a two-part Julian date from `UTC` to `TAI`.
-
-# Example
-
-```jldoctest
-julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
-2017-03-14T07:18:52.509 UTC
-julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
-(2.4578265e6, 0.3052026506732349)
-```
-"""
-@inline function utctai(jd1, jd2)
-    ls = leapseconds(jd1 + jd2)
-    dtat = ls/SECONDS_PER_DAY;
-    if jd1 > jd2
-        jd1 = jd1
-        jd2 += dtat
-    else
-        jd1 += dtat
-        jd2 = jd2
-    end
-    jd1, jd2
-end
 
 """
    taiutc(jd1, jd2)
@@ -521,7 +496,7 @@ julia> AstroTime.Epochs.tcbtdb(tcb.jd1, tcb.jd2)
     date, date1
 end
 
-@inline function jd2cal(jd1, jd2)
+function jd2cal(jd1, jd2)
     dj = jd1 + jd2
     if dj < JD_MIN || dj > JD_MAX
         throw(ArgumentError("Julian date is outside of the representable range ($JD_MIN, $JD_MAX)."))
@@ -544,16 +519,16 @@ end
         f += 1.0
     end
     d = round(date-f1) + round(date1-f2) + round(f1+f2-f)
-    jd = round(d) + 1
+    jd = Int(round(d) + 1)
 
     l = jd + 68569
     n = (4 * l) ÷ 146097
     l -= (146097 * n + 3) ÷ 4
     i = (4000 * (l + 1)) ÷ 1461001
     l -= (1461 * i) ÷ 4 - 31
-    k = (80 * l) ÷ 2447.
+    k = (80 * l) ÷ 2447
     id = Int(floor((l - (2447 * k) ÷ 80)))
-    l = k / 11
+    l = k ÷ 11
     im = Int(floor((k + 2 - 12 * l)))
     iy = Int(floor((100 * (n - 49) + i + l)))
 
@@ -590,6 +565,106 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+"""
+   utctai(jd1, jd2)
+
+Transform a two-part Julian date from `UTC` to `TAI`.
+
+# Example
+
+```jldoctest
+julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UTC
+julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
+(2.4578265e6, 0.3052026506732349)
+```
+"""
+function utctai(jd1, jd2)
+    big1 = jd1 >= jd2
+    if big1
+        u1 = jd1
+        u2 = jd2
+    else
+        u1 = jd2
+        u2 = jd1
+    end
+
+    iy, im, id, fd = jd2cal(u1, u2)
+    u2 -= fd
+    drift0 = leapseconds(u1 +  u2)
+    drift12 = leapseconds(u1 + u2 + 0.5)
+    drift24 = leapseconds(u1 + u2 + 1.5)
+
+    dlod = 2.0 * (drift12 - drift0)
+    dleap = drift24 - (drift0 + dlod)
+
+    fd *= (SECONDS_PER_DAY + dleap)/SECONDS_PER_DAY
+    fd *= (SECONDS_PER_DAY + dlod)/SECONDS_PER_DAY
+
+    z1, z2 = cal2jd(iy, im, id)
+
+    a2 = z1 - u1
+    a2 += z2
+    a2 += fd + drift0 / SECONDS_PER_DAY
+    if big1
+        date = u1
+        date1 = a2
+    else
+        date = a2
+        date1 = u1
+    end
+    date, date1
+end
+
+"""
+    datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
+
+Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
+
+# Example
+
+```jldoctest
+julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
+(2.4577535e6, 0.9999884260598836)
+julia> AstroTime.Epochs.datetime2julian(TT, 2017, 2, 1, 23, 59, 59)
+(2.4577855e6, 0.999988425925926)
+```
+"""
+function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
+
+    jd = sum(cal2jd(year, month, date))
+    seclim = 60.0
+    adjusted_seconds_per_day = SECONDS_PER_DAY
+    if hour < 0 || hour > 23
+        throw(ArgumentError("The input hour value should be between 0 and 23"))
+    end
+    if min < 0 || min > 59
+        throw(ArgumentError("The input minute value should be between 0 and 59"))
+    end
+
+    if scale == UTC
+        dat0 = leapseconds(jd)
+        dat12 = leapseconds(jd + 0.5)
+        dat24 = leapseconds(jd + 1.5)
+
+        dleap = dat24 - (2.0 * dat12 - dat0)
+        adjusted_seconds_per_day = SECONDS_PER_DAY + dleap
+        if hour == 23 && min == 59
+            seclim += dleap
+        end
+    end
+
+    if sec < 0
+        throw(ArgumentError("The input second value should be greater than 0"))
+    end
+
+    if sec >= seclim
+            throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
+    end
+
+    time  = ( 60.0 * ( 60.0 * hour + min )  + sec ) / adjusted_seconds_per_day
+    jd, time
+end
 
 @inline function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
@@ -626,7 +701,6 @@ end
     ihmsf[4] = Int(af)
 
     sign, ihmsf[1], ihmsf[2], ihmsf[3], ihmsf[4]
-
 end
 
 # TAI <-> UTC
