@@ -580,7 +580,7 @@ julia> AstroTime.Epochs.utctai(utc.jd1, utc.jd2)
 ```
 """
 function utctai(jd1, jd2)
-    big1 = jd1 >= jd2 
+    big1 = jd1 >= jd2
     if big1
         u1 = jd1
         u2 = jd2
@@ -614,6 +614,56 @@ function utctai(jd1, jd2)
         date1 = u1
     end
     date, date1
+end
+
+"""
+    datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
+
+Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
+
+# Example
+
+```jldoctest
+julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
+(2.4577535e6, 0.9999884260598836)
+julia> AstroTime.Epochs.datetime2julian(TT, 2017, 2, 1, 23, 59, 59)
+(2.4577855e6, 0.999988425925926)
+```
+"""
+function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
+
+    jd = sum(cal2jd(year, month, date))
+    seclim = 60.0
+    adjusted_seconds_per_day = SECONDS_PER_DAY
+    if hour < 0 || hour > 23
+        throw(ArgumentError("The input hour value should be between 0 and 23"))
+    end
+    if min < 0 || min > 59
+        throw(ArgumentError("The input minute value should be between 0 and 59"))
+    end
+
+    if scale == UTC
+        dat0 = leapseconds(jd)
+        dat12 = leapseconds(jd + 0.5)
+        dat24 = leapseconds(jd + 1.5)
+
+        dleap = dat24 - (2.0 * dat12 - dat0)
+        adjusted_seconds_per_day = SECONDS_PER_DAY + dleap
+        if hour == 23 && min == 59
+            seclim += dleap
+        end
+    end
+
+    if sec < 0
+        throw(ArgumentError("The input second value should be greater than 0"))
+    end
+
+    if sec >= seclim
+            throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
+    end
+
+    time  = ( 60.0 * ( 60.0 * hour + min )  + sec ) / adjusted_seconds_per_day
+    jd, time
 end
 
 # TAI <-> UTC
