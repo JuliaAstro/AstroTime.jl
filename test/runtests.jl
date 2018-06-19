@@ -155,7 +155,8 @@ AstroTime.update()
         tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
         tcb = TCBEpoch(2000, 1, 1, 12, 0, 0.0)
         Δtr(ep) = Epochs.diff_tdb_tt(julian1(ep), julian2(ep))
-        dat(ep) = Epochs.dut1(ep)-Epochs.leapseconds(julian(ep))
+        dut1(ep) = Epochs.dut1(ep)
+        dat(ep) = dut1(ep) - Epochs.leapseconds(julian(ep))
 
         @test Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
         @test Epochs.tttai(julian2(tt), julian1(tt)) == ERFA.tttai(julian2(tt), julian1(tt))
@@ -223,6 +224,9 @@ AstroTime.update()
 
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
+
+        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
+        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
 
         @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
         @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
