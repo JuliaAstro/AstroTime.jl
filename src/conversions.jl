@@ -637,8 +637,7 @@ end
 
 Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
 
-# Example
-
+#Example
 ```jldoctest
 julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
 (2.4577535e6, 0.9999884260598836)
@@ -682,6 +681,27 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     jd, time
 end
 
+"""
+   utcut1(jd1, jd2)
+
+Transform a two-part Julian date from `UTC` to `UT1`.
+
+# Example
+
+```jldoctest
+julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UTC
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
+(2.4578265e6, 0.30477440993249416)
+```
+"""
+@inline function utcut1(jd1, jd2, dut1, dat)
+    jd = +(jd1, jd2)
+    dta = dut1 - dat
+    tai1, tai2 = utctai(jd1, jd2)
+    date, date1 = taiut1(tai1, tai2, dta)
+    date, date1
+end
 
 # TAI <-> UTC
 @transform UTC TAI ep begin
