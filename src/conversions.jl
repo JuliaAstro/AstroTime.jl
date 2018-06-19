@@ -630,9 +630,8 @@ julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
 (2.4578265e6, 0.30477440993249416)
 ```
 """
-@inline function utcut1(jd1, jd2, dut1)
+@inline function utcut1(jd1, jd2, dut1, dat)
     jd = +(jd1, jd2)
-    dat = leapseconds(jd)
     dta = dut1 - dat
     tai1, tai2 = utctai(jd1, jd2)
     date, date1 = taiut1(tai1, tai2, dta)

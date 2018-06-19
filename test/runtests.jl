@@ -225,8 +225,8 @@ AstroTime.update()
         @test Epochs.jd2cal(julian1(tt), julian2(tt)) == ERFA.jd2cal(julian1(tt), julian2(tt))
         @test Epochs.jd2cal(julian2(tt), julian1(tt)) == ERFA.jd2cal(julian2(tt), julian1(tt))
 
-        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc)) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
-        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc)) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
+        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
+        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
