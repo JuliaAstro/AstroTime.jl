@@ -681,7 +681,6 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     jd, time
 end
 
-<<<<<<< HEAD
 @inline function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
     a = SECONDS_PER_DAY * abs(days)
