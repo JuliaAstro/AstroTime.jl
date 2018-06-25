@@ -682,7 +682,7 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
 end
 
 """
-   utcut1(jd1, jd2)
+   utcut1(jd1, jd2, dut1, dat)
 
 Transform a two-part Julian date from `UTC` to `UT1`.
 
@@ -691,7 +691,7 @@ Transform a two-part Julian date from `UTC` to `UT1`.
 ```jldoctest
 julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
 2017-03-14T07:18:52.509 UTC
-julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2, Epochs.dut1(utc), leapseconds(julian(utc)))
 (2.4578265e6, 0.30477440993249416)
 ```
 """
@@ -700,6 +700,68 @@ julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2)
     dta = dut1 - dat
     tai1, tai2 = utctai(jd1, jd2)
     date, date1 = taiut1(tai1, tai2, dta)
+    date, date1
+end
+
+"""
+   ut1utc(jd1, jd2, dut1)
+
+Transform a two-part Julian date from `UT1` to `UTC`.
+
+# Example
+
+```jldoctest
+julia> ut1  = Epoch{UT1}(2.4578265e6, 0.30477440993249416)
+2017-03-14T07:18:52.509 UT1
+julia> AstroTime.Epochs.ut1utc(ut1.jd1, ut1.jd2, Epochs.dut1(ut1))
+(2.4578265e6, 0.3047686523910154)
+```
+"""
+function ut1utc(jd1, jd2, dut1)
+    duts = dut1
+    big1 = jd1 >= jd2
+    if big1
+        u1 = jd1
+        u2 = jd2
+    else
+        u1 = jd2
+        u2 = jd1
+    end
+    d1 = u1
+    dats1 = 0
+    for i in -1:3
+        d2 = u2 + float(i)
+        year, month, day, frac = jd2cal(d1, d2)
+        dats2 = leapseconds(d1 + d2 - frac)
+        if i == - 1
+            dats1 = dats2
+        end
+        ddats = dats2 - dats1
+        if abs(ddats) >= 0.5
+            if ddats * duts >= 0
+                duts -= ddats
+            end
+            d1, d2 = cal2jd(year, month, day)
+            us1 = d1
+            us2 = d2 - 1.0 + duts / SECONDS_PER_DAY
+            du = u1 - us1
+            du += u2 - us2
+            if  du > 0
+                fd = du * SECONDS_PER_DAY / ( SECONDS_PER_DAY + ddats )
+                duts += ddats * ( frac <= 1.0 ? frac : 1.0 )
+            end
+            break
+        end
+        dats1 = dats2
+    end
+    u2 -= duts / SECONDS_PER_DAY
+    if big1
+        date = u1
+        date1 = u2
+    else
+        date = u2
+        date1 = u1
+    end
     date, date1
 end
 
