@@ -32,4 +32,8 @@ end
 
 Epoch2{S}(ep::Epoch2{S}, Δt) where {S} = Epoch2{S}(ep.epoch, ep.offset, Δt)
 
+<<<<<<< HEAD
 end
+=======
+end
+>>>>>>> Add high-accuracy epoch type
