@@ -590,8 +590,7 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
-
-@inline function d2tf(ndp, days)
+function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
     a = SECONDS_PER_DAY * abs(days)
 
@@ -619,14 +618,7 @@ end
     as = floor(a / nrs)
     af = floor(a - as * nrs)
 
-    ihmsf = zeros(Int,4)
-    ihmsf[1] = Int(ah)
-    ihmsf[2] = Int(am)
-    ihmsf[3] = Int(as)
-    ihmsf[4] = Int(af)
-
-    sign, ihmsf[1], ihmsf[2], ihmsf[3], ihmsf[4]
-
+    sign, ah, am, as, af
 end
 
 # TAI <-> UTC
