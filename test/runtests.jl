@@ -5,6 +5,10 @@ using ERFA
 
 AstroTime.update()
 
+function fractionofday(dt)
+    Dates.hour(dt)/24 + Dates.minute(dt)/(24*60) + Dates.second(dt)/86400 + Dates.millisecond(dt)/8.64e7
+end
+
 @testset "AstroTime" begin
     @testset "Periods" begin
         s = 1.0seconds
@@ -155,7 +159,8 @@ AstroTime.update()
         tdb = TDBEpoch(2000, 1, 1, 12, 0, 0.0)
         tcb = TCBEpoch(2000, 1, 1, 12, 0, 0.0)
         Δtr(ep) = Epochs.diff_tdb_tt(julian1(ep), julian2(ep))
-        dat(ep) = Epochs.dut1(ep)-Epochs.leapseconds(julian(ep))
+        dut1(ep) = Epochs.dut1(ep)
+        dat(ep) = dut1(ep) - Epochs.leapseconds(julian(ep))
 
         @test Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
         @test Epochs.tttai(julian2(tt), julian1(tt)) == ERFA.tttai(julian2(tt), julian1(tt))
@@ -179,8 +184,12 @@ AstroTime.update()
 
         leap = UTCEpoch(2016, 12, 31, 23, 59, 60)
         tai1, tai2 = ERFA.utctai(julian1(leap), julian2(leap))
-        @test_broken Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
-        @test_broken Epochs.taiutc(tai1, tai2) == ERFA.taiutc(tai1, tai2)
+        @test Epochs.utctai(julian1(leap), julian2(leap)) == ERFA.utctai(julian1(leap), julian2(leap))
+        let (jd2, jd1) = Epochs.taiutc(tai1, tai2)
+            erfa_jd2, erfa_jd1 =  ERFA.taiutc(tai1, tai2)
+            @test jd2 ≈ erfa_jd2
+            @test jd1 ≈ erfa_jd1
+        end
 
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
@@ -226,11 +235,36 @@ AstroTime.update()
 
         @test Epochs.d2tf(1, -1.7) == ERFA.d2tf(1, -1.7)
         @test Epochs.d2tf(-1, 1.7) == ERFA.d2tf(-1, 1.7)
+
+        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
+        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
+        ut1_nearleap = UT1Epoch(2016, 12, 31, 23, 59, 59)
+        @test Epochs.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1)) == ERFA.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1))
+        @test Epochs.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1)) == ERFA.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1))
+        let (jd1, jd2) = Epochs.ut1utc(julian1(ut1_nearleap), julian2(ut1_nearleap), dut1(ut1_nearleap))
+            erfa_jd1, erfa_jd2 = ERFA.ut1utc(julian1(ut1_nearleap), julian2(ut1_nearleap), dut1(ut1_nearleap))
+            @test jd1 == erfa_jd1
+            @test jd2 ≈ erfa_jd2
+        end
+        let (jd2, jd1) = Epochs.ut1utc(julian2(ut1_nearleap), julian1(ut1_nearleap), dut1(ut1_nearleap))
+            erfa_jd2, erfa_jd1 = ERFA.ut1utc(julian2(ut1_nearleap), julian1(ut1_nearleap), dut1(ut1_nearleap))
+            @test jd2 ≈ erfa_jd2
+            @test jd1 == erfa_jd1
+        end
+        
+        @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
+        @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
+        @test_throws ArgumentError Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 25, 59, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 61, 60)
+        @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 61)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
+        @test fractionofday(DateTime(1959,1,1)) == 0.0
+        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
         for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) == ERFA.dat(year, 4, 1, 0.0)
+            @test leapseconds(TTEpoch(year, 4, 1)) ≈ ERFA.dat(year, 4, 1, 0.0)
         end
     end
 end
