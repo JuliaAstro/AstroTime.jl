@@ -580,37 +580,6 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
-function d2tf(ndp, days)
-    sign = (days >= 0.0 ) ? '+' : '-'
-    a = SECONDS_PER_DAY * abs(days)
-
-    if ndp < 0
-        nrs = 1
-        for n in range(1,-ndp)
-            nrs *= (n == 2 || n == 4) ? 6 : 10
-        end
-        w = a / nrs
-        a = nrs * round(w)
-    end
-
-    nrs = 1
-    for n in range(1,ndp)
-        nrs *= 10
-    end
-    rm = nrs * 60.0
-    rh = rm * 60.0
-
-    a = round(nrs * a)
-    ah = floor(a / rh)
-    a -= ah * rh
-    am = floor(a / rm)
-    a -= am * rm
-    as = floor(a / nrs)
-    af = floor(a - as * nrs)
-
-    sign, ah, am, as, af
-end
-
 """
    utctai(jd1, jd2)
 
@@ -712,7 +681,7 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     jd, time
 end
 
-@inline function d2tf(ndp, days)
+function d2tf(ndp, days)
     sign = (days >= 0.0 ) ? '+' : '-'
     a = SECONDS_PER_DAY * abs(days)
 
@@ -768,11 +737,11 @@ function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
     a1 = jd1
     b1 = jd2
     jd = jd1 + jd2
-  
+
     year1, month1, day1, frac1 = jd2cal(a1, b1)
-  
+
     leap = 0
-  
+
     if scale == UTC
         dat0 = leapseconds(jd - frac1)
         dat12 = leapseconds(jd - frac1 +0.5)
@@ -783,9 +752,9 @@ function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
             frac1 += frac1 * dleap / SECONDS_PER_DAY
         end
     end
-  
+
     sign, hour, min, sec, fracd = d2tf(ndp, frac1)
-  
+
     if hour > 23
         year2, month2, day2, frac2 = jd2cal(a1+1.5, b1-frac1)
         if !leap
@@ -818,7 +787,7 @@ function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
             end
         end
   end
-  
+
   year1, month1, day1, hour, min, sec, fracd
 end
 
@@ -887,26 +856,26 @@ end
 # TAI <-> UTC
 @transform UTC TAI ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.utctai(jd1, jd2)
+    date, date1 = utctai(jd1, jd2)
     TAIEpoch(date, date1)
 end
 
 @transform TAI UTC ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.taiutc(jd1, jd2)
+    date, date1 = taiutc(jd1, jd2)
     UTCEpoch(date, date1)
 end
 
 # UTC <-> UT1
 @transform UT1 UTC ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.ut1utc(jd1, jd2, dut1(ep))
+    date, date1 = ut1utc(jd1, jd2, dut1(ep))
     UTCEpoch(date, date1)
 end
 
 @transform UTC UT1 ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.utcut1(jd1, jd2, dut1(ep))
+    date, date1 = utcut1(jd1, jd2, dut1(ep), leapseconds(julian(ep)))
     UT1Epoch(date, date1)
 end
 
@@ -926,13 +895,13 @@ end
 # TT <-> UT1
 @transform UT1 TT ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.ut1tt(jd1, jd2, Δt)
+    date, date1 = ut1tt(jd1, jd2, Δt)
     TTEpoch(date, date1)
 end
 
 @transform TT UT1 ep Δt=diff_ut1_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.ttut1(jd1, jd2, Δt)
+    date, date1 = ttut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)
 end
 
@@ -952,39 +921,39 @@ end
 # TT <-> TCG
 @transform TCG TT ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tcgtt(jd1, jd2)
+    date, date1 = tcgtt(jd1, jd2)
     TTEpoch(date, date1)
 end
 
 @transform TT TCG ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tttcg(jd1, jd2)
+    date, date1 = tttcg(jd1, jd2)
     TCGEpoch(date, date1)
 end
 
 # TT <-> TDB
 @transform TDB TT ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tdbtt(jd1, jd2, Δtr)
+    date, date1 = tdbtt(jd1, jd2, Δtr)
     TTEpoch(date, date1)
 end
 
 @transform TT TDB ep Δtr=diff_tdb_tt(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tttdb(jd1, jd2, Δtr)
+    date, date1 = tttdb(jd1, jd2, Δtr)
     TDBEpoch(date, date1)
 end
 
 # TDB <-> TCB
 @transform TCB TDB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tcbtdb(jd1, jd2)
+    date, date1 = tcbtdb(jd1, jd2)
     TDBEpoch(date, date1)
 end
 
 @transform TDB TCB ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = ERFA.tdbtcb(jd1, jd2)
+    date, date1 = tdbtcb(jd1, jd2)
     TCBEpoch(date, date1)
 end
 
