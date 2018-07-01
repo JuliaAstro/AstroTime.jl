@@ -580,6 +580,37 @@ function cal2jd(iy, im, id)
     jd, jd1
 end
 
+function d2tf(ndp, days)
+    sign = (days >= 0.0 ) ? '+' : '-'
+    a = SECONDS_PER_DAY * abs(days)
+
+    if ndp < 0
+        nrs = 1
+        for n in range(1,-ndp)
+            nrs *= (n == 2 || n == 4) ? 6 : 10
+        end
+        w = a / nrs
+        a = nrs * round(w)
+    end
+
+    nrs = 1
+    for n in range(1,ndp)
+        nrs *= 10
+    end
+    rm = nrs * 60.0
+    rh = rm * 60.0
+
+    a = round(nrs * a)
+    ah = floor(a / rh)
+    a -= ah * rh
+    am = floor(a / rm)
+    a -= am * rm
+    as = floor(a / nrs)
+    af = floor(a - as * nrs)
+
+    sign, ah, am, as, af
+end
+
 """
    utctai(jd1, jd2)
 
