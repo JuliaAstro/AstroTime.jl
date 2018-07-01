@@ -712,6 +712,36 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     jd, time
 end
 
+@inline function d2tf(ndp, days)
+    sign = (days >= 0.0 ) ? '+' : '-'
+    a = SECONDS_PER_DAY * abs(days)
+
+    if ndp < 0
+        nrs = 1
+        for n in range(1,-ndp)
+            nrs *= (n == 2 || n == 4) ? 6 : 10
+        end
+        w = a / nrs
+        a = nrs * round(w)
+    end
+
+    nrs = 1
+    for n in range(1,ndp)
+        nrs *= 10
+    end
+    rm = nrs * 60.0
+    rh = rm * 60.0
+
+    a = round(nrs * a)
+    ah = floor(a / rh)
+    a -= ah * rh
+    am = floor(a / rm)
+    a -= am * rm
+    as = floor(a / nrs)
+    af = floor(a - as * nrs)
+    sign, Int(ah), Int(am), Int(as), Int(af)
+end
+
 """
    utcut1(jd1, jd2, dut1, dat)
 
@@ -732,6 +762,64 @@ julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2, Epochs.dut1(utc), leapseconds(j
     tai1, tai2 = utctai(jd1, jd2)
     date, date1 = taiut1(tai1, tai2, dta)
     date, date1
+end
+
+function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
+    a1 = jd1
+    b1 = jd2
+    jd = jd1 + jd2
+  
+    year1, month1, day1, frac1 = jd2cal(a1, b1)
+  
+    leap = 0
+  
+    if scale == UTC
+        dat0 = leapseconds(jd - frac1)
+        dat12 = leapseconds(jd - frac1 +0.5)
+        dat24 = leapseconds(jd + 1.5 - frac1)
+        dleap = dat24 - (2.0 * dat12 - dat0)
+        leap = dleap != 0.0
+        if leap
+            frac1 += frac1 * dleap / SECONDS_PER_DAY
+        end
+    end
+  
+    sign, hour, min, sec, fracd = d2tf(ndp, frac1)
+  
+    if hour > 23
+        year2, month2, day2, frac2 = jd2cal(a1+1.5, b1-frac1)
+        if !leap
+            year1 = year2
+            month1 = month2
+            day1 = day2
+            hour = 0
+            min = 0
+            sec = 0
+        else
+            if min > 0
+                  year1 = year2
+                  month1 = month2
+                  day1 = day2
+                  hour = 0
+                  min = 0
+                  sec = 0
+            else
+                  hour = 23
+                  min = 59
+                  sec = 60
+            end
+            if ndp < 0 && min == 60
+                  year1 = year2
+                  month1 = month2
+                  day1 = day2
+                  hour = 0
+                  min = 0
+                  sec = 0
+            end
+        end
+  end
+  
+  year1, month1, day1, hour, min, sec, fracd
 end
 
 """

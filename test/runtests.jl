@@ -190,7 +190,6 @@ end
             @test jd2 ≈ erfa_jd2
             @test jd1 ≈ erfa_jd1
         end
-
         @test Epochs.diff_tdb_tt(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0) == ERFA.dtdb(julian1(tdb), julian2(tdb), 1.0, 2.0, 3.0, 4.0)
         @test Epochs.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb)) == ERFA.tdbtt(julian1(tdb), julian2(tdb), Δtr(tdb))
         @test Epochs.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb)) == ERFA.tdbtt(julian2(tdb), julian1(tdb), Δtr(tdb))
@@ -258,6 +257,11 @@ end
         @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 25, 59, 60)
         @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 61, 60)
         @test_throws ArgumentError Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 61)
+
+        utc2 = UTCEpoch(2001, 03, 01, 23, 30, 0)
+        @test Epochs.julian2datetime(timescale(leap), 3, leap.jd1, leap.jd2) == ERFA.d2dtf("UTC", 3, leap.jd1, leap.jd2)
+        @test Epochs.julian2datetime(timescale(tt), 3, tt.jd1, tt.jd2) == ERFA.d2dtf("TT", 3, tt.jd1, tt.jd2)
+        @test Epochs.julian2datetime(timescale(utc2), 3, utc2.jd1, utc2.jd2) == ERFA.d2dtf("UTC", 3, utc2.jd1, utc2.jd2)
     end
     @testset "Leap Seconds" begin
         @test leapseconds(TTEpoch(1959,1,1)) == 0
