@@ -11,33 +11,17 @@ Returns
 day, frac : float64
     Integer and fractional part of val1 + val2.
 """
-function day_frac(val1, val2; factor=1.0, divisor=1.0)
+function sec_frac(val1, val2)
     # Add val1 and val2 exactly, returning the result as two float64s.
     # The first is the approximate sum (with some floating point error)
     # and the second is the error of the float64 sum.
     sum12, err12 = two_sum(val1, val2)
 
-    if factor != 1.0
-        sum12, carry = two_product(sum12, factor)
-        carry += err12 * factor
-        sum12, err12 = two_sum(sum12, carry)
-    end
-
-    if divisor != 1.0
-        q1 = sum12 / divisor
-        p1, p2 = two_product(q1, divisor)
-        d1, d2 = two_sum(sum12, -p1)
-        d2 += err12
-        d2 -= p2
-        q2 = (d1 + d2) / divisor  # 3-part float fine here; nothing can be lost
-        sum12, err12 = two_sum(q1, q2)
-    end
-
     # get integer fraction
-    day = Int(round(sum12))
-    extra, frac = two_sum(sum12, -day)
+    sec = Int64(round(sum12))
+    extra, frac = two_sum(sum12, -sec)
     frac += extra + err12
-    day, frac
+    sec, frac
 end
 
 

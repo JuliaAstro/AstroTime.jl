@@ -13,10 +13,12 @@ include("utils.jl")
 include("TimeScales.jl")
 include("Periods.jl")
 include("Epochs.jl")
+include("Epochs2.jl")
 
 @reexport using .TimeScales
 @reexport using .Periods
 @reexport using .Epochs
+@reexport using .Epochs2
 
 """
     @timescale scale
