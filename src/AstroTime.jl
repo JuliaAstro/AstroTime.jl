@@ -10,19 +10,13 @@ export @timescale
 
 include("utils.jl")
 
-include("LeapSeconds.jl")
 include("TimeScales.jl")
 include("Periods.jl")
 include("Epochs.jl")
 
 @reexport using .TimeScales
 @reexport using .Periods
-@reexport using .LeapSeconds
 @reexport using .Epochs
-
-function __init__()
-    isfile(LSK_FILE) && push!(LSK_DATA, path(LSK_FILE))
-end
 
 """
     @timescale scale
@@ -54,8 +48,6 @@ end
 
 function update()
     EarthOrientation.update()
-    download(LSK_FILE)
-    push!(LSK_DATA, path(LSK_FILE))
     nothing
 end
 

@@ -1,11 +1,10 @@
 using ItemGraphs: ItemGraph, add_edge!, edgeitems
 
 using MuladdMacro
-using ..LeapSeconds
+using LeapSeconds
 using ..Periods
+
 export @transform
-
-
 
 abstract type Transformation end
 
@@ -40,7 +39,7 @@ end
 
 
 """
-   taiutc(jd1, jd2)
+    taiutc(jd1, jd2)
 
 Transform a two-part Julian date from `TAI` to `UTC`.
 
@@ -65,7 +64,7 @@ julia> AstroTime.Epochs.taiutc(tai.jd1, tai.jd2)
 
     u1 = a1
     u2 = a2
-    for i in range(1,3)
+    for i in 1:3
         tai1, tai2 = utctai(u1, u2)
         u2 += a1 - tai1
         u2 += a2 - tai2
@@ -146,7 +145,7 @@ Transform a two-part Julian date from `UT1` to `TAI`.
 ```jldoctest
 julia> ut1 = Epoch{UT1}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 UT1
-julia> AstroTime.Epochs.ut1tai(ut1.jd1, ut1.jd2, AstroTime.Epochs.dut1(ut1)-AstroTime.Epochs.leapseconds(julian(ut1)))
+julia> AstroTime.Epochs.ut1tai(ut1.jd1, ut1.jd2, AstroTime.Epochs.dut1(ut1)-AstroTime.Epochs.offset_tai_utc(julian(ut1)))
 (2.4578265e6, 0.3048243932182868)
 ```
 """
@@ -172,7 +171,7 @@ Transform a two-part Julian date from `TAI` to `UT1`.
 ```jldoctest
 julia> tai = Epoch{TAI}(2.4578265e6, 0.30440190993249416)
 2017-03-14T07:18:20.325 TAI
-julia> AstroTime.Epochs.ut1tai(tai.jd1, tai.jd2, AstroTime.Epochs.dut1(tai)-AstroTime.Epochs.leapseconds(julian(tai)))
+julia> AstroTime.Epochs.ut1tai(tai.jd1, tai.jd2, AstroTime.Epochs.dut1(tai)-AstroTime.Epochs.offset_tai_utc(julian(tai)))
 (2.4578265e6, 0.30477440993249416)
 ```
 """
@@ -368,7 +367,7 @@ function diff_tdb_tt(jd1, jd2, ut, elong, u, v)
 end
 
 @inline function diff_ut1_tt(ep::Epoch)
-    leapsec = leapseconds(julian(ep))
+    leapsec = offset_tai_utc(julian(ep))
     ΔUT1 = dut1(ep)
     OFFSET_TT_TAI + leapsec - ΔUT1
 end
@@ -414,11 +413,11 @@ julia> AstroTime.Epochs.ttut1(tt.jd1, tt.jd2, AstroTime.Epochs.deltat(tt))
 ```
 """
 @inline function ttut1(jd1, jd2, dt)
-     dtd = dt / SECONDS_PER_DAY
-     if jd1 > jd2
+    dtd = dt / SECONDS_PER_DAY
+    if jd1 > jd2
         date = jd1
         date1 = jd2 - dtd
-     else
+    else
         date = jd1 - dtd
         date1 = jd2
     end
@@ -439,15 +438,15 @@ julia> AstroTime.Epochs.ut1tt(ut1.jd1, ut1.jd2, AstroTime.Epochs.deltat(ut1))
 ```
 """
 @inline function ut1tt(jd1, jd2, dt)
-     dtd = dt / SECONDS_PER_DAY
-     if jd1 > jd2
+    dtd = dt / SECONDS_PER_DAY
+    if jd1 > jd2
         date = jd1
         date1 = jd2 + dtd
-     else
+    else
         date = jd1 + dtd
         date1 = jd2
-     end
-     date, date1
+    end
+    date, date1
 end
 
 """
@@ -548,7 +547,6 @@ function jd2cal(jd1, jd2)
     iy = Int(floor((100 * (n - 49) + i + l)))
 
     iy, im, id, f
-
 end
 
 function cal2jd(iy, im, id)
@@ -563,7 +561,8 @@ function cal2jd(iy, im, id)
         throw(ArgumentError("Month is outside of the range (1,12)"))
     end
 
-    ly = ((im == 2 ) && !Bool(iy % 4!=0) && (Bool(iy % 100!=0) || !Bool(iy % 400!=0)))? 1:0 #check if leap year
+    # Check if leap year
+    ly = ((im == 2 ) && !(iy % 4 != 0) && ((iy % 100 != 0) || !(iy % 400 != 0))) ? 1 : 0
 
     if ((id < 1) || (id > (MON_LENGTH[im] + ly)))
         throw(ArgumentError("Day is outside of permissible range (1, $(MON_LENGTH[im]))"))
@@ -573,15 +572,15 @@ function cal2jd(iy, im, id)
     iypmy = trunc(Int,(iy + my))
     jd = MJD
     jd1 = float((((1461 * (iypmy + 4800)) ÷ 4)
-          + (367 * trunc(Int,(im - 2 - 12 * my))) ÷ 12
-          - (3 * ((iypmy + 4900) ÷ 100)) ÷ 4
-          + trunc(Int,id) - 2432076))
+        + (367 * trunc(Int,(im - 2 - 12 * my))) ÷ 12
+        - (3 * ((iypmy + 4900) ÷ 100)) ÷ 4
+        + trunc(Int,id) - 2432076))
 
     jd, jd1
 end
 
 """
-   utctai(jd1, jd2)
+    utctai(jd1, jd2)
 
 Transform a two-part Julian date from `UTC` to `TAI`.
 
@@ -606,9 +605,9 @@ function utctai(jd1, jd2)
 
     iy, im, id, fd = jd2cal(u1, u2)
     u2 -= fd
-    drift0 = leapseconds(u1 +  u2)
-    drift12 = leapseconds(u1 + u2 + 0.5)
-    drift24 = leapseconds(u1 + u2 + 1.5)
+    drift0 = offset_tai_utc(u1 +  u2)
+    drift12 = offset_tai_utc(u1 + u2 + 0.5)
+    drift24 = offset_tai_utc(u1 + u2 + 1.5)
 
     dlod = 2.0 * (drift12 - drift0)
     dleap = drift24 - (drift0 + dlod)
@@ -635,9 +634,10 @@ end
 """
     datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <: TimeScale}
 
-Transforms DateTime field to two-part Julian Date, special provision for leapseconds is provided.
+Transforms DateTime field to two-part Julian Date, special provision for leap seconds is provided.
 
-#Example
+# Example
+
 ```jldoctest
 julia> AstroTime.Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60)
 (2.4577535e6, 0.9999884260598836)
@@ -658,9 +658,9 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     end
 
     if scale == UTC
-        dat0 = leapseconds(jd)
-        dat12 = leapseconds(jd + 0.5)
-        dat24 = leapseconds(jd + 1.5)
+        dat0 = offset_tai_utc(jd)
+        dat12 = offset_tai_utc(jd + 0.5)
+        dat24 = offset_tai_utc(jd + 1.5)
 
         dleap = dat24 - (2.0 * dat12 - dat0)
         adjusted_seconds_per_day = SECONDS_PER_DAY + dleap
@@ -674,7 +674,7 @@ function datetime2julian(scale::T, year, month, date, hour, min, sec) where {T <
     end
 
     if sec >= seclim
-            throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
+        throw(ArgumentError("Time exceeds the maximum seconds in $(year)-$(month)-$(date)"))
     end
 
     time  = ( 60.0 * ( 60.0 * hour + min )  + sec ) / adjusted_seconds_per_day
@@ -687,7 +687,7 @@ function d2tf(ndp, days)
 
     if ndp < 0
         nrs = 1
-        for n in range(1,-ndp)
+        for n in 1:-ndp
             nrs *= (n == 2 || n == 4) ? 6 : 10
         end
         w = a / nrs
@@ -695,7 +695,7 @@ function d2tf(ndp, days)
     end
 
     nrs = 1
-    for n in range(1,ndp)
+    for n in 1:ndp
         nrs *= 10
     end
     rm = nrs * 60.0
@@ -712,7 +712,7 @@ function d2tf(ndp, days)
 end
 
 """
-   utcut1(jd1, jd2, dut1, dat)
+    utcut1(jd1, jd2, dut1, dat)
 
 Transform a two-part Julian date from `UTC` to `UT1`.
 
@@ -721,7 +721,7 @@ Transform a two-part Julian date from `UTC` to `UT1`.
 ```jldoctest
 julia> utc  = Epoch{UTC}(2.4578265e6, 0.30477440993249416)
 2017-03-14T07:18:52.509 UTC
-julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2, Epochs.dut1(utc), leapseconds(julian(utc)))
+julia> AstroTime.Epochs.utcut1(utc.jd1, utc.jd2, Epochs.dut1(utc), offset_tai_utc(julian(utc)))
 (2.4578265e6, 0.30477440993249416)
 ```
 """
@@ -743,9 +743,9 @@ function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
     leap = 0
 
     if scale == UTC
-        dat0 = leapseconds(jd - frac1)
-        dat12 = leapseconds(jd - frac1 +0.5)
-        dat24 = leapseconds(jd + 1.5 - frac1)
+        dat0 = offset_tai_utc(jd - frac1)
+        dat12 = offset_tai_utc(jd - frac1 +0.5)
+        dat24 = offset_tai_utc(jd + 1.5 - frac1)
         dleap = dat24 - (2.0 * dat12 - dat0)
         leap = dleap != 0.0
         if leap
@@ -766,33 +766,33 @@ function julian2datetime(scale::T, ndp, jd1, jd2) where T <: TimeScale
             sec = 0
         else
             if min > 0
-                  year1 = year2
-                  month1 = month2
-                  day1 = day2
-                  hour = 0
-                  min = 0
-                  sec = 0
+                year1 = year2
+                month1 = month2
+                day1 = day2
+                hour = 0
+                min = 0
+                sec = 0
             else
-                  hour = 23
-                  min = 59
-                  sec = 60
+                hour = 23
+                min = 59
+                sec = 60
             end
             if ndp < 0 && min == 60
-                  year1 = year2
-                  month1 = month2
-                  day1 = day2
-                  hour = 0
-                  min = 0
-                  sec = 0
+                year1 = year2
+                month1 = month2
+                day1 = day2
+                hour = 0
+                min = 0
+                sec = 0
             end
         end
-  end
+    end
 
-  year1, month1, day1, hour, min, sec, fracd
+    year1, month1, day1, hour, min, sec, fracd
 end
 
 """
-   ut1utc(jd1, jd2, dut1)
+    ut1utc(jd1, jd2, dut1)
 
 Transform a two-part Julian date from `UT1` to `UTC`.
 
@@ -820,7 +820,7 @@ function ut1utc(jd1, jd2, dut1)
     for i in -1:3
         d2 = u2 + float(i)
         year, month, day, frac = jd2cal(d1, d2)
-        dats2 = leapseconds(d1 + d2 - frac)
+        dats2 = offset_tai_utc(d1 + d2 - frac)
         if i == - 1
             dats1 = dats2
         end
@@ -875,18 +875,18 @@ end
 
 @transform UTC UT1 ep begin
     jd1, jd2 = julian1(ep), julian2(ep)
-    date, date1 = utcut1(jd1, jd2, dut1(ep), leapseconds(julian(ep)))
+    date, date1 = utcut1(jd1, jd2, dut1(ep), offset_tai_utc(julian(ep)))
     UT1Epoch(date, date1)
 end
 
 # TAI <-> UT1
-@transform UT1 TAI ep Δt=dut1(ep)-leapseconds(ep) begin
+@transform UT1 TAI ep Δt=dut1(ep)-offset_tai_utc(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = ut1tai(jd1, jd2, Δt)
     TAIEpoch(date, date1)
 end
 
-@transform TAI UT1 ep Δt=dut1(ep)-leapseconds(ep) begin
+@transform TAI UT1 ep Δt=dut1(ep)-offset_tai_utc(ep) begin
     jd1, jd2 = julian1(ep), julian2(ep)
     date, date1 = taiut1(jd1, jd2, Δt)
     UT1Epoch(date, date1)

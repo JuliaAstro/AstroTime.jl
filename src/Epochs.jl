@@ -4,13 +4,15 @@ using EarthOrientation
 using ERFA
 
 import Base: +, -, ==, isapprox, isless
+import Dates
+using Dates: DateTime, @dateformat_str
 
 using ..TimeScales, ..Periods
 import ..TimeScales: acronyms
-import ..LeapSeconds: leapseconds, LSK_DATA
+import LeapSeconds: offset_tai_utc
 
 export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
-    leapseconds, jd2000, jd1950, mjd, timescale
+    offset_tai_utc, jd2000, jd1950, mjd, timescale
 
 const date_fmt = dateformat"yyyy-mm-ddTHH:MM:SS.sss"
 
@@ -90,7 +92,7 @@ julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
 2017-03-14T07:18:20.325
 ```
 """
-function Base.DateTime(ep::Epoch{T}) where {T}
+function DateTime(ep::Epoch{T}) where {T}
     dt = ERFA.d2dtf(string(T), 3, julian1(ep), julian2(ep))
     DateTime(dt...)
 end
@@ -135,7 +137,7 @@ jd1950(ep) = julian(ep) - J1950
 (::Century)(ep::Epoch, base=0.0) = centuries((julian1(ep) - base + julian2(ep)) * days)
 
 dut1(ep::Epoch) = getΔUT1(julian(ep))
-leapseconds(ep::Epoch) = leapseconds(julian(ep))
+offset_tai_utc(ep::Epoch) = offset_tai_utc(julian(ep))
 
 function isapprox(a::Epoch{T}, b::Epoch{T}) where {T}
     return julian(a) ≈ julian(b)

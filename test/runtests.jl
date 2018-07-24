@@ -1,7 +1,9 @@
 using AstroTime
 using AstroTime.Epochs
-using Base.Test
+using Test
 using ERFA
+import Dates
+using Dates: DateTime
 
 AstroTime.update()
 
@@ -160,7 +162,7 @@ end
         tcb = TCBEpoch(2000, 1, 1, 12, 0, 0.0)
         Δtr(ep) = Epochs.diff_tdb_tt(julian1(ep), julian2(ep))
         dut1(ep) = Epochs.dut1(ep)
-        dat(ep) = dut1(ep) - Epochs.leapseconds(julian(ep))
+        dat(ep) = dut1(ep) - Epochs.offset_tai_utc(julian(ep))
 
         @test Epochs.tttai(julian1(tt), julian2(tt)) == ERFA.tttai(julian1(tt), julian2(tt))
         @test Epochs.tttai(julian2(tt), julian1(tt)) == ERFA.tttai(julian2(tt), julian1(tt))
@@ -235,8 +237,8 @@ end
         @test Epochs.d2tf(1, -1.7) == ERFA.d2tf(1, -1.7)
         @test Epochs.d2tf(-1, 1.7) == ERFA.d2tf(-1, 1.7)
 
-        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
-        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),leapseconds(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
+        @test Epochs.utcut1(julian1(utc), julian2(utc), dut1(utc),offset_tai_utc(julian(utc))) == ERFA.utcut1(julian1(utc), julian2(utc), dut1(utc))
+        @test Epochs.utcut1(julian2(utc), julian1(utc),dut1(utc),offset_tai_utc(julian(utc))) == ERFA.utcut1(julian2(utc), julian1(utc), dut1(utc))
         ut1_nearleap = UT1Epoch(2016, 12, 31, 23, 59, 59)
         @test Epochs.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1)) == ERFA.ut1utc(julian1(ut1), julian2(ut1), dut1(ut1))
         @test Epochs.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1)) == ERFA.ut1utc(julian2(ut1), julian1(ut1), dut1(ut1))
@@ -250,7 +252,7 @@ end
             @test jd2 ≈ erfa_jd2
             @test jd1 == erfa_jd1
         end
-        
+
         @test Epochs.datetime2julian(UTC, 2016, 12, 31, 23, 59, 60) == ERFA.dtf2d("UTC", 2016, 12, 31, 23, 59, 60)
         @test Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 59) == ERFA.dtf2d("TT", 2016, 12, 31, 23, 59, 59)
         @test_throws ArgumentError Epochs.datetime2julian(TT, 2016, 12, 31, 23, 59, 60)
@@ -262,13 +264,5 @@ end
         @test Epochs.julian2datetime(timescale(leap), 3, leap.jd1, leap.jd2) == ERFA.d2dtf("UTC", 3, leap.jd1, leap.jd2)
         @test Epochs.julian2datetime(timescale(tt), 3, tt.jd1, tt.jd2) == ERFA.d2dtf("TT", 3, tt.jd1, tt.jd2)
         @test Epochs.julian2datetime(timescale(utc2), 3, utc2.jd1, utc2.jd2) == ERFA.d2dtf("UTC", 3, utc2.jd1, utc2.jd2)
-    end
-    @testset "Leap Seconds" begin
-        @test leapseconds(TTEpoch(1959,1,1)) == 0
-        @test fractionofday(DateTime(1959,1,1)) == 0.0
-        # Doing approximate checking due to small machine epsilon. (fails on windows 32-bit)
-        for year = 1960:Dates.year(now())
-            @test leapseconds(TTEpoch(year, 4, 1)) ≈ ERFA.dat(year, 4, 1, 0.0)
-        end
     end
 end
