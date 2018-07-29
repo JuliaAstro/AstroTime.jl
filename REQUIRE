@@ -1,8 +1,8 @@
 julia 0.7-beta
 EarthOrientation 0.2.0
-ItemGraphs 0.2.0
+# ItemGraphs 0.2.0
 LeapSeconds
 MuladdMacro 0.0.2
-OptionalData 0.1.0
+# OptionalData 0.1.0
 Reexport 0.1.0
-RemoteFiles 0.1.0
+# RemoteFiles 0.1.0
