@@ -1,5 +1,3 @@
-__precompile__()
-
 module AstroTime
 
 using EarthOrientation
@@ -11,6 +9,7 @@ export @timescale
 include("TimeScales.jl")
 include("Periods.jl")
 #= include("Epochs.jl") =#
+include("datetime.jl")
 include("Epochs2.jl")
 
 @reexport using .TimeScales

@@ -266,5 +266,6 @@ end
     #=     @test Epochs.julian2datetime(timescale(utc2), 3, utc2.jd1, utc2.jd2) == ERFA.d2dtf("UTC", 3, utc2.jd1, utc2.jd2) =#
     #= end =#
 
+    include("datetime.jl")
     include("epochs.jl")
 end
