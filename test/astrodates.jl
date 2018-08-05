@@ -26,7 +26,7 @@ const REFERENCES = (
 
 @testset "DateTime" begin
     @testset for ref in REFERENCES
-        s = ScaledDate{TT}(ref[end])
+        s = Date(ref[end])
         @test year(s) == ref[1]
         @test month(s) == ref[2]
         @test day(s) == ref[3]
