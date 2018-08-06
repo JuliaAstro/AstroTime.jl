@@ -2,7 +2,7 @@ module AstroDates
 
 using ..TimeScales: TimeScale
 
-import Base: time
+import Base: time, show
 import Dates
 
 export Date, Time, DateTime,
@@ -157,6 +157,11 @@ month(s::Date) = s.month
 day(s::Date) = s.day
 calendar(s::Date{C}) where {C} = C
 
+show(io::IO, d::Date) = print(io,
+                              year(d), "-",
+                              lpad(month(d), 2, '0'), "-",
+                              lpad(day(d), 2, '0'))
+
 Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
 Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
 
@@ -178,8 +183,8 @@ const CCSDS_EPOCH = Date(1958, 1, 1)
 const GALILEO_EPOCH = Date(1999, 8, 22)
 const GPS_EPOCH = Date(1980, 1, 6)
 const J2000_EPOCH = Date(2000, 1, 1)
-const MIN_EPOCH = Date(typemin(Int64))
-const MAX_EPOCH = Date(typemax(Int64))
+const MIN_EPOCH = Date(typemin(Int32))
+const MAX_EPOCH = Date(typemax(Int32))
 
 struct Time
     hour::Int
@@ -229,6 +234,15 @@ hour(s::Time) = s.hour
 minute(s::Time) = s.minute
 second(s::Time) = s.second
 
+function show(io::IO, t::Time)
+    h = lpad(hour(t), 2, '0')
+    m = lpad(minute(t), 2, '0')
+    sec = second(t)
+    s = lpad(floor(Int, sec), 2, '0')
+    f = rpad(split(string(sec), '.')[end], 3, '0')[1:3]
+    print(io, h, ":", m, ":", s, ".", f)
+end
+
 struct DateTime{C}
     date::Date{C}
     time::Time
@@ -236,6 +250,8 @@ end
 
 date(dt::DateTime) = dt.date
 time(dt::DateTime) = dt.time
+
+show(io::IO, dt::DateTime) = print(io, date(dt), "T", time(dt))
 
 function DateTime(year, month, day, hour=0, minute=0, second=0.0)
     DateTime(Date(year, month, day), Time(hour, minute, second))

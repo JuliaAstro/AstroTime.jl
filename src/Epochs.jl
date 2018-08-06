@@ -3,7 +3,7 @@ module Epochs
 using LeapSeconds: offset_tai_utc
 using EarthOrientation: getΔUT1
 
-import Base: -, +, <, ==, isapprox
+import Base: -, +, <, ==, isapprox, show
 import Dates
 
 using ..TimeScales
@@ -13,10 +13,6 @@ using ..Periods
 export Epoch,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
     FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH
-
-const OFFSET_TAI_TT = 32.184
-const LG_RATE = 6.969290134e-10
-const LB_RATE = 1.550519768e-8
 
 struct Epoch{S, T}
     epoch::Int64
@@ -57,6 +53,8 @@ Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
 include("offsets.jl")
 include("accessors.jl")
 
+show(io::IO, ep::Epoch{S}) where {S} = print(io, DateTime(ep), " ", S)
+
 function Epoch{S}(date::Date, time::Time) where S
     seconds = second(time)
     ts_offset = tai_offset(S, date, time)
@@ -77,7 +75,8 @@ end
 
 Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
 
-function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0, minute::Int=0, second::Float64=0.0) where S
+function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
+                  minute::Int=0, second::Float64=0.0) where S
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
 end
 
@@ -102,7 +101,6 @@ end
 
 const JULIAN_EPOCH = Epoch{TT}(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = Epoch{TT}(AstroDates.J2000_EPOCH, AstroDates.H12)
-const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
 const MODIFIED_JULIAN_EPOCH = Epoch{TT}(AstroDates.MODIFIED_JULIAN_EPOCH, AstroDates.H00)
 const FIFTIES_EPOCH = Epoch{TT}(AstroDates.FIFTIES_EPOCH, AstroDates.H00)
 const CCSDS_EPOCH = Epoch{TT}(AstroDates.CCSDS_EPOCH, AstroDates.H00)

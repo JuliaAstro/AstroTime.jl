@@ -2,6 +2,12 @@ using MuladdMacro
 
 include(joinpath("constants", "tdb.jl"))
 
+const OFFSET_TAI_TT = 32.184
+const LG_RATE = 6.969290134e-10
+const LB_RATE = 1.550519768e-8
+
+const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
+
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 tai_offset(::CoordinatedUniversalTime, ep) = offset_tai_utc(julian(ep))
@@ -12,8 +18,7 @@ tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * get
 """
     tai_offset(TDB, ep)
 
-Computes difference TDB-TT in seconds at time JD (julian days)
-The timescale for the input JD can be either TDB or TT.
+Computes difference TDB-TAI in seconds at the epoch `ep`.
 
 The accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD.
 Note that an accurate transformation betweem TDB and TT depends on the
@@ -91,17 +96,17 @@ function tai_offset(::BarycentricDynamicalTime, ep, ut, elong, u, v)
     for j in eachindex(fairhd4)
         @muladd w4 += fairhd4[j][1] * sin(fairhd4[j][2] * t + fairhd4[j][3])
     end
+
     # Multiply by powers of T and combine.
     wf = @evalpoly t w0 w1 w2 w3 w4
+
     # Adjustments to use JPL planetary masses instead of IAU.
     wj = 0.00065e-6 * sin(6069.776754 * t + 4.021194) +
         0.00033e-6 * sin( 213.299095 * t + 5.543132) +
         (-0.00196e-6 * sin(6208.294251 * t + 5.696701)) +
         (-0.00173e-6 * sin(  74.781599 * t + 2.435900)) +
         0.03638e-6 * t * t
-    # ============
-    # Final result
-    # ============
+
     # TDB-TT in seconds.
     w = wt + wf + wj
 
