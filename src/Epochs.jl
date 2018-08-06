@@ -3,18 +3,18 @@ module Epochs
 using LeapSeconds: offset_tai_utc
 using EarthOrientation: getΔUT1
 
-import Base: -
+import Base: -, +, <, ==, isapprox
 import Dates
 
 using ..TimeScales
 using ..AstroDates
+using ..Periods
 
 export Epoch, -, julian, j2000,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH, FIFTIES_EPOCH,
     GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH
 
 const OFFSET_TAI_TT = 32.184
-const SECONDS_PER_DAY = 86400.0
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 
@@ -73,17 +73,17 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, Δt)
 end
 
-julian(ep::Epoch) = (ep - JULIAN_EPOCH) / SECONDS_PER_DAY
-j2000(ep::Epoch) = (ep - J2000_EPOCH) / SECONDS_PER_DAY
+julian(ep::Epoch) = get(days(ep - JULIAN_EPOCH))
+j2000(ep::Epoch) = get(days(ep - J2000_EPOCH))
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 tai_offset(::CoordinatedUniversalTime, ep) = offset_tai_utc(julian(ep))
 tai_offset(::UniversalTime, ep) = tai_offset(UTC, ep) + getΔUT1(julian(ep))
-tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * (ep - EPOCH_77)
-tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * (ep - EPOCH_77)
+tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
+tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * get(ep - EPOCH_77)
 function tai_offset(::BarycentricDynamicalTime, ep)
-    dt = (ep - J2000_EPOCH) / SECONDS_PER_DAY
+    dt = get(days(ep - J2000_EPOCH))
     g = 357.53 + 0.9856003dt
     tai_offset(TT, ep) + 0.001658sind(g) + 0.000014sind(2g)
 end
@@ -101,9 +101,19 @@ function tai_offset(scale, date, time)
     offset
 end
 
-function -(a::Epoch, b::Epoch)
-    (a.epoch - b.epoch) + (a.offset - b.offset)
+function isapprox(a::Epoch, b::Epoch)
+    a.epoch == b.epoch && a.offset ≈ b.offset
 end
+
+function ==(a::Epoch, b::Epoch)
+    a.epoch == b.epoch && a.offset == b.offset
+end
+
+<(ep1::Epoch{T}, ep2::Epoch{T}) where {T} = get(ep1 - ep2) < 0.0
+
++(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, get(seconds(p)))
+-(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
+-(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
 
 const JULIAN_EPOCH = Epoch{TT}(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = Epoch{TT}(AstroDates.J2000_EPOCH, AstroDates.H12)
