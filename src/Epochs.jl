@@ -107,4 +107,6 @@ const CCSDS_EPOCH = Epoch{TT}(AstroDates.CCSDS_EPOCH, AstroDates.H00)
 const GALILEO_EPOCH = Epoch{TT}(AstroDates.GALILEO_EPOCH, AstroDates.H00)
 const GPS_EPOCH = Epoch{TT}(AstroDates.GPS_EPOCH, AstroDates.H00)
 
+const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
+
 end

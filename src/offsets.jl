@@ -6,8 +6,6 @@ const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 
-const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
-
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 tai_offset(::CoordinatedUniversalTime, ep) = offset_tai_utc(julian(ep))
