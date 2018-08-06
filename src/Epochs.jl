@@ -9,7 +9,9 @@ import Dates
 using ..TimeScales
 using ..AstroDates
 
-export Epoch, JULIAN_EPOCH
+export Epoch, -, julian, j2000,
+    JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH, FIFTIES_EPOCH,
+    GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH
 
 const OFFSET_TAI_TT = 32.184
 const SECONDS_PER_DAY = 86400.0
@@ -71,11 +73,12 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, Δt)
 end
 
-julian(ep::Epoch) = (ep.epoch + ep.offset) / SECONDS_PER_DAY
+julian(ep::Epoch) = (ep - JULIAN_EPOCH) / SECONDS_PER_DAY
+j2000(ep::Epoch) = (ep - J2000_EPOCH) / SECONDS_PER_DAY
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
-tai_offset(::CoordinatedUniversalTime, ep) = tai_offset_tai_utc(julian(ep))
+tai_offset(::CoordinatedUniversalTime, ep) = offset_tai_utc(julian(ep))
 tai_offset(::UniversalTime, ep) = tai_offset(UTC, ep) + getΔUT1(julian(ep))
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * (ep - EPOCH_77)
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * (ep - EPOCH_77)
@@ -105,5 +108,10 @@ end
 const JULIAN_EPOCH = Epoch{TT}(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = Epoch{TT}(AstroDates.J2000_EPOCH, AstroDates.H12)
 const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
+const MODIFIED_JULIAN_EPOCH = Epoch{TT}(AstroDates.MODIFIED_JULIAN_EPOCH, AstroDates.H00)
+const FIFTIES_EPOCH = Epoch{TT}(AstroDates.FIFTIES_EPOCH, AstroDates.H00)
+const CCSDS_EPOCH = Epoch{TT}(AstroDates.CCSDS_EPOCH, AstroDates.H00)
+const GALILEO_EPOCH = Epoch{TT}(AstroDates.GALILEO_EPOCH, AstroDates.H00)
+const GPS_EPOCH = Epoch{TT}(AstroDates.GPS_EPOCH, AstroDates.H00)
 
 end
