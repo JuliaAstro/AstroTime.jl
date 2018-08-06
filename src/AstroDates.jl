@@ -2,9 +2,12 @@ module AstroDates
 
 using ..TimeScales: TimeScale
 
+import Base: time
+import Dates
+
 export Date, Time, DateTime,
     year, month, day, j2000day, calendar,
-    hour, minute, second
+    hour, minute, second, date, time
 
 abstract type Calendar end
 
@@ -137,6 +140,10 @@ function Date(offset)
     Date{calendar}(year, month, day)
 end
 
+function Date(epoch, offset)
+    Date(j2000day(epoch) + offset)
+end
+
 function Date(year, month, day)
     check = Date(j2000day(year, month, day))
     if check.year != year || check.month != month || check.day != day
@@ -149,6 +156,9 @@ year(s::Date) = s.year
 month(s::Date) = s.month
 day(s::Date) = s.day
 calendar(s::Date{C}) where {C} = C
+
+Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
+Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
 
 function j2000day(calendar::Calendar, year, month, day)
     last_j2000_dayofyear(calendar, year - 1) + finddayinyear(month, day, isleap(calendar, year))
@@ -168,6 +178,8 @@ const CCSDS_EPOCH = Date(1958, 1, 1)
 const GALILEO_EPOCH = Date(1999, 8, 22)
 const GPS_EPOCH = Date(1980, 1, 6)
 const J2000_EPOCH = Date(2000, 1, 1)
+const MIN_EPOCH = Date(typemin(Int64))
+const MAX_EPOCH = Date(typemax(Int64))
 
 struct Time
     hour::Int
@@ -187,6 +199,29 @@ struct Time
     end
 end
 
+function Time(second_in_day_a, second_in_day_b)
+    carry = floor(Int, second_in_day_b)
+    wholeseconds = second_in_day_a + carry
+    fractional = second_in_day_b - carry
+
+    # range check
+    if wholeseconds < 0 || wholeseconds > 86400
+        throw(ArgumentError("Seconds are out of range"))
+    end
+
+    # extract the time components
+    hour = wholeseconds ÷ 3600
+    wholeseconds -= 3600 * hour
+    minute = wholeseconds ÷ 60
+    wholeseconds -= 60 * minute
+    second = wholeseconds + fractional
+
+    Time(hour, minute, second)
+end
+
+Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t), Dates.second(t))
+Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t))
+
 const H00 = Time(0, 0, 0.0)
 const H12 = Time(12, 0, 0.0)
 
@@ -198,6 +233,25 @@ struct DateTime{C}
     date::Date{C}
     time::Time
 end
+
+date(dt::DateTime) = dt.date
+time(dt::DateTime) = dt.time
+
+function DateTime(year, month, day, hour=0, minute=0, second=0.0)
+    DateTime(Date(year, month, day), Time(hour, minute, second))
+end
+
+year(dt::DateTime) = year(date(dt))
+month(dt::DateTime) = month(date(dt))
+day(dt::DateTime) = day(date(dt))
+hour(dt::DateTime) = hour(time(dt))
+minute(dt::DateTime) = minute(time(dt))
+second(dt::DateTime) = second(time(dt))
+
+DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
+                                        Dates.hour(dt), Dates.minute(dt), Dates.second(dt))
+Dates.DateTime(dt::DateTime) = Dates.DateTime(year(dt), month(dt), day(dt),
+                                              hour(dt), minute(dt), second(dt))
 
 end
 
