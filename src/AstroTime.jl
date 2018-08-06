@@ -7,15 +7,13 @@ export @timescale
 
 include("TimeScales.jl")
 include("Periods.jl")
-#= include("Epochs.jl") =#
 include("AstroDates.jl")
-include("Epochs2.jl")
+include("Epochs.jl")
 
 @reexport using .TimeScales
 @reexport using .Periods
-#= @reexport using .Epochs =#
 @reexport using .AstroDates
-@reexport using .Epochs2
+@reexport using .Epochs
 
 #= """ =#
 #=     @timescale scale =#

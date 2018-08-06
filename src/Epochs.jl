@@ -1,176 +1,109 @@
 module Epochs
 
-using EarthOrientation
-using ERFA
+using LeapSeconds: offset_tai_utc
+using EarthOrientation: getΔUT1
 
-import Base: +, -, ==, isapprox, isless
+import Base: -
 import Dates
-using Dates: DateTime, @dateformat_str
 
-using ..TimeScales, ..Periods
-import ..TimeScales: acronyms
-import LeapSeconds: offset_tai_utc
+using ..TimeScales
+using ..AstroDates
 
-export Epoch, julian, julian1, julian2, +, -, ==, isapprox, isless,
-    offset_tai_utc, jd2000, jd1950, mjd, timescale
+export Epoch, JULIAN_EPOCH
 
-const date_fmt = dateformat"yyyy-mm-ddTHH:MM:SS.sss"
+const OFFSET_TAI_TT = 32.184
+const SECONDS_PER_DAY = 86400.0
+const LG_RATE = 6.969290134e-10
+const LB_RATE = 1.550519768e-8
 
-struct Epoch{S,T<:Number}
-    jd1::T
-    jd2::T
-    """
-        Epoch{T}(jd1, jd2=0.0) where {T}
-
-    Construct an `Epoch` with timescale `T` from a two-part Julian date.
-
-    # Example
-
-    ```jldoctest
-    julia> Epoch{TT}(2.4578265e6, 0.30440190993249416)
-    2017-03-14T07:18:20.325 TT
-    ```
-    """
-    function Epoch{S}(jd1::T, jd2::T=zero(T)) where {S, T<:Number}
-        new{S::TimeScale,T}(jd1, jd2)
-    end
+struct Epoch{S, T}
+    epoch::Int64
+    offset::T
+    Epoch{S}(epoch::Int64, offset::T) where {S, T} = new{S::TimeScale, T}(epoch, offset)
 end
 
-function Base.show(io::IO, ep::Epoch)
-    print(io, "$(Dates.format(DateTime(ep), date_fmt)) $(timescale(ep))")
-end
+function Epoch{S}(epoch::Int64, offset, Δt) where S
+    sum = offset + Δt
 
-timescale(ep::Epoch{S}) where {S} = S
-
-"""
-    Epoch{T}(year, month, day,
-        hour=0, minute=0, seconds=0, milliseconds=0) where {T}
-
-Construct an `Epoch` with timescale `T` at the given date and time.
-
-# Example
-
-```jldoctest
-julia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)
-2017-03-14T07:18:20.325 TT
-```
-"""
-function Epoch{T}(year, month, day,
-    hour=0, minute=0, seconds=0, milliseconds=0) where {T}
-    jd, jd1 = ERFA.dtf2d(string(T),
-    year, month, day, hour, minute, seconds + milliseconds/1000)
-    Epoch{T}(jd, jd1)
-end
-
-"""
-    Epoch{T}(dt::DateTime) where {T}
-
-Convert a `DateTime` object to an `Epoch` with timescale `T`.
-
-# Example
-
-```jldoctest
-julia> Epoch{TT}(DateTime(2017, 3, 14, 7, 18, 20, 325))
-2017-03-14T07:18:20.325 TT
-```
-"""
-function Epoch{T}(dt::DateTime) where {T}
-    Epoch{T}(Dates.year(dt), Dates.month(dt), Dates.day(dt),
-        Dates.hour(dt), Dates.minute(dt),
-        Dates.second(dt) + Dates.millisecond(dt)/1000)
-end
-
-"""
-    DateTime(ep::Epoch{T}) where T
-
-Convert an `Epoch` with timescale `T` to a `DateTime` object.
-
-# Example
-
-```jldoctest
-julia> DateTime(Epoch{TT}(2017, 3, 14, 7, 18, 20, 325))
-2017-03-14T07:18:20.325
-```
-"""
-function DateTime(ep::Epoch{T}) where {T}
-    dt = ERFA.d2dtf(string(T), 3, julian1(ep), julian2(ep))
-    DateTime(dt...)
-end
-
-"""
-    Epoch{T}(timestamp::AbstractString,
-        fmt::DateFormat=dateformat"yyyy-mm-ddTHH:MM:SS.sss") where {T}
-
-Construct an `Epoch` with timescale `T` from a timestamp. Optionally a `DateFormat`
-object can be passed which improves performance if many date strings need to be
-parsed and the format is known in advance.
-
-# Example
-
-```jldoctest
-julia> Epoch{TT}("2017-03-14T07:18:20.325")
-2017-03-14T07:18:20.325 TT
-```
-"""
-Epoch{T}(str::AbstractString, fmt=date_fmt) where {T} = Epoch{T}(DateTime(str, fmt))
-
-for scale in acronyms
-    epoch = Symbol(scale, "Epoch")
-    @eval begin
-        const $epoch = Epoch{$scale}
-        export $epoch
-    end
-end
-
-julian1(ep) = ep.jd1
-julian2(ep) = ep.jd2
-julian(ep) = julian1(ep) + julian2(ep)
-mjd(ep) = julian(ep) - MJD
-jd2000(ep) = julian(ep) - J2000
-jd1950(ep) = julian(ep) - J1950
-
-(::Second)(ep::Epoch, base=0.0) = seconds((julian1(ep) - base + julian2(ep)) * days)
-(::Minute)(ep::Epoch, base=0.0) = minutes((julian1(ep) - base + julian2(ep)) * days)
-(::Hour)(ep::Epoch, base=0.0) = hours((julian1(ep) - base + julian2(ep)) * days)
-(::Day)(ep::Epoch, base=0.0) = days((julian1(ep) - base + julian2(ep)) * days)
-(::Year)(ep::Epoch, base=0.0) = years((julian1(ep) - base + julian2(ep)) * days)
-(::Century)(ep::Epoch, base=0.0) = centuries((julian1(ep) - base + julian2(ep)) * days)
-
-dut1(ep::Epoch) = getΔUT1(julian(ep))
-offset_tai_utc(ep::Epoch) = offset_tai_utc(julian(ep))
-
-function isapprox(a::Epoch{T}, b::Epoch{T}) where {T}
-    return julian(a) ≈ julian(b)
-end
-
-function (==)(a::Epoch{T}, b::Epoch{T}) where {T}
-    return DateTime(a) == DateTime(b)
-end
-
-isless(ep1::Epoch{T}, ep2::Epoch{T}) where {T} = julian(ep1) < julian(ep2)
-
-function (+)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S,U<:TimeUnit}
-    delta = get(days(p))
-    if delta >= oneunit(T2)
-        ep1 = Epoch{S}(julian1(ep) + delta, julian2(ep))
+    if !isfinite(sum)
+        offset′ = sum
+        epoch′ = sum < 0 ? typemin(Int64) : typemax(Int64)
     else
-        ep1 = Epoch{S}(julian1(ep), julian2(ep) + delta)
+        o′ = sum - Δt
+        d′ = sum - o′
+        Δ0 = offset - o′
+        Δd = Δt - d′
+        residual = Δ0 + Δd
+        dl = floor(Int64, sum)
+        offset′ = (sum - dl) + residual
+        epoch′ = epoch + dl
     end
+
+    Epoch{S}(epoch′, offset′)
 end
 
-function (-)(ep::Epoch{S,T1}, p::Period{U,T2}) where {T1,T2,S,U<:TimeUnit}
-    delta = get(days(p))
-    if delta >= oneunit(T2)
-        ep1 = Epoch{S}(julian1(ep) - delta, julian2(ep))
-    else
-        ep1 = Epoch{S}(julian1(ep), julian2(ep) - delta)
+function Epoch{S}(date::Date, time::Time) where S
+    seconds = second(time)
+    ts_offset = tai_offset(S, date, time)
+
+    sum = seconds + ts_offset
+    s′ = sum - ts_offset
+    t′ = sum - s′
+    Δs = seconds  - s′
+    Δt = ts_offset - t′
+    residual = Δs + Δt
+    dl = floor(Int64, sum)
+
+    offset = (sum - dl) + residual
+    epoch  = Int64(60) * ((j2000day(date) * Int64(24) + hour(time)) * Int64(60)
+                          + minute(time) - Int64(720)) + dl
+    Epoch{S}(epoch, offset)
+end
+
+function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0, minute::Int=0, second::Float64=0.0) where S
+    Epoch{S}(Date(year, month, day), Time(hour, minute, second))
+end
+
+Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
+
+function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
+    Δt = tai_offset(S2, ep) - tai_offset(S1, ep)
+    Epoch{S2}(ep.epoch, ep.offset, Δt)
+end
+
+julian(ep::Epoch) = (ep.epoch + ep.offset) / SECONDS_PER_DAY
+
+tai_offset(::InternationalAtomicTime, ep) = 0.0
+tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
+tai_offset(::CoordinatedUniversalTime, ep) = tai_offset_tai_utc(julian(ep))
+tai_offset(::UniversalTime, ep) = tai_offset(UTC, ep) + getΔUT1(julian(ep))
+tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * (ep - EPOCH_77)
+tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * (ep - EPOCH_77)
+function tai_offset(::BarycentricDynamicalTime, ep)
+    dt = (ep - J2000_EPOCH) / SECONDS_PER_DAY
+    g = 357.53 + 0.9856003dt
+    tai_offset(TT, ep) + 0.001658sind(g) + 0.000014sind(2g)
+end
+
+tai_offset(ep::Epoch{S}) where {S} = tai_offset(S, ep)
+
+tai_offset(::InternationalAtomicTime, date, time) = 0.0
+
+function tai_offset(scale, date, time)
+    ref = Epoch{TAI}(date, time)
+    offset = 0.0
+    for _ in 1:8
+        offset = -tai_offset(scale, Epoch{TAI}(ref, offset))
     end
+    offset
 end
 
-function (-)(ep1::Epoch{T}, ep2::Epoch{T}) where {T}
-    ((julian1(ep1) - julian1(ep2)) + (julian2(ep1) - julian2(ep2))) * days
+function -(a::Epoch, b::Epoch)
+    (a.epoch - b.epoch) + (a.offset - b.offset)
 end
 
-include("conversions.jl")
+const JULIAN_EPOCH = Epoch{TT}(AstroDates.JULIAN_EPOCH, AstroDates.H12)
+const J2000_EPOCH = Epoch{TT}(AstroDates.J2000_EPOCH, AstroDates.H12)
+const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
 
 end
