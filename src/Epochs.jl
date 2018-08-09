@@ -14,13 +14,13 @@ export Epoch,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
     FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH
 
-struct Epoch{S, T}
+struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
     offset::T
     Epoch{S}(epoch::Int64, offset::T) where {S, T} = new{S::TimeScale, T}(epoch, offset)
 end
 
-for scale in TimeScales.acronyms
+for scale in TimeScales.ACRONYMS
     epoch = Symbol(scale, "Epoch")
     @eval begin
         const $epoch = Epoch{$scale}
@@ -78,6 +78,11 @@ Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
                   minute::Int=0, second::Float64=0.0) where S
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
+end
+
+function Epoch{S}(year::Int, month::Int, day::Int, hour::Int,
+                  minute::Int, second::Int, milliseconds::Int) where S
+    Epoch{S}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
 end
 
 function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}

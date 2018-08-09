@@ -3,6 +3,8 @@ module AstroTime
 using EarthOrientation
 using Reexport
 
+import Dates
+
 export @timescale
 
 include("TimeScales.jl")
@@ -14,6 +16,24 @@ include("Epochs.jl")
 @reexport using .Periods
 @reexport using .AstroDates
 @reexport using .Epochs
+
+function __init__()
+    for scale in TimeScales.ACRONYMS
+        epoch = Symbol(scale, "Epoch")
+        @eval begin
+            Dates.CONVERSION_TRANSLATIONS[$epoch] = (
+                Dates.Year,
+                Dates.Month,
+                Dates.Day,
+                Dates.Hour,
+                Dates.Minute,
+                Dates.Second,
+                Dates.Millisecond,
+            )
+            Dates.default_format(::Type{$epoch}) = Dates.ISODateTimeFormat
+        end
+    end
+end
 
 """
     @timescale scale

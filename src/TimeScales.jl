@@ -16,7 +16,7 @@ The following timescales are defined:
 """
 abstract type TimeScale end
 
-const scales = (
+const SCALES = (
     :CoordinatedUniversalTime,
     :UniversalTime,
     :InternationalAtomicTime,
@@ -26,7 +26,7 @@ const scales = (
     :BarycentricDynamicalTime,
 )
 
-const acronyms = (
+const ACRONYMS = (
     :UTC,
     :UT1,
     :TAI,
@@ -36,7 +36,7 @@ const acronyms = (
     :TDB,
 )
 
-for (acronym, scale) in zip(acronyms, scales)
+for (acronym, scale) in zip(ACRONYMS, SCALES)
     name = String(acronym)
     @eval begin
         struct $scale <: TimeScale end
