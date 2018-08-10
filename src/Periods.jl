@@ -4,7 +4,22 @@ import Base: *, /, get, isapprox, show
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
-    Period, *, /, get
+    Period, *, /, get,
+    SECONDS_PER_MINUTE,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_DAY,
+    SECONDS_PER_YEAR,
+    SECONDS_PER_CENTURY,
+    MINUTES_PER_HOUR,
+    MINUTES_PER_DAY,
+    MINUTES_PER_YEAR,
+    MINUTES_PER_CENTURY,
+    HOURS_PER_DAY,
+    HOURS_PER_YEAR,
+    HOURS_PER_CENTURY,
+    DAYS_PER_YEAR,
+    DAYS_PER_CENTURY,
+    YEARS_PER_CENTURY
 
 const SECONDS_PER_MINUTE   = 60.0
 const SECONDS_PER_HOUR     = 60.0 * 60.0

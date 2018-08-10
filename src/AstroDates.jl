@@ -176,6 +176,8 @@ end
 
 j2000day(s::Date{C}) where {C} = j2000day(C, year(s), month(s), day(s))
 
+julian(s::Date) = j2000day(s) + 2.451545e6
+
 const JULIAN_EPOCH = Date(-4712,  1,  1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)
 const FIFTIES_EPOCH = Date(1950, 1, 1)

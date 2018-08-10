@@ -34,7 +34,7 @@ function DateTime(ep::Epoch)
         offset2000B += 1
     end
     time = offset2000A % Int64(86400)
-    if time < Int64(0)
+    if time < 0
         time += Int64(86400)
     end
     date = Int((offset2000A - time) ÷ Int64(86400))
@@ -42,11 +42,10 @@ function DateTime(ep::Epoch)
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, offset2000B)
 
-    #= if (timeScale.insideLeap(this)) { =#
-    #=     // fix the seconds number to take the leap into account =#
-    #=     timeComponents = new TimeComponents(timeComponents.getHour(), timeComponents.getMinute(), =#
-    #=                                         timeComponents.getSecond() + timeScale.getLeap(this)) =#
-    #= } =#
+    if insideleap(ep)
+        leap = 1.0
+        time_comp = Time(hour(time_comp), minute(time_comp), second(time_comp) + leap)
+    end
 
     DateTime(date_comp, time_comp)
 end

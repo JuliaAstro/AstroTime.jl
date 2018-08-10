@@ -3,7 +3,7 @@ module Epochs
 using LeapSeconds: offset_tai_utc
 using EarthOrientation: getΔUT1
 
-import Base: -, +, <, ==, isapprox, show
+import Base: -, +, <, ==, isapprox, isless, show
 import Dates
 
 using ..TimeScales
@@ -48,7 +48,7 @@ function Epoch{S}(epoch::Int64, offset, Δt) where S
     Epoch{S}(epoch′, offset′)
 end
 
-Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
+Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
 
 include("offsets.jl")
 include("accessors.jl")
@@ -73,7 +73,11 @@ function Epoch{S}(date::Date, time::Time) where S
     Epoch{S}(epoch, offset)
 end
 
+Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
+
 Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
+
+include("leapseconds.jl")
 
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
                   minute::Int=0, second::Float64=0.0) where S
@@ -98,7 +102,8 @@ function ==(a::Epoch, b::Epoch)
     a.epoch == b.epoch && a.offset == b.offset
 end
 
-<(ep1::Epoch{T}, ep2::Epoch{T}) where {T} = get(ep1 - ep2) < 0.0
+<(ep1::Epoch, ep2::Epoch) = get(ep1 - ep2) < 0.0
+isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
 
 +(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, get(seconds(p)))
 -(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
