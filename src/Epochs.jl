@@ -5,6 +5,7 @@ using EarthOrientation: getΔUT1
 
 import Base: -, +, <, ==, isapprox, isless, show
 import Dates
+import Dates: format, parse
 
 using ..TimeScales
 using ..AstroDates
@@ -74,6 +75,15 @@ function Epoch{S}(date::Date, time::Time) where S
     Epoch{S}(epoch, offset)
 end
 
+Epoch(str::AbstractString, df::Dates.DateFormat=ISOEpochFormat) = parse(Epoch, str, df)
+
+Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
+
+Epoch{S}(str::AbstractString,
+         df::Dates.DateFormat=Dates.default_format(Epoch{S})) where {S} = parse(Epoch{S}, str, df)
+
+Epoch{S}(str::AbstractString, format::AbstractString) where {S} = Epoch{S}(str, Dates.DateFormat(format))
+
 Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
 
 Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
@@ -86,6 +96,12 @@ end
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int,
                   minute::Int, second::Int, milliseconds::Int) where S
     Epoch{S}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
+end
+
+function Epoch(year::Int, month::Int, day::Int, hour::Int,
+               minute::Int, second::Int, milliseconds::Int,
+               scale::S) where S<:TimeScale
+    Epoch{scale}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
 end
 
 function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
@@ -123,5 +139,12 @@ const PAST_INFINITY = TAIEpoch(UNIX_EPOCH, -Inf)
 const FUTURE_INFINITY = TAIEpoch(UNIX_EPOCH, Inf)
 
 const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
+
+function Dates.validargs(::Type{Epoch}, y::Int64, m::Int64, d::Int64,
+                         h::Int64, mi::Int64, s::Int64, ms::Int64, ts::S) where S<:TimeScale
+    err = Dates.validargs(Dates.DateTime, y, m, d, h, mi, s, ms)
+    err !== nothing || return err
+    return Dates.argerror()
+end
 
 end

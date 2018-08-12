@@ -4,6 +4,7 @@ using ..TimeScales: TimeScale
 
 import Base: time, show
 import Dates
+import Dates: year, month, day, hour, minute, second
 
 export Date, Time, DateTime,
     year, month, day, j2000day, calendar,
@@ -146,6 +147,10 @@ function Date(epoch, offset)
 end
 
 function Date(year, month, day)
+    if month < 1 || month > 12
+        throw(ArgumentError("Invalid month number: $month"))
+    end
+
     check = Date(j2000day(year, month, day))
     if check.year != year || check.month != month || check.day != day
         throw(ArgumentError("Invalid date."))
