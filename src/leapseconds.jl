@@ -1,7 +1,7 @@
 import Dates
 using LeapSeconds
 
-export insideleap
+export insideleap, getleap
 
 insideleap(ep::Epoch{S}) where {S} = false
 getleap(ep::Epoch{S}) where {S} = 0.0
@@ -55,15 +55,6 @@ for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
     push!(TAI_OFFSETS, o)
 end
 
-const LEAP_STARTS = TAIEpoch{Float64}[]
-const LEAP_STOPS = TAIEpoch{Float64}[]
-
-for (epoch, offset) in zip(LeapSeconds.LS_EPOCHS, LeapSeconds.LEAP_SECONDS)
-    tai = TAIEpoch(Dates.julian2datetime(epoch))
-    push!(LEAP_STARTS, TAIEpoch(tai, offset - 1))
-    push!(LEAP_STOPS, TAIEpoch(tai, offset))
-end
-
 function insideleap(ep::UTCEpoch)
     offset = findoffset(ep)
     offset === nothing && return false
@@ -89,3 +80,4 @@ function getoffset(to::TAIOffset, d::Date, t::Time)
     fraction = secondinday(t)
     to.offset + days * (to.slope_utc * SECONDS_PER_DAY) + fraction * to.slope_utc
 end
+
