@@ -12,9 +12,9 @@ j2000(ep::Epoch) = get(days(ep - J2000_EPOCH))
 function DateTime(ep::Epoch)
     if !isfinite(ep.offset)
         if ep.offset < 0
-            DateTime(AstroDates.MIN_EPOCH, AstroDates.H00)
+            return DateTime(AstroDates.MIN_EPOCH, AstroDates.H00)
         else
-            DateTime(AstroDates.MAX_EPOCH, Time(23, 59, 59.999))
+            return DateTime(AstroDates.MAX_EPOCH, Time(23, 59, 59.999))
         end
     end
 
@@ -43,7 +43,7 @@ function DateTime(ep::Epoch)
     time_comp = Time(time, offset2000B)
 
     if insideleap(ep)
-        leap = 1.0
+        leap = getleap(ep)
         time_comp = Time(hour(time_comp), minute(time_comp), second(time_comp) + leap)
     end
 

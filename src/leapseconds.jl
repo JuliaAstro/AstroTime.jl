@@ -3,35 +3,56 @@ using LeapSeconds
 
 export insideleap
 
-struct TaiOffset
+insideleap(ep::Epoch{S}) where {S} = false
+getleap(ep::Epoch{S}) where {S} = 0.0
+
+struct TAIOffset
+    date::TAIEpoch{Float64}
+    jd::Float64
     start::TAIEpoch{Float64}
-    stop::TAIEpoch{Float64}
+    reference::TAIEpoch{Float64}
     leap::Float64
-    epoch::Float64
-    drift::Float64
     offset::Float64
+    slope_utc::Float64
+    slope_tai::Float64
 end
 
-isless(ep::Epoch, t::TaiOffset) = isless(ep, t.start)
+Base.isless(t::TAIOffset, ep::Epoch) = isless(ep, t.date)
+Base.isless(ep::Epoch, t::TAIOffset) = isless(ep, t.date)
 
-const OFFSETS = TaiOffset[]
+Base.isless(t::TAIOffset, jd::Float64) = isless(jd, t.jd)
+Base.isless(jd::Float64, t::TAIOffset) = isless(jd, t.jd)
 
-for (i, (epoch, offset, dep, rate)) in enumerate(zip(LeapSeconds.EPOCHS,
-                                                     LeapSeconds.OFFSETS,
-                                                     LeapSeconds.DRIFT_EPOCHS,
-                                                     LeapSeconds.DRIFT_RATES))
-    tai = TAIEpoch(Dates.julian2datetime(epoch))
-    previous = i == 1 ? 0.0 : OFFSETS[i-1].offset
+const TAI_OFFSETS = TAIOffset[]
+
+function findoffset(ep)
+    idx = searchsortedlast(TAI_OFFSETS, ep)
+    idx == 0 && return nothing
+
+    TAI_OFFSETS[idx]
+end
+
+const EPOCHS = [LeapSeconds.EPOCHS; LeapSeconds.LS_EPOCHS]
+const OFFSETS = [LeapSeconds.OFFSETS; LeapSeconds.LEAP_SECONDS]
+const DRIFT_EPOCHS = [LeapSeconds.DRIFT_EPOCHS;
+                      zeros(length(LeapSeconds.LS_EPOCHS))]
+const DRIFT_RATES = [LeapSeconds.DRIFT_RATES;
+                     zeros(length(LeapSeconds.LS_EPOCHS))]
+
+for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
+    previous = isempty(TAI_OFFSETS) ? 0.0 : last(TAI_OFFSETS).offset
+    tai = TAIEpoch(Dates.julian2datetime(ep))
+    ref = TAIEpoch(TAIEpoch(Dates.julian2datetime(dep)), offset)
     start = TAIEpoch(tai, previous)
-    start_offset = offset + (epoch - dep) * rate
+    start_offset = offset + (ep - dep) * rate
+    stop = TAIEpoch(tai, start_offset)
     slope = rate / SECONDS_PER_DAY
-end
-
-for (epoch, offset) in zip(LeapSeconds.LS_EPOCHS, LeapSeconds.LEAP_SECONDS)
-    tai = TAIEpoch(Dates.julian2datetime(epoch))
-    push!(OFFSETS,
-          TaiOffset(TAIEpoch(tai, offset - 1), TAIEpoch(tai, offset),
-                    1.0, 0.0, 0.0, 0.0))
+    leap = get(stop - start) / (1 + slope)
+    o = TAIOffset(start, ep,
+                  TAIEpoch(start, leap),
+                  ref,
+                  leap, offset, slope, slope / (1 + slope))
+    push!(TAI_OFFSETS, o)
 end
 
 const LEAP_STARTS = TAIEpoch{Float64}[]
@@ -44,12 +65,27 @@ for (epoch, offset) in zip(LeapSeconds.LS_EPOCHS, LeapSeconds.LEAP_SECONDS)
 end
 
 function insideleap(ep::UTCEpoch)
-    idx = searchsortedlast(LEAP_STARTS, ep)
-    if idx == 0
-        return 0.0
-    else
-        ep < LEAP_STOPS[idx]
-    end
+    offset = findoffset(ep)
+    offset === nothing && return false
+
+    ep < offset.start
 end
 
-insideleap(ep::Epoch{S}) where {S} = false
+function getleap(ep::UTCEpoch)
+    offset = findoffset(ep)
+    offset === nothing && return 0.0
+
+    offset.leap
+end
+
+function getoffset(t::TAIOffset, ep::Epoch)
+    t.slope_tai == 0.0 && return t.offset
+
+    t.offset + get(ep - t.reference) * t.slope_tai
+end
+
+function getoffset(to::TAIOffset, d::Date, t::Time)
+    days = AstroDates.julian(d) - to.jd
+    fraction = secondinday(t)
+    to.offset + days * (to.slope_utc * SECONDS_PER_DAY) + fraction * to.slope_utc
+end

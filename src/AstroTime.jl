@@ -58,6 +58,8 @@ macro timescale(scale::Symbol, ep::Symbol, args...)
     return quote
         struct $sc <: TimeScale end
         const $epoch = Epoch{$sc()}
+        Base.show(io::IO, $sc) = print(io, string(typeof($sc)))
+
         Dates.CONVERSION_TRANSLATIONS[$epoch] = (
             Dates.Year,
             Dates.Month,

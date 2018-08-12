@@ -42,9 +42,9 @@ for (acronym, scale) in zip(ACRONYMS, SCALES)
         struct $scale <: TimeScale end
         const $acronym = $scale()
         export $scale, $acronym
+
+        Base.show(io::IO, ::$scale) = print(io, $name)
     end
 end
-
-Base.show(io::IO, x::TimeScale) = print(io, string(typeof(x)))
 
 end

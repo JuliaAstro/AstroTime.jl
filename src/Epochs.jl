@@ -12,7 +12,8 @@ using ..Periods
 
 export Epoch,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
-    FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH
+    FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH,
+    PAST_INFINITY, FUTURE_INFINITY, UNIX_EPOCH
 
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
@@ -77,8 +78,6 @@ Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
 
 Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
 
-include("leapseconds.jl")
-
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
                   minute::Int=0, second::Float64=0.0) where S
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
@@ -109,13 +108,19 @@ isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
 -(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
 -(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
 
-const JULIAN_EPOCH = Epoch{TT}(AstroDates.JULIAN_EPOCH, AstroDates.H12)
-const J2000_EPOCH = Epoch{TT}(AstroDates.J2000_EPOCH, AstroDates.H12)
-const MODIFIED_JULIAN_EPOCH = Epoch{TT}(AstroDates.MODIFIED_JULIAN_EPOCH, AstroDates.H00)
-const FIFTIES_EPOCH = Epoch{TT}(AstroDates.FIFTIES_EPOCH, AstroDates.H00)
-const CCSDS_EPOCH = Epoch{TT}(AstroDates.CCSDS_EPOCH, AstroDates.H00)
-const GALILEO_EPOCH = Epoch{TT}(AstroDates.GALILEO_EPOCH, AstroDates.H00)
-const GPS_EPOCH = Epoch{TT}(AstroDates.GPS_EPOCH, AstroDates.H00)
+include("leapseconds.jl")
+
+const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)
+const J2000_EPOCH = TTEpoch(AstroDates.J2000_EPOCH, AstroDates.H12)
+const MODIFIED_JULIAN_EPOCH = TTEpoch(AstroDates.MODIFIED_JULIAN_EPOCH, AstroDates.H00)
+const FIFTIES_EPOCH = TTEpoch(AstroDates.FIFTIES_EPOCH, AstroDates.H00)
+const CCSDS_EPOCH = TTEpoch(AstroDates.CCSDS_EPOCH, AstroDates.H00)
+const GALILEO_EPOCH = TTEpoch(AstroDates.GALILEO_EPOCH, AstroDates.H00)
+const GPS_EPOCH = TTEpoch(AstroDates.GPS_EPOCH, AstroDates.H00)
+const UNIX_EPOCH = TAIEpoch(AstroDates.UNIX_EPOCH, Time(0, 0, 10.0))
+
+const PAST_INFINITY = TAIEpoch(UNIX_EPOCH, -Inf)
+const FUTURE_INFINITY = TAIEpoch(UNIX_EPOCH, Inf)
 
 const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
 

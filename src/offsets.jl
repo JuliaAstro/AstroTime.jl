@@ -10,10 +10,16 @@ const LB_RATE = 1.550519768e-8
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
-tai_offset(::CoordinatedUniversalTime, ep) = -offset_tai_utc(julian(ep))
 tai_offset(::UniversalTime, ep) = tai_offset(UTC, ep) + getΔUT1(julian(ep))
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * get(ep - EPOCH_77)
+
+function tai_offset(::CoordinatedUniversalTime, ep)
+    offset = findoffset(ep)
+    offset === nothing && return 0.0
+
+    -getoffset(offset, ep)
+end
 
 """
     tai_offset(TDB, ep)
@@ -120,7 +126,10 @@ tai_offset(::InternationalAtomicTime, date, time) = 0.0
 function tai_offset(::CoordinatedUniversalTime, date, time)
     minute_in_day = hour(time) * 60 + minute(time)
     correction  = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440;
-    offset_tai_utc(AstroDates.julian(date) + correction)
+    offset = findoffset(AstroDates.julian(date) + correction)
+    offset === nothing && return 0.0
+
+    getoffset(offset, date, time)
 end
 
 function tai_offset(scale, date, time)

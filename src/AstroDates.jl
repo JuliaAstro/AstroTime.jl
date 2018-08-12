@@ -7,7 +7,8 @@ import Dates
 
 export Date, Time, DateTime,
     year, month, day, j2000day, calendar,
-    hour, minute, second, date, time
+    hour, minute, second, date, time,
+    secondinday
 
 abstract type Calendar end
 
@@ -187,6 +188,7 @@ const GPS_EPOCH = Date(1980, 1, 6)
 const J2000_EPOCH = Date(2000, 1, 1)
 const MIN_EPOCH = Date(typemin(Int32))
 const MAX_EPOCH = Date(typemax(Int32))
+const UNIX_EPOCH = Date(1970, 1, 1)
 
 struct Time
     hour::Int
@@ -235,6 +237,8 @@ const H12 = Time(12, 0, 0.0)
 hour(s::Time) = s.hour
 minute(s::Time) = s.minute
 second(s::Time) = s.second
+
+secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 
 function show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
