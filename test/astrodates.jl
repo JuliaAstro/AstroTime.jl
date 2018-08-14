@@ -30,5 +30,6 @@ const REFERENCES = (
         @test year(s) == ref[1]
         @test month(s) == ref[2]
         @test day(s) == ref[3]
+        @test j2000day(s) == ref[end]
     end
 end

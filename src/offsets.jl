@@ -10,9 +10,13 @@ const LB_RATE = 1.550519768e-8
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
-tai_offset(::UniversalTime, ep) = tai_offset(UTC, ep) + getΔUT1(julian(ep))
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
-tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TT, ep) + LB_RATE * get(ep - EPOCH_77)
+tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * get(ep - EPOCH_77)
+
+function tai_offset(::UniversalTime, ep)
+    # FIXME: This is not correct
+    tai_offset(UTC, ep) + getΔUT1(julian(ep))
+end
 
 function tai_offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)

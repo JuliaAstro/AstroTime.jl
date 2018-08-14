@@ -104,10 +104,7 @@ function Epoch(year::Int, month::Int, day::Int, hour::Int,
     Epoch{scale}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
 end
 
-function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
-    Δt = tai_offset(S2, ep) - tai_offset(S1, ep)
-    Epoch{S2}(ep.epoch, ep.offset, Δt)
-end
+Epoch{S2}(ep::Epoch{S1}) where {S1, S2} = Epoch{S2}(ep.epoch, ep.offset)
 
 function isapprox(a::Epoch, b::Epoch)
     a.epoch == b.epoch && a.offset ≈ b.offset
@@ -138,7 +135,7 @@ const UNIX_EPOCH = TAIEpoch(AstroDates.UNIX_EPOCH, Time(0, 0, 10.0))
 const PAST_INFINITY = TAIEpoch(UNIX_EPOCH, -Inf)
 const FUTURE_INFINITY = TAIEpoch(UNIX_EPOCH, Inf)
 
-const EPOCH_77 = Epoch{TAI}(1977, 1, 1)
+const EPOCH_77 = TAIEpoch(1977, 1, 1)
 
 function Dates.validargs(::Type{Epoch}, y::Int64, m::Int64, d::Int64,
                          h::Int64, mi::Int64, s::Int64, ms::Int64, ts::S) where S<:TimeScale

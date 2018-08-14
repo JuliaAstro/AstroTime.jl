@@ -277,8 +277,16 @@ second(dt::DateTime) = second(time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
                                         Dates.hour(dt), Dates.minute(dt), Dates.second(dt))
-Dates.DateTime(dt::DateTime) = Dates.DateTime(year(dt), month(dt), day(dt),
-                                              hour(dt), minute(dt), second(dt))
+function Dates.DateTime(dt::DateTime)
+    y = year(dt)
+    m = month(dt)
+    d = day(dt)
+    h = hour(dt)
+    m = minute(dt)
+    s = floor(Int, second(dt))
+    ms = floor((second(dt) - s) * 1000)
+    Dates.DateTime(y, m, d, h, m, s, ms)
+end
 
 end
 

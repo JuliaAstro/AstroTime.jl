@@ -1,22 +1,41 @@
 @testset "Epochs" begin
-    ep = Epoch{TDB}(Int64(100000), 1e-18)
-    ep1 = Epoch{TDB}(ep, 100 * 365.25 * 86400)
-    @test ep.offset == ep1.offset
+    @testset "Precision" begin
+        ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
+        @test ep.epoch == 0
+        @test ep.offset ≈ 2eps()
 
-    ep1 = Epoch{TDB}(ep, Inf)
-    @test ep1.epoch == typemax(Int64)
-    @test ep1.offset == Inf
-    ep1 = Epoch{TDB}(ep, -Inf)
-    @test ep1.epoch == typemin(Int64)
-    @test ep1.offset == -Inf
+        ep += 1000centuries
+        @test ep.epoch == get(seconds(1000centuries))
+        @test ep.offset ≈ 2eps()
+    end
+    @testset "Time Scales" begin
+        tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        tt = TTEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        utc = UTCEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        ut1 = UT1Epoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        tdb = TDBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        tcb = TCBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        tcg = TCGEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
 
-    tai = Epoch{TAI}(Int64(100000), 0.0)
-    tt = Epoch{TT}(tai)
-    @test tt.epoch == 100032
-    @test tt.offset ≈ 0.184
-    tai1 = Epoch{TAI}(tt)
-    @test tai1.epoch == 100000
-    @test tai1.offset ≈ 0.0
+        @test tai.epoch == 587512971
+        @test tai.offset == 0.5512474363782758
+        @test tt.epoch ==  587512939
+        @test tt.offset == 0.3672474363782783
+        @test utc.epoch == 587513008
+        @test utc.offset == 0.5512474363782758
+        @test ut1.epoch == 587513008
+        @test_broken ut1.offset == 0.47200339587608653
+        @test tdb.epoch == 587512939
+        @test tdb.offset ≈ 0.3682890196414874 atol=1e-14
+        @test tcb.epoch == 587512919
+        @test tcb.offset == 0.005062972974656077
+        @test tcg.epoch == 587512938
+        @test tcg.offset == 0.45195931572465753
+
+        tt = TTEpoch(2000, 1, 1, 12)
+        @test tt - J2000_EPOCH == 0.0seconds
+    end
+
 
     @testset "Leap Seconds" begin
         @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"

@@ -17,6 +17,8 @@ include("Epochs.jl")
 @reexport using .AstroDates
 @reexport using .Epochs
 
+import .Epochs: format
+
 function __init__()
     Dates.CONVERSION_SPECIFIERS['t'] = TimeScale
     Dates.CONVERSION_DEFAULTS[TimeScale] = ""
