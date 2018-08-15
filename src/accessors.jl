@@ -1,6 +1,7 @@
 import Dates
 
-import ..AstroDates: DateTime, year, month, day, hour, minute, second
+import ..AstroDates: DateTime, year, month, day,
+    hour, minute, second, millisecond, secs
 
 export julian, j2000, timescale
 
@@ -56,6 +57,9 @@ day(ep::Epoch) = day(DateTime(ep))
 hour(ep::Epoch) = hour(DateTime(ep))
 minute(ep::Epoch) = minute(DateTime(ep))
 second(ep::Epoch) = second(DateTime(ep))
+millisecond(ep::Epoch) = millisecond(DateTime(ep))
+
+secs(ep::Epoch) = secs(DateTime(ep))
 
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
 Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))

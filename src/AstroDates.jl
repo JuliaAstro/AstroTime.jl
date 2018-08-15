@@ -4,12 +4,12 @@ using ..TimeScales: TimeScale
 
 import Base: time, show
 import Dates
-import Dates: year, month, day, hour, minute, second
+import Dates: year, month, day, hour, minute, second, millisecond
 
 export Date, Time, DateTime,
     year, month, day, j2000day, calendar,
-    hour, minute, second, date, time,
-    secondinday
+    hour, minute, second, millisecond, date, time,
+    secondinday, seconds
 
 abstract type Calendar end
 
@@ -241,7 +241,9 @@ const H12 = Time(12, 0, 0.0)
 
 hour(s::Time) = s.hour
 minute(s::Time) = s.minute
-second(s::Time) = s.second
+secs(s::Time) = s.second
+second(s::Time) = floor(Int, s.second)
+millisecond(s::Time) = floor(Int, (secs(s) - second(s)) * 1000)
 
 secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 
@@ -274,6 +276,9 @@ day(dt::DateTime) = day(date(dt))
 hour(dt::DateTime) = hour(time(dt))
 minute(dt::DateTime) = minute(time(dt))
 second(dt::DateTime) = second(time(dt))
+millisecond(dt::DateTime) = millisecond(time(dt))
+
+secs(dt::DateTime) = secs(time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
                                         Dates.hour(dt), Dates.minute(dt), Dates.second(dt))

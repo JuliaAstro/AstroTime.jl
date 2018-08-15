@@ -55,7 +55,7 @@ Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
 include("offsets.jl")
 include("accessors.jl")
 
-show(io::IO, ep::Epoch{S}) where {S} = print(io, DateTime(ep), " ", S)
+show(io::IO, ep::Epoch{S}) where {S} = print(io, format(ep, ISOEpochFormat))
 
 function Epoch{S}(date::Date, time::Time) where S
     seconds = second(time)
@@ -142,6 +142,10 @@ function Dates.validargs(::Type{Epoch}, y::Int64, m::Int64, d::Int64,
     err = Dates.validargs(Dates.DateTime, y, m, d, h, mi, s, ms)
     err !== nothing || return err
     return Dates.argerror()
+end
+
+function Dates.format(io, d::Dates.DatePart{'t'}, ep)
+    print(io, timescale(ep))
 end
 
 end
