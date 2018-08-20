@@ -33,8 +33,8 @@ function __init__()
         TimeScale,
     )
     @eval begin
-        global ISOEpochFormat = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
         Dates.default_format(::Type{Epoch}) = ISOEpochFormat
+        global ISOEpochFormat = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
     end
 
     for scale in TimeScales.ACRONYMS

@@ -4,8 +4,8 @@
         @test ep.epoch == 0
         @test ep.offset ≈ 2eps()
 
-        ep += 1000centuries
-        @test ep.epoch == get(seconds(1000centuries))
+        ep += 10000centuries
+        @test ep.epoch == get(seconds(10000centuries))
         @test ep.offset ≈ 2eps()
     end
     @testset "Time Scales" begin

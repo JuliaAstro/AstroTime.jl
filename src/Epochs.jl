@@ -55,10 +55,10 @@ Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
 include("offsets.jl")
 include("accessors.jl")
 
-show(io::IO, ep::Epoch{S}) where {S} = print(io, format(ep, ISOEpochFormat))
+show(io::IO, ep::Epoch{S}) where {S} = print(io, DateTime(ep), " ", S)
 
 function Epoch{S}(date::Date, time::Time) where S
-    seconds = second(time)
+    seconds = secs(time)
     ts_offset = tai_offset(S, date, time)
 
     sum = seconds + ts_offset

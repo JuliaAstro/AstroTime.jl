@@ -45,7 +45,7 @@ function DateTime(ep::Epoch)
 
     if insideleap(ep)
         leap = getleap(ep)
-        time_comp = Time(hour(time_comp), minute(time_comp), second(time_comp) + leap)
+        time_comp = Time(hour(time_comp), minute(time_comp), secs(time_comp) + leap)
     end
 
     DateTime(date_comp, time_comp)

@@ -17,6 +17,18 @@ struct TAIOffset
     slope_tai::Float64
 end
 
+function getoffset(t::TAIOffset, ep::Epoch)
+    t.slope_tai == 0.0 && return t.offset
+
+    t.offset + get(ep - t.reference) * t.slope_tai
+end
+
+function getoffset(to::TAIOffset, d::Date, t::Time)
+    days = AstroDates.julian(d) - to.jd
+    fraction = secondinday(t)
+    to.offset + days * (to.slope_utc * SECONDS_PER_DAY) + fraction * to.slope_utc
+end
+
 Base.isless(t::TAIOffset, ep::Epoch) = isless(ep, t.date)
 Base.isless(ep::Epoch, t::TAIOffset) = isless(ep, t.date)
 
@@ -40,8 +52,9 @@ const DRIFT_RATES = [LeapSeconds.DRIFT_RATES;
                      zeros(length(LeapSeconds.LS_EPOCHS))]
 
 for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
-    previous = isempty(TAI_OFFSETS) ? 0.0 : last(TAI_OFFSETS).offset
-    tai = TAIEpoch(Dates.julian2datetime(ep))
+    dt = DateTime(Dates.julian2datetime(ep))
+    tai = TAIEpoch(dt)
+    previous = isempty(TAI_OFFSETS) ? 0.0 : getoffset(last(TAI_OFFSETS), date(dt), AstroDates.H00)
     ref = TAIEpoch(TAIEpoch(Dates.julian2datetime(dep)), offset)
     start = TAIEpoch(tai, previous)
     start_offset = offset + (ep - dep) * rate
@@ -67,17 +80,5 @@ function getleap(ep::UTCEpoch)
     offset === nothing && return 0.0
 
     offset.leap
-end
-
-function getoffset(t::TAIOffset, ep::Epoch)
-    t.slope_tai == 0.0 && return t.offset
-
-    t.offset + get(ep - t.reference) * t.slope_tai
-end
-
-function getoffset(to::TAIOffset, d::Date, t::Time)
-    days = AstroDates.julian(d) - to.jd
-    fraction = secondinday(t)
-    to.offset + days * (to.slope_utc * SECONDS_PER_DAY) + fraction * to.slope_utc
 end
 

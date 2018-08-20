@@ -182,7 +182,7 @@ end
 
 j2000day(s::Date{C}) where {C} = j2000day(C, year(s), month(s), day(s))
 
-julian(s::Date) = j2000day(s) + 2.451545e6
+julian(s::Date) = j2000day(s) + 2.4515445e6
 
 const JULIAN_EPOCH = Date(-4712,  1,  1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)
@@ -206,7 +206,7 @@ struct Time
         elseif minute < 0 || minute > 59
             throw(ArgumentError("`minute` must be an integer between 0 and 59."))
         elseif second < 0 || second >= 61.0
-            throw(ArgumentError("`minute` must be a float between 0 and 60."))
+            throw(ArgumentError("`second` must be a float between 0 and 61."))
         end
 
         new(hour, minute, second)
@@ -239,20 +239,19 @@ Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t))
 const H00 = Time(0, 0, 0.0)
 const H12 = Time(12, 0, 0.0)
 
-hour(s::Time) = s.hour
-minute(s::Time) = s.minute
-secs(s::Time) = s.second
-second(s::Time) = floor(Int, s.second)
-millisecond(s::Time) = floor(Int, (secs(s) - second(s)) * 1000)
+hour(t::Time) = t.hour
+minute(t::Time) = t.minute
+secs(t::Time) = t.second
+second(t::Time) = floor(Int, t.second)
+millisecond(t::Time) = round(Int, (secs(t) - second(t)) * 1000)
 
 secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 
 function show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
-    sec = second(t)
-    s = lpad(floor(Int, sec), 2, '0')
-    f = rpad(split(string(sec), '.')[end], 3, '0')[1:3]
+    s = lpad(second(t), 2, '0')
+    f = lpad(millisecond(t), 3, '0')
     print(io, h, ":", m, ":", s, ".", f)
 end
 
@@ -288,8 +287,8 @@ function Dates.DateTime(dt::DateTime)
     d = day(dt)
     h = hour(dt)
     m = minute(dt)
-    s = floor(Int, second(dt))
-    ms = floor((second(dt) - s) * 1000)
+    s = second(dt)
+    ms = floor((secs(dt) - s) * 1000)
     Dates.DateTime(y, m, d, h, m, s, ms)
 end
 
