@@ -1,7 +1,7 @@
 import Dates
 
 import ..AstroDates: DateTime, year, month, day,
-    hour, minute, second, millisecond, secs
+    hour, minute, second, millisecond, secs, julian
 
 export julian, j2000, timescale
 

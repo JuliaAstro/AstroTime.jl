@@ -52,16 +52,16 @@ const DRIFT_RATES = [LeapSeconds.DRIFT_RATES;
                      zeros(length(LeapSeconds.LS_EPOCHS))]
 
 for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
-    dt = DateTime(Dates.julian2datetime(ep))
+    dt = DateTime(Dates.julian2datetime(ep + LeapSeconds.MJD_EPOCH))
     tai = TAIEpoch(dt)
     previous = isempty(TAI_OFFSETS) ? 0.0 : getoffset(last(TAI_OFFSETS), date(dt), AstroDates.H00)
-    ref = TAIEpoch(TAIEpoch(Dates.julian2datetime(dep)), offset)
+    ref = TAIEpoch(TAIEpoch(Dates.julian2datetime(dep + LeapSeconds.MJD_EPOCH)), offset)
     start = TAIEpoch(tai, previous)
     start_offset = offset + (ep - dep) * rate
     stop = TAIEpoch(tai, start_offset)
     slope = rate / SECONDS_PER_DAY
     leap = get(stop - start) / (1 + slope)
-    o = TAIOffset(start, ep,
+    o = TAIOffset(start, ep + LeapSeconds.MJD_EPOCH,
                   TAIEpoch(start, leap),
                   ref,
                   leap, offset, slope, slope / (1 + slope))

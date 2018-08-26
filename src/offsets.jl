@@ -14,7 +14,7 @@ tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * get(ep - EPOCH_77)
 
 function tai_offset(::UniversalTime, ep)
-    jd = get(days(ep - UTCEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)))
+    jd = julian(DateTime(UTCEpoch(ep)))
     tai_offset(UTC, ep) + getΔUT1(jd)
 end
 

@@ -9,7 +9,7 @@ import Dates: year, month, day, hour, minute, second, millisecond
 export Date, Time, DateTime,
     year, month, day, j2000day, calendar,
     hour, minute, second, millisecond, date, time,
-    secondinday, seconds
+    secondinday, secs, fractionofday, julian
 
 abstract type Calendar end
 
@@ -245,6 +245,8 @@ secs(t::Time) = t.second
 second(t::Time) = floor(Int, t.second)
 millisecond(t::Time) = round(Int, (secs(t) - second(t)) * 1000)
 
+fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
+
 secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 
 function show(io::IO, t::Time)
@@ -276,6 +278,8 @@ hour(dt::DateTime) = hour(time(dt))
 minute(dt::DateTime) = minute(time(dt))
 second(dt::DateTime) = second(time(dt))
 millisecond(dt::DateTime) = millisecond(time(dt))
+
+julian(dt::DateTime) = fractionofday(time(dt)) + julian(date(dt))
 
 secs(dt::DateTime) = secs(time(dt))
 
