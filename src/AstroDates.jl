@@ -7,7 +7,7 @@ import Dates
 import Dates: year, month, day, hour, minute, second, millisecond
 
 export Date, Time, DateTime,
-    year, month, day, j2000day, calendar,
+    year, month, day, j2000, calendar,
     hour, minute, second, millisecond, date, time,
     secondinday, secs, fractionofday, julian
 
@@ -143,7 +143,7 @@ function Date(offset)
 end
 
 function Date(epoch, offset)
-    Date(j2000day(epoch) + offset)
+    Date(j2000(epoch) + offset)
 end
 
 function Date(year, month, day)
@@ -151,7 +151,7 @@ function Date(year, month, day)
         throw(ArgumentError("Invalid month number: $month"))
     end
 
-    check = Date(j2000day(year, month, day))
+    check = Date(j2000(year, month, day))
     if check.year != year || check.month != month || check.day != day
         throw(ArgumentError("Invalid date."))
     end
@@ -171,18 +171,18 @@ show(io::IO, d::Date) = print(io,
 Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
 Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
 
-function j2000day(calendar::Calendar, year, month, day)
+function j2000(calendar::Calendar, year, month, day)
     last_j2000_dayofyear(calendar, year - 1) + finddayinyear(month, day, isleap(calendar, year))
 end
 
-function j2000day(year, month, day)
+function j2000(year, month, day)
     calendar = getcalendar(year, month, day)
-    j2000day(calendar, year, month, day)
+    j2000(calendar, year, month, day)
 end
 
-j2000day(s::Date{C}) where {C} = j2000day(C, year(s), month(s), day(s))
+j2000(s::Date{C}) where {C} = j2000(C, year(s), month(s), day(s))
 
-julian(s::Date) = j2000day(s) + 2.4515445e6
+julian(s::Date) = j2000(s) + 2.4515445e6
 
 const JULIAN_EPOCH = Date(-4712,  1,  1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)

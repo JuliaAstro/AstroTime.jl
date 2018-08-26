@@ -70,7 +70,7 @@ function Epoch{S}(date::Date, time::Time) where S
     dl = floor(Int64, sum)
 
     offset = (sum - dl) + residual
-    epoch  = Int64(60) * ((j2000day(date) * Int64(24) + hour(time)) * Int64(60)
+    epoch  = Int64(60) * ((j2000(date) * Int64(24) + hour(time)) * Int64(60)
                           + minute(time) - Int64(720)) + dl
     Epoch{S}(epoch, offset)
 end

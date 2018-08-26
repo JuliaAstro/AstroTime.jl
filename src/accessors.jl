@@ -3,12 +3,9 @@ import Dates
 import ..AstroDates: DateTime, year, month, day,
     hour, minute, second, millisecond, secs, julian
 
-export julian, j2000, timescale
+export timescale
 
 timescale(ep::Epoch{S}) where {S} = S
-
-julian(ep::Epoch) = get(days(ep - JULIAN_EPOCH))
-j2000(ep::Epoch) = get(days(ep - J2000_EPOCH))
 
 function DateTime(ep::Epoch)
     if !isfinite(ep.offset)
