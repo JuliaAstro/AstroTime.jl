@@ -44,13 +44,13 @@ the quantity TDB-TT can differ by as much as about 4 microseconds.
 
 """
 function tai_offset(::BarycentricDynamicalTime, ep)
-    dt = get(days(ep - J2000_EPOCH))
+    dt = j2000(TT, ep)
     g = 357.53 + 0.9856003dt
     tai_offset(TT, ep) + 0.001658sind(g) + 0.000014sind(2g)
 end
 
 function tai_offset(::BarycentricDynamicalTime, ep, ut, elong, u, v)
-    t = get(centuries(ep - J2000_EPOCH)) / 10.0
+    t = get(centuries(j2000(TT, ep) * days)) / 10.0
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
 
