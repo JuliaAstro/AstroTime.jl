@@ -28,14 +28,6 @@ struct Epoch{S, T} <: Dates.AbstractDateTime
     Epoch{S}(epoch::Int64, offset::T) where {S, T} = new{S::TimeScale, T}(epoch, offset)
 end
 
-for scale in TimeScales.ACRONYMS
-    epoch = Symbol(scale, "Epoch")
-    @eval begin
-        const $epoch = Epoch{$scale}
-        export $epoch
-    end
-end
-
 function Epoch{S}(epoch::Int64, offset, Δt) where S
     sum = offset + Δt
 
@@ -56,6 +48,22 @@ function Epoch{S}(epoch::Int64, offset, Δt) where S
     Epoch{S}(epoch′, offset′)
 end
 
+"""
+    Epoch{S}(ep::Epoch, Δt) where S
+
+Construct a new `Epoch` with time scale `S` which is `ep` shifted by `Δt`
+seconds.
+
+### Example ###
+
+```jldoctest
+julia> t = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 UTC
+
+julia> UTCEpoch(ep, 20.0)
+2018-02-06T20:45:20.000 UTC
+```
+"""
 Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
 
 function j2000(scale, ep::Epoch)
@@ -144,6 +152,16 @@ isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
 +(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, get(seconds(p)))
 -(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
 -(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
+
+for scale in TimeScales.ACRONYMS
+    epoch = Symbol(scale, "Epoch")
+    @eval begin
+        const $epoch = Epoch{$scale}
+        export $epoch
+
+        @doc @doc(Epoch{$scale}) $epoch
+    end
+end
 
 include("leapseconds.jl")
 
