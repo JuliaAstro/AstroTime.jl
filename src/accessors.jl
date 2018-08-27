@@ -1,7 +1,8 @@
 import Dates
 
 import ..AstroDates: DateTime, year, month, day,
-    hour, minute, second, millisecond, julian
+    hour, minute, second, millisecond,
+    time, date, fractionofday
 
 export timescale
 
@@ -59,6 +60,9 @@ minute(ep::Epoch) = minute(DateTime(ep))
 second(typ, ep::Epoch) = second(typ, DateTime(ep))
 second(ep::Epoch) = second(Float64, DateTime(ep))
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
+time(ep::Epoch) = time(DateTime(ep))
+date(ep::Epoch) = date(DateTime(ep))
+fractionofday(ep::Epoch) = fractionofday(time(ep))
 
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
 Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))

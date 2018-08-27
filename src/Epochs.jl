@@ -7,14 +7,20 @@ import Base: -, +, <, ==, isapprox, isless, show
 import Dates
 import Dates: format, parse
 
+import ..AstroDates: julian, j2000, julian_split
+
 using ..TimeScales
 using ..AstroDates
 using ..Periods
 
+const J2000_TO_JULIAN = 2.451545e6
+const J2000_TO_MJD = 51544.5
+
 export Epoch,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
     FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH,
-    PAST_INFINITY, FUTURE_INFINITY, UNIX_EPOCH
+    PAST_INFINITY, FUTURE_INFINITY, UNIX_EPOCH,
+    julian, j2000, julian_split, modified_julian
 
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
@@ -51,6 +57,24 @@ function Epoch{S}(epoch::Int64, offset, Δt) where S
 end
 
 Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
+
+function j2000(scale, ep::Epoch)
+    (ep.offset + tai_offset(scale, ep) + ep.epoch) / SECONDS_PER_DAY
+end
+julian(scale, ep::Epoch) = j2000(scale, ep) + J2000_TO_JULIAN
+modified_julian(scale, ep::Epoch) = j2000(scale, ep) + J2000_TO_MJD
+
+function julian_split(scale, ep::Epoch)
+    jd = julian(scale, ep)
+    jd1 = trunc(jd)
+    jd2 = jd - jd1
+    jd1, jd2
+end
+
+j2000(ep::Epoch{S}) where {S} = j2000(S, ep)
+julian(ep::Epoch{S}) where {S} = julian(S, ep)
+modified_julian(ep::Epoch{S}) where {S} = modified_julian(S, ep)
+julian_split(ep::Epoch{S}) where {S} = julian_split(S, ep)
 
 include("offsets.jl")
 include("accessors.jl")

@@ -1,15 +1,12 @@
-import ..AstroDates: julian, j2000, julian_split
-
 using MuladdMacro
 
-export tai_offset, julian, j2000, julian_split
+export tai_offset
 
 include(joinpath("constants", "tdb.jl"))
 
 const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
-const J2000_TO_JULIAN = 2.451545e6
 
 tai_offset(ep::Epoch{S}) where {S} = tai_offset(S, ep)
 
@@ -18,32 +15,16 @@ tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * get(ep - EPOCH_77)
 
-function j2000(ep::Epoch, scale)
-    (ep.offset + tai_offset(scale, ep) + ep.epoch) / SECONDS_PER_DAY
-end
-julian(ep::Epoch, scale) = j2000(ep, scale) + J2000_TO_JULIAN
-
-function julian_split(ep::Epoch, scale)
-    jd2000 = j2000(ep, scale)
-    jd1 = trunc(jd2000)
-    jd2 = jd2000 - jd1
-    jd1, jd2
-end
-
-j2000(ep::Epoch{S}) where {S} = j2000(ep, S)
-julian(ep::Epoch{S}) where {S} = julian(ep, S)
-julian_two(ep::Epoch{S}) where {S} = julian_two(ep, S)
-
-function tai_offset(::UniversalTime, ep)
-    jd = julian(ep, UTC)
-    tai_offset(UTC, ep) + getΔUT1(jd)
-end
-
 function tai_offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)
     offset === nothing && return 0.0
 
     -getoffset(offset, ep)
+end
+
+function tai_offset(::UniversalTime, ep)
+    jd = julian(UTC, ep)
+    tai_offset(UTC, ep) + getΔUT1(jd)
 end
 
 """
