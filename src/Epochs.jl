@@ -58,7 +58,7 @@ include("accessors.jl")
 show(io::IO, ep::Epoch{S}) where {S} = print(io, DateTime(ep), " ", S)
 
 function Epoch{S}(date::Date, time::Time) where S
-    seconds = secs(time)
+    seconds = second(Float64, time)
     ts_offset = tai_offset(S, date, time)
 
     sum = seconds + ts_offset

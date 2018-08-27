@@ -1,8 +1,8 @@
-import ..AstroDates: julian, j2000
+import ..AstroDates: julian, j2000, julian_split
 
 using MuladdMacro
 
-export tai_offset, julian, j2000, julian_two
+export tai_offset, julian, j2000, julian_split
 
 include(joinpath("constants", "tdb.jl"))
 
@@ -23,7 +23,7 @@ function j2000(ep::Epoch, scale)
 end
 julian(ep::Epoch, scale) = j2000(ep, scale) + J2000_TO_JULIAN
 
-function julian_two(ep::Epoch, scale)
+function julian_split(ep::Epoch, scale)
     jd2000 = j2000(ep, scale)
     jd1 = trunc(jd2000)
     jd2 = jd2000 - jd1

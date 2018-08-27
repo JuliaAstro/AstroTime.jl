@@ -7,9 +7,10 @@ import Dates
 import Dates: year, month, day, hour, minute, second, millisecond
 
 export Date, Time, DateTime,
-    year, month, day, j2000, calendar,
+    year, month, day, calendar,
     hour, minute, second, millisecond, date, time,
-    secondinday, secs, fractionofday, julian
+    secondinday, fractionofday,
+    julian, j2000, julian_split
 
 abstract type Calendar end
 
@@ -241,9 +242,10 @@ const H12 = Time(12, 0, 0.0)
 
 hour(t::Time) = t.hour
 minute(t::Time) = t.minute
-secs(t::Time) = t.second
-second(t::Time) = floor(Int, t.second)
-millisecond(t::Time) = round(Int, (secs(t) - second(t)) * 1000)
+second(::Type{Float64}, t::Time) = t.second
+second(::Type{Int}, t::Time) = floor(Int, t.second)
+second(t::Time) = second(Float64, t)
+millisecond(t::Time) = round(Int, (second(t) - second(Int, t)) * 1000)
 
 fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
 
@@ -252,7 +254,7 @@ secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 function show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
-    s = lpad(second(t), 2, '0')
+    s = lpad(second(Int, t), 2, '0')
     f = lpad(millisecond(t), 3, '0')
     print(io, h, ":", m, ":", s, ".", f)
 end
@@ -276,23 +278,25 @@ month(dt::DateTime) = month(date(dt))
 day(dt::DateTime) = day(date(dt))
 hour(dt::DateTime) = hour(time(dt))
 minute(dt::DateTime) = minute(time(dt))
-second(dt::DateTime) = second(time(dt))
+second(typ, dt::DateTime) = second(typ, time(dt))
+second(dt::DateTime) = second(Float64, time(dt))
 millisecond(dt::DateTime) = millisecond(time(dt))
 
 julian(dt::DateTime) = fractionofday(time(dt)) + julian(date(dt))
-
-secs(dt::DateTime) = secs(time(dt))
+j2000(dt::DateTime) = fractionofday(time(dt)) + j2000(date(dt))
+julian_split(dt::DateTime) = julian(date(dt)), fractionofday(time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
-                                        Dates.hour(dt), Dates.minute(dt), Dates.second(dt))
+                                        Dates.hour(dt), Dates.minute(dt),
+                                        Dates.millisecond(dt) / 1000.0 + Dates.second(dt))
 function Dates.DateTime(dt::DateTime)
     y = year(dt)
     m = month(dt)
     d = day(dt)
     h = hour(dt)
     m = minute(dt)
-    s = second(dt)
-    ms = floor((secs(dt) - s) * 1000)
+    s = second(Int, dt)
+    ms = floor((second(Float64, dt) - s) * 1000)
     Dates.DateTime(y, m, d, h, m, s, ms)
 end
 

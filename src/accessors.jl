@@ -1,7 +1,7 @@
 import Dates
 
 import ..AstroDates: DateTime, year, month, day,
-    hour, minute, second, millisecond, secs, julian
+    hour, minute, second, millisecond, julian
 
 export timescale
 
@@ -42,7 +42,10 @@ function DateTime(ep::Epoch)
 
     if insideleap(ep)
         leap = getleap(ep)
-        time_comp = Time(hour(time_comp), minute(time_comp), secs(time_comp) + leap)
+        h = hour(time_comp)
+        m = minute(time_comp)
+        s = second(Float64, time_comp) + leap
+        time_comp = Time(h, m, s)
     end
 
     DateTime(date_comp, time_comp)
@@ -53,10 +56,9 @@ month(ep::Epoch) = month(DateTime(ep))
 day(ep::Epoch) = day(DateTime(ep))
 hour(ep::Epoch) = hour(DateTime(ep))
 minute(ep::Epoch) = minute(DateTime(ep))
-second(ep::Epoch) = second(DateTime(ep))
+second(typ, ep::Epoch) = second(typ, DateTime(ep))
+second(ep::Epoch) = second(Float64, DateTime(ep))
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
-
-secs(ep::Epoch) = secs(DateTime(ep))
 
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
 Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))
