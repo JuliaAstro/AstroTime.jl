@@ -41,43 +41,99 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.@timescale-Tuple{Any}",
+    "location": "api.html#AstroTime.@timescale-Tuple{Symbol,Symbol,Vararg{Any,N} where N}",
     "page": "API",
     "title": "AstroTime.@timescale",
     "category": "macro",
-    "text": "@timescale scale\n\nDefine a new timescale and the corresponding Epoch type alias.\n\nExample\n\njulia> @timescale Custom\n\njulia> Custom <: TimeScale\ntrue\njulia> CustomEpoch == Epoch{Custom, T} where T <: Number\ntrue\n\n\n\n"
+    "text": "@timescale scale\n\nDefine a new timescale and the corresponding Epoch type alias.\n\nExample\n\njulia> @timescale GMT ep tai_offset(UTC, ep)\n\njulia> GMT <: TimeScale\ntrue\n\njulia> GMTEpoch\nEpoch{GMT,T} where T\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{NTuple{4,Any}, NTuple{5,Any}, NTuple{6,Any}, NTuple{7,Any}, Tuple{Any,Any,Any}, Tuple{T}} where T",
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{S}, Tuple{Epoch{S,T} where T,Any}} where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{T}(year, month, day,\n    hour=0, minute=0, seconds=0, milliseconds=0) where {T}\n\nConstruct an Epoch with timescale T at the given date and time.\n\nExample\n\njulia> Epoch{TT}(2017, 3, 14, 7, 18, 20, 325)\n2017-03-14T07:18:20.325 TT\n\n\n\n"
+    "text": "Epoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{AbstractString,Any}, Tuple{AbstractString}, Tuple{T}} where T",
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{T}, Tuple{T}, Tuple{S}, Tuple{T,T}} where T where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{T}(timestamp::AbstractString,\n    fmt::DateFormat=dateformat\"yyyy-mm-ddTHH:MM:SS.sss\") where {T}\n\nConstruct an Epoch with timescale T from a timestamp. Optionally a DateFormat object can be passed which improves performance if many date strings need to be parsed and the format is known in advance.\n\nExample\n\njulia> Epoch{TT}(\"2017-03-14T07:18:20.325\")\n2017-03-14T07:18:20.325 TT\n\n\n\n"
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{AstroTime.Epochs.Epoch{S,T} where T<:Number}, Tuple{S}, Tuple{T}} where S where T",
+    "location": "api.html#AstroTime.Epochs.TAIEpoch",
     "page": "API",
-    "title": "AstroTime.Epochs.Epoch",
-    "category": "method",
-    "text": "Epoch{T}(ep::Epoch{S}) where {T}, S}\n\nConvert an Epoch with timescale S to an Epoch with timescale T.\n\nExample\n\njulia> Epoch{TT}(Epoch{TAI}(2000, 1, 1))\n2000-01-01T00:00:32.184 TT\n\n\n\n"
+    "title": "AstroTime.Epochs.TAIEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{DateTime}, Tuple{T}} where T",
+    "location": "api.html#AstroTime.Epochs.TCBEpoch",
     "page": "API",
-    "title": "AstroTime.Epochs.Epoch",
+    "title": "AstroTime.Epochs.TCBEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TCGEpoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.TCGEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TDBEpoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.TDBEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TTEpoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.TTEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.UT1Epoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.UT1Epoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.UTCEpoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.UTCEpoch",
+    "category": "type",
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2).\n\n\n\n\n\nEpoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.now-Tuple{}",
+    "page": "API",
+    "title": "AstroTime.Epochs.now",
     "category": "method",
-    "text": "Epoch{T}(dt::DateTime) where {T}\n\nConvert a DateTime object to an Epoch with timescale T.\n\nExample\n\njulia> Epoch{TT}(DateTime(2017, 3, 14, 7, 18, 20, 325))\n2017-03-14T07:18:20.325 TT\n\n\n\n"
+    "text": "now()\n\nGet the current date and time as a UTCEpoch.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.tai_offset-Tuple{BarycentricDynamicalTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(TDB, ep)\n\nComputes difference TDB-TAI in seconds at the epoch ep.\n\nThe accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD. Note that an accurate transformation betweem TDB and TT depends on the trajectory of the observer. For two observers fixed on the earth surface the quantity TDB-TT can differ by as much as about 4 microseconds.\n\nReferences\n\nhttps://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB\nIssue #26\n\n\n\n\n\n"
 },
 
 {
