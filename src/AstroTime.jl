@@ -21,11 +21,14 @@ import .Epochs: format
 
 function __init__()
     Dates.CONVERSION_SPECIFIERS['t'] = TimeScale
+    Dates.CONVERSION_SPECIFIERS['D'] = Epochs.DayOfYearToken
     Dates.CONVERSION_DEFAULTS[TimeScale] = ""
+    Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,
         Dates.Month,
         Dates.Day,
+        Epochs.DayOfYearToken,
         Dates.Hour,
         Dates.Minute,
         Dates.Second,
@@ -44,6 +47,7 @@ function __init__()
                 Dates.Year,
                 Dates.Month,
                 Dates.Day,
+                Epochs.DayOfYearToken,
                 Dates.Hour,
                 Dates.Minute,
                 Dates.Second,

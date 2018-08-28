@@ -176,15 +176,25 @@ function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
 end
 
-function Epoch{S}(year::Int, month::Int, day::Int, hour::Int,
-                  minute::Int, second::Int, milliseconds::Int) where S
-    Epoch{S}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
+function Epoch{S}(year::Int, month::Int, day::Int, dayofyear::Int,
+                  hour::Int, minute::Int, second::Int, milliseconds::Int) where S
+    if dayofyear != 0
+        date = Date(year, dayofyear)
+    else
+        date = Date(year, month, day)
+    end
+    Epoch{S}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
-function Epoch(year::Int, month::Int, day::Int, hour::Int,
-               minute::Int, second::Int, milliseconds::Int,
+function Epoch(year::Int, month::Int, day::Int, dayofyear::Int,
+               hour::Int, minute::Int, second::Int, milliseconds::Int,
                scale::S) where S<:TimeScale
-    Epoch{scale}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
+    if dayofyear != 0
+        date = Date(year, dayofyear)
+    else
+        date = Date(year, month, day)
+    end
+    Epoch{scale}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
 function Epoch{S2}(ep::Epoch{S1}, ts_offset) where {S1, S2}
@@ -222,6 +232,16 @@ for scale in TimeScales.ACRONYMS
     end
 end
 
+function TDBEpoch(ep::TTEpoch, ut, elong, u, v)
+    offset = tai_offset(TDB, ep, ut, elong, u, v)
+    TDBEpoch(ep, offset)
+end
+
+function TTEpoch(ep::TDBEpoch, ut, elong, u, v)
+    offset = tai_offset(TDB, ep, ut, elong, u, v)
+    TTEpoch(ep, offset)
+end
+
 include("leapseconds.jl")
 include("range.jl")
 
@@ -244,6 +264,20 @@ function Dates.validargs(::Type{Epoch}, y::Int64, m::Int64, d::Int64,
     err = Dates.validargs(Dates.DateTime, y, m, d, h, mi, s, ms)
     err !== nothing || return err
     return Dates.argerror()
+end
+
+abstract type DayOfYearToken end
+
+@inline function Dates.tryparsenext(d::Dates.DatePart{'D'}, str, i, len, locale)
+    next = Dates.tryparsenext_base10(str, i, len, 1, 3)
+    next === nothing && return nothing
+    val, i = next
+    (val >= 1 && val <= 366) || throw(ArgumentError("Day number must be within 1 and 366."))
+    return val, i
+end
+
+function Dates.format(io, d::Dates.DatePart{'D'}, ep)
+    print(io, dayofyear(ep))
 end
 
 function Dates.format(io, d::Dates.DatePart{'t'}, ep)

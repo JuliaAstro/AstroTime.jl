@@ -4,10 +4,13 @@ using ..TimeScales: TimeScale
 
 import Base: time, show
 import Dates
-import Dates: year, month, day, hour, minute, second, millisecond
+import Dates: year, month, day,
+    hour, minute, second, millisecond,
+    yearmonthday, dayofyear
 
 export Date, Time, DateTime,
-    year, month, day, calendar,
+    year, month, day, calendar, yearmonthday,
+    dayofyear,
     hour, minute, second, millisecond, date, time,
     secondinday, fractionofday,
     julian, j2000, julian_split
@@ -96,6 +99,7 @@ function findmonth(dayinyear, isleap)
 end
 
 function findday(dayinyear, month, isleap)
+    (!isleap && dayinyear > 365) && throw(ArgumentError("Day of year cannot be 366 for a non-leap year."))
     previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
     dayinyear - previous_days[month]
 end
@@ -143,7 +147,7 @@ end
     Date{calendar}(year, month, day)
 end
 
-function Date(epoch, offset)
+function Date(epoch::Date, offset::Int)
     Date(j2000(epoch) + offset)
 end
 
@@ -157,6 +161,14 @@ function Date(year, month, day)
         throw(ArgumentError("Invalid date."))
     end
     Date{calendar(check)}(year, month, day)
+end
+
+function Date(year, dayinyear)
+    leap = isleap(GregorianCalendar(), year)
+    month = findmonth(dayinyear, leap)
+    day = findday(dayinyear, month, leap)
+
+    Date{GregorianCalendar()}(year, month, day)
 end
 
 year(s::Date) = s.year
@@ -276,6 +288,8 @@ end
 year(dt::DateTime) = year(date(dt))
 month(dt::DateTime) = month(date(dt))
 day(dt::DateTime) = day(date(dt))
+yearmonthday(dt::DateTime) = year(date(dt)), month(date(dt)), day(date(dt))
+dayofyear(dt::DateTime) = dayofyear(yearmonthday(dt)...)
 hour(dt::DateTime) = hour(time(dt))
 minute(dt::DateTime) = minute(time(dt))
 second(typ, dt::DateTime) = second(typ, time(dt))

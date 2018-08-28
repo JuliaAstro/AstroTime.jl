@@ -2,7 +2,7 @@ import Dates
 
 import ..AstroDates: DateTime, year, month, day,
     hour, minute, second, millisecond,
-    time, date, fractionofday
+    time, date, fractionofday, yearmonthday, dayofyear
 
 export timescale
 
@@ -54,6 +54,8 @@ end
 year(ep::Epoch) = year(DateTime(ep))
 month(ep::Epoch) = month(DateTime(ep))
 day(ep::Epoch) = day(DateTime(ep))
+yearmonthday(ep::Epoch) = yearmonthday(DateTime(ep))
+dayofyear(ep::Epoch) = dayofyear(DateTime(ep))
 hour(ep::Epoch) = hour(DateTime(ep))
 minute(ep::Epoch) = minute(DateTime(ep))
 second(typ, ep::Epoch) = second(typ, DateTime(ep))

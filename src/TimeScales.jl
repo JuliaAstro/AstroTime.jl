@@ -58,7 +58,7 @@ tryparse(::T) where T = nothing
     next === nothing && return nothing
     word, i = next
     val = tryparse(word)
-    val === nothing && return nothing
+    val === nothing && throw(ArgumentError("'$word' is not a recognized time scale."))
     return val, i
 end
 
