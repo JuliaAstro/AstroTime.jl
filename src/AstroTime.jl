@@ -66,19 +66,19 @@ Define a new timescale and the corresponding `Epoch` type alias.
 # Example
 
 ```jldoctest
-julia> @timescale Custom
+julia> @timescale GMT ep tai_offset(UTC, ep)
 
-julia> Custom <: TimeScale
+julia> GMT <: TimeScale
 true
-julia> CustomEpoch == Epoch{Custom, T} where T <: Number
-true
+
+julia> GMTEpoch
+Epoch{GMT,T} where T
 ```
 """
 macro timescale(scale::Symbol, ep::Symbol, args...)
     epoch = Expr(:escape, Symbol(scale, "Epoch"))
     sc = Expr(:escape, scale)
     name = String(scale)
-    ep_arg = Expr(:escape, ep)
     return quote
         struct $sc <: TimeScale end
         const $epoch = Epoch{$sc()}

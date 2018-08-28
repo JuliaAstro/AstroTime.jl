@@ -8,7 +8,6 @@ makedocs(
         "Home" => "index.md",
         "API" => "api.md",
     ],
-    doctest = false,
 )
 
 deploydocs(
@@ -16,5 +15,5 @@ deploydocs(
     target = "build",
     deps = nothing,
     make = nothing,
-    julia = "0.6",
+    julia = "nightly",
 )

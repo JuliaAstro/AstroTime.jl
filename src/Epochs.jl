@@ -100,7 +100,7 @@ seconds.
 ### Example ###
 
 ```jldoctest
-julia> t = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 UTC
 
 julia> UTCEpoch(ep, 20.0)
