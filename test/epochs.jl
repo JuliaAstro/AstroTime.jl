@@ -35,8 +35,12 @@
         tt = TTEpoch(2000, 1, 1, 12)
         @test tt - J2000_EPOCH == 0.0seconds
     end
-
-
+    @testset "Accessors" begin
+        @test JULIAN_EPOCH - Inf * seconds == PAST_INFINITY
+        @test JULIAN_EPOCH + Inf * seconds == FUTURE_INFINITY
+        @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
+        @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
+    end
     @testset "Leap Seconds" begin
         @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
 
