@@ -9,8 +9,8 @@ import Dates: year, month, day,
     yearmonthday, dayofyear
 
 export Date, Time, DateTime,
-    year, month, day, calendar, yearmonthday,
-    dayofyear,
+    year, month, day, calendar,
+    yearmonthday, dayofyear,
     hour, minute, second, millisecond, date, time,
     secondinday, fractionofday,
     julian, j2000, julian_split
@@ -164,11 +164,19 @@ function Date(year, month, day)
 end
 
 function Date(year, dayinyear)
+    calendar = GregorianCalendar()
+    if year < 1583
+        if year < 1
+            calendar = ProlepticJulianCalendar()
+        else
+            calendar = JulianCalendar()
+        end
+    end
     leap = isleap(GregorianCalendar(), year)
     month = findmonth(dayinyear, leap)
     day = findday(dayinyear, month, leap)
 
-    Date{GregorianCalendar()}(year, month, day)
+    Date{calendar}(year, month, day)
 end
 
 year(s::Date) = s.year
@@ -289,7 +297,10 @@ year(dt::DateTime) = year(date(dt))
 month(dt::DateTime) = month(date(dt))
 day(dt::DateTime) = day(date(dt))
 yearmonthday(dt::DateTime) = year(date(dt)), month(date(dt)), day(date(dt))
-dayofyear(dt::DateTime) = dayofyear(yearmonthday(dt)...)
+function dayofyear(dt::DateTime{C}) where C
+    leap = isleap(C, year(dt))
+    finddayinyear(month(dt), day(dt), leap)
+end
 hour(dt::DateTime) = hour(time(dt))
 minute(dt::DateTime) = minute(time(dt))
 second(typ, dt::DateTime) = second(typ, time(dt))
