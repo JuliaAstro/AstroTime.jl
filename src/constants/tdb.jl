@@ -1,5 +1,3 @@
-export fairhd0, fairhd1, fairhd2, fairhd3, fairhd4
-
 const fairhd = [
 # 1, 10
 [ 1656.674564e-6,     6283.075849991,  6.240054195 ],
