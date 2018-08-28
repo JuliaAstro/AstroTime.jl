@@ -319,10 +319,10 @@ function Dates.DateTime(dt::DateTime)
     m = month(dt)
     d = day(dt)
     h = hour(dt)
-    m = minute(dt)
+    mi = minute(dt)
     s = second(Int, dt)
     ms = floor((second(Float64, dt) - s) * 1000)
-    Dates.DateTime(y, m, d, h, m, s, ms)
+    Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 
 end

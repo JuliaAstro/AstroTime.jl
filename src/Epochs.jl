@@ -1,7 +1,7 @@
 module Epochs
 
-using LeapSeconds: offset_tai_utc
 using EarthOrientation: getΔUT1
+using LeapSeconds: offset_tai_utc
 
 import Base: -, +, <, ==, isapprox, isless, show
 import Dates
@@ -51,16 +51,22 @@ function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
     Epoch{S}(epoch′, offset′, ts_offset)
 end
 
-function Epoch{S}(jd1::T, jd2::T=zero(T); epoch=:j2000) where {S, T}
+"""
+    Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
+
+Construct an `Epoch` with time scale `S` from a Julian date
+(optionally split into `jd1` and `jd2`).
+"""
+function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
 
-    if epoch == :j2000
+    if origin == :j2000
         # pass
-    elseif epoch == :julian
+    elseif origin == :julian
         jd1 -= J2000_TO_JULIAN
-    elseif epoch == :mjd
+    elseif origin == :mjd
         jd1 -= J2000_TO_MJD
     else
         throw(ArgumentError("Unknown Julian epoch: $epoch"))
