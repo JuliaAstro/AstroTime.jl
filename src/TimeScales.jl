@@ -1,5 +1,7 @@
 module TimeScales
 
+import Dates
+
 export TimeScale
 
 """
@@ -16,7 +18,7 @@ The following timescales are defined:
 """
 abstract type TimeScale end
 
-const scales = (
+const SCALES = (
     :CoordinatedUniversalTime,
     :UniversalTime,
     :InternationalAtomicTime,
@@ -26,7 +28,7 @@ const scales = (
     :BarycentricDynamicalTime,
 )
 
-const acronyms = (
+const ACRONYMS = (
     :UTC,
     :UT1,
     :TAI,
@@ -36,14 +38,28 @@ const acronyms = (
     :TDB,
 )
 
-for (acronym, scale) in zip(acronyms, scales)
+for (acronym, scale) in zip(ACRONYMS, SCALES)
     name = String(acronym)
     @eval begin
         struct $scale <: TimeScale end
         const $acronym = $scale()
-        Base.show(io::IO, ::$scale) = print(io, $name)
         export $scale, $acronym
+
+        Base.show(io::IO, ::$scale) = print(io, $name)
+        tryparse(::Val{Symbol($name)}) = $acronym
     end
+end
+
+tryparse(s::T) where T<:AbstractString = tryparse(Val(Symbol(s)))
+tryparse(::T) where T = nothing
+
+@inline function Dates.tryparsenext(d::Dates.DatePart{'t'}, str, i, len, locale)
+    next = Dates.tryparsenext_word(str, i, len, locale, Dates.max_width(d))
+    next === nothing && return nothing
+    word, i = next
+    val = tryparse(word)
+    val === nothing && throw(ArgumentError("'$word' is not a recognized time scale."))
+    return val, i
 end
 
 end

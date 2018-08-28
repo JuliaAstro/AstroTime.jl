@@ -1,13 +1,45 @@
 module Periods
 
-import Base: *, /, get, isapprox, show
+import Base: -, *, /, get, isapprox, show
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
-    J2000, J1950, MJD,
     seconds, minutes, hours, days, years, centuries,
-    Period, *, /, get
+    Period, -, *, /, get,
+    SECONDS_PER_MINUTE,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_DAY,
+    SECONDS_PER_YEAR,
+    SECONDS_PER_CENTURY,
+    MINUTES_PER_HOUR,
+    MINUTES_PER_DAY,
+    MINUTES_PER_YEAR,
+    MINUTES_PER_CENTURY,
+    HOURS_PER_DAY,
+    HOURS_PER_YEAR,
+    HOURS_PER_CENTURY,
+    DAYS_PER_YEAR,
+    DAYS_PER_CENTURY,
+    YEARS_PER_CENTURY
 
-include("constants.jl")
+const SECONDS_PER_MINUTE   = 60.0
+const SECONDS_PER_HOUR     = 60.0 * 60.0
+const SECONDS_PER_DAY      = 60.0 * 60.0 * 24.0
+const SECONDS_PER_YEAR     = 60.0 * 60.0 * 24.0 * 365.25
+const SECONDS_PER_CENTURY  = 60.0 * 60.0 * 24.0 * 365.25 * 100.0
+
+const MINUTES_PER_HOUR     = 60.0
+const MINUTES_PER_DAY      = 60.0 * 24.0
+const MINUTES_PER_YEAR     = 60.0 * 24.0 * 365.25
+const MINUTES_PER_CENTURY  = 60.0 * 24.0 * 365.25 * 100.0
+
+const HOURS_PER_DAY        = 24.0
+const HOURS_PER_YEAR       = 24.0 * 365.25
+const HOURS_PER_CENTURY    = 24.0 * 365.25 * 100.0
+
+const DAYS_PER_YEAR        = 365.25
+const DAYS_PER_CENTURY     = 365.25 * 100.0
+
+const YEARS_PER_CENTURY    = 100.0
 
 """
 All time units are subtypes of the abstract type `TimeUnit`.
@@ -53,6 +85,7 @@ show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
 
 (*)(Δt::T, ::U) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
 
+(-)(p::Period) = Period{p.unit}(-p.Δt)
 (*)(x::T, p::Period) where {T<:Number} = Period{p.unit}(p.Δt * x)
 (*)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt * x)
 (/)(x::T, p::Period) where {T<:Number} = Period{p.unit}(x / p.Δ)
