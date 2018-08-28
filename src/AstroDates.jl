@@ -124,7 +124,7 @@ struct Date{C}
     Date{C}(year, month, day) where {C} = new{C::Calendar}(year, month, day)
 end
 
-function Date(offset)
+@inline function Date(offset)
     calendar = GregorianCalendar()
     if offset < -152384
         if offset > -730122
@@ -214,7 +214,7 @@ struct Time
     end
 end
 
-function Time(second_in_day_a, second_in_day_b)
+@inline function Time(second_in_day_a, second_in_day_b)
     carry = floor(Int, second_in_day_b)
     wholeseconds = second_in_day_a + carry
     fractional = second_in_day_b - carry

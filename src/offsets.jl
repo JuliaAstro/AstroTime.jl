@@ -15,14 +15,14 @@ tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * get(ep - EPOCH_77)
 
-function tai_offset(::CoordinatedUniversalTime, ep)
+@inline function tai_offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)
     offset === nothing && return 0.0
 
     -getoffset(offset, ep)
 end
 
-function tai_offset(::UniversalTime, ep)
+@inline function tai_offset(::UniversalTime, ep)
     jd = julian(UTC, ep)
     tai_offset(UTC, ep) + getΔUT1(jd)
 end
@@ -43,10 +43,10 @@ the quantity TDB-TT can differ by as much as about 4 microseconds.
 2. [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
-function tai_offset(::BarycentricDynamicalTime, ep)
+@inline function tai_offset(::BarycentricDynamicalTime, ep)
     dt = j2000(TT, ep)
-    g = 357.53 + 0.9856003dt
-    tai_offset(TT, ep) + 0.001658sind(g) + 0.000014sind(2g)
+    g = deg2rad(357.53 + 0.9856003dt)
+    tai_offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
 end
 
 function tai_offset(::BarycentricDynamicalTime, ep, ut, elong, u, v)
@@ -127,18 +127,19 @@ end
 
 tai_offset(::InternationalAtomicTime, date, time) = 0.0
 
-function tai_offset(::CoordinatedUniversalTime, date, time)
+@inline function tai_offset(::CoordinatedUniversalTime, date, time)
     minute_in_day = hour(time) * 60 + minute(time)
-    correction  = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440;
+    correction  = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
     offset = findoffset(AstroDates.julian(date) + correction)
     offset === nothing && return 0.0
 
     getoffset(offset, date, time)
 end
 
-function tai_offset(scale, date, time)
+@inline function tai_offset(scale, date, time)
     ref = Epoch{TAI}(date, time)
     offset = 0.0
+    # Maybe replace this with a simple convergence check
     for _ in 1:8
         offset = -tai_offset(scale, Epoch{TAI}(ref, offset))
     end
