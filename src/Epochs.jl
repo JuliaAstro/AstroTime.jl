@@ -195,6 +195,8 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep))
 end
 
+Epoch{S, T}(ep::Epoch{S, T}) where {S, T} = ep
+
 function isapprox(a::Epoch, b::Epoch)
     a.epoch == b.epoch && a.offset ≈ b.offset
 end
@@ -221,6 +223,7 @@ for scale in TimeScales.ACRONYMS
 end
 
 include("leapseconds.jl")
+include("range.jl")
 
 const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = TTEpoch(AstroDates.J2000_EPOCH, AstroDates.H12)
