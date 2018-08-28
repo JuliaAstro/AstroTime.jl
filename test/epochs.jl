@@ -51,12 +51,19 @@
 
             @test before.epoch == 394372833
             @test before.offset == 0.0
+            @test before.ts_offset == -34.0
+
             @test start.epoch == 394372834
             @test start.offset == 0.0
+            @test start.ts_offset == -35.0
+
             @test during.epoch == 394372834
             @test during.offset == 0.5
+            @test during.ts_offset == -35.0
+
             @test after.epoch == 394372835
             @test after.offset == 0.0
+            @test after.ts_offset == -35.0
 
             @test !insideleap(before)
             @test insideleap(start)

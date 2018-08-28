@@ -8,7 +8,7 @@ const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 
-tai_offset(ep::Epoch{S}) where {S} = tai_offset(S, ep)
+tai_offset(ep::Epoch) = ep.ts_offset
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
@@ -129,8 +129,8 @@ tai_offset(::InternationalAtomicTime, date, time) = 0.0
 
 @inline function tai_offset(::CoordinatedUniversalTime, date, time)
     minute_in_day = hour(time) * 60 + minute(time)
-    correction  = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
-    offset = findoffset(AstroDates.julian(date) + correction)
+    correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
+    offset = findoffset(julian(date) + correction)
     offset === nothing && return 0.0
 
     getoffset(offset, date, time)

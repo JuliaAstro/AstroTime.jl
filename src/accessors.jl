@@ -17,12 +17,11 @@ function DateTime(ep::Epoch)
         end
     end
 
-    ts_offset = tai_offset(ep)
-    sum = ep.offset + ts_offset
-    o′ = sum - ts_offset
+    sum = ep.offset + ep.ts_offset
+    o′ = sum - ep.ts_offset
     d′ = sum - o′
     Δo = ep.offset - o′
-    Δd = ts_offset - d′
+    Δd = ep.ts_offset - d′
     residual = Δo + Δd
 
     carry = floor(Int64, sum)
@@ -65,5 +64,4 @@ date(ep::Epoch) = date(DateTime(ep))
 fractionofday(ep::Epoch) = fractionofday(time(ep))
 
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
-Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))
 

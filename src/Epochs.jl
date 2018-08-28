@@ -20,15 +20,18 @@ export Epoch,
     JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
     FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH,
     PAST_INFINITY, FUTURE_INFINITY, UNIX_EPOCH,
-    julian, j2000, julian_split, modified_julian
+    julian, j2000, julian_split, modified_julian, now
 
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
     offset::T
-    Epoch{S}(epoch::Int64, offset::T) where {S, T} = new{S::TimeScale, T}(epoch, offset)
+    ts_offset::T
+    function Epoch{S}(epoch::Int64, offset::T, ts_offset::T) where {S, T}
+        new{S::TimeScale, T}(epoch, offset, ts_offset)
+    end
 end
 
-function Epoch{S}(epoch::Int64, offset, Δt) where S
+function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
     sum = offset + Δt
 
     if !isfinite(sum)
@@ -45,11 +48,45 @@ function Epoch{S}(epoch::Int64, offset, Δt) where S
         epoch′ = epoch + dl
     end
 
-    Epoch{S}(epoch′, offset′)
+    Epoch{S}(epoch′, offset′, ts_offset)
+end
+
+function Epoch{S}(jd1::T, jd2::T=zero(T); epoch=:j2000) where {S, T}
+    if jd2 > jd1
+        jd1, jd2 = jd2, jd1
+    end
+
+    if epoch == :j2000
+        # pass
+    elseif epoch == :julian
+        jd1 -= J2000_TO_JULIAN
+    elseif epoch == :mjd
+        jd1 -= J2000_TO_MJD
+    else
+        throw(ArgumentError("Unknown Julian epoch: $epoch"))
+    end
+
+    jd1 *= SECONDS_PER_DAY
+    jd2 *= SECONDS_PER_DAY
+
+    sum = jd1 + jd2
+
+    o′ = sum - jd2
+    d′ = sum - o′
+    Δ0 = jd1 - o′
+    Δd = jd2 - d′
+    residual = Δ0 + Δd
+    epoch = floor(Int64, sum)
+    offset = (sum - epoch) + residual
+
+    ftype = float(T)
+
+    ts_offset = tai_offset(S, Epoch{TAI}(epoch, ftype(offset), zero(ftype)))
+    Epoch{S}(epoch, offset, ts_offset)
 end
 
 """
-    Epoch{S}(ep::Epoch, Δt) where S
+    Epoch{S}(ep::Epoch{S}, Δt) where S
 
 Construct a new `Epoch` with time scale `S` which is `ep` shifted by `Δt`
 seconds.
@@ -64,25 +101,30 @@ julia> UTCEpoch(ep, 20.0)
 2018-02-06T20:45:20.000 UTC
 ```
 """
-Epoch{S}(ep::Epoch, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, Δt)
+Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, ep.ts_offset, Δt)
 
-function j2000(scale, ep::Epoch)
-    (ep.offset + tai_offset(scale, ep) + ep.epoch) / SECONDS_PER_DAY
+function j2000(ep::Epoch, tai_offset)
+    (ep.offset + tai_offset + ep.epoch) / SECONDS_PER_DAY
 end
-julian(scale, ep::Epoch) = j2000(scale, ep) + J2000_TO_JULIAN
-modified_julian(scale, ep::Epoch) = j2000(scale, ep) + J2000_TO_MJD
+julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_JULIAN
+modified_julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_MJD
 
-function julian_split(scale, ep::Epoch)
-    jd = julian(scale, ep)
+function julian_split(ep::Epoch, tai_offset)
+    jd = julian(ep, tai_offset)
     jd1 = trunc(jd)
     jd2 = jd - jd1
     jd1, jd2
 end
 
-j2000(ep::Epoch{S}) where {S} = j2000(S, ep)
-julian(ep::Epoch{S}) where {S} = julian(S, ep)
-modified_julian(ep::Epoch{S}) where {S} = modified_julian(S, ep)
-julian_split(ep::Epoch{S}) where {S} = julian_split(S, ep)
+j2000(ep::Epoch) = j2000(ep, ep.ts_offset)
+julian(ep::Epoch) = julian(ep, ep.ts_offset)
+modified_julian(ep::Epoch) = modified_julian(ep, ep.ts_offset)
+julian_split(ep::Epoch) = julian_split(ep, ep.ts_offset)
+
+j2000(scale, ep::Epoch) = j2000(ep, tai_offset(scale, ep))
+julian(scale, ep::Epoch) = julian(ep, tai_offset(scale, ep))
+modified_julian(scale, ep::Epoch) = modified_julian(ep, tai_offset(scale, ep))
+julian_split(scale, ep::Epoch) = julian_split(ep, tai_offset(scale, ep))
 
 include("offsets.jl")
 include("accessors.jl")
@@ -104,21 +146,30 @@ function Epoch{S}(date::Date, time::Time) where S
     offset = (sum - dl) + residual
     epoch  = Int64(60) * ((j2000(date) * Int64(24) + hour(time)) * Int64(60)
                           + minute(time) - Int64(720)) + dl
-    Epoch{S}(epoch, offset)
+    from_tai = tai_offset(S, Epoch{TAI}(epoch, offset, 0.0))
+    Epoch{S}(epoch, offset, from_tai)
 end
 
-Epoch(str::AbstractString, df::Dates.DateFormat=ISOEpochFormat) = parse(Epoch, str, df)
+Epoch(str::AbstractString, format::Dates.DateFormat=ISOEpochFormat) = parse(Epoch, str, format)
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
 
 Epoch{S}(str::AbstractString,
-         df::Dates.DateFormat=Dates.default_format(Epoch{S})) where {S} = parse(Epoch{S}, str, df)
+         format::Dates.DateFormat=Dates.default_format(Epoch{S})) where {S} = parse(Epoch{S}, str, format)
 
 Epoch{S}(str::AbstractString, format::AbstractString) where {S} = Epoch{S}(str, Dates.DateFormat(format))
 
 Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
 
 Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
+Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))
+
+"""
+    now()
+
+Get the current date and time as a `UTCEpoch`.
+"""
+now() = UTCEpoch(Dates.now())
 
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
                   minute::Int=0, second::Float64=0.0) where S
@@ -136,7 +187,13 @@ function Epoch(year::Int, month::Int, day::Int, hour::Int,
     Epoch{scale}(Date(year, month, day), Time(hour, minute, second + 1e-3milliseconds))
 end
 
-Epoch{S2}(ep::Epoch{S1}) where {S1, S2} = Epoch{S2}(ep.epoch, ep.offset)
+function Epoch{S2}(ep::Epoch{S1}, ts_offset) where {S1, S2}
+    Epoch{S2}(ep.epoch, ep.offset, ts_offset)
+end
+
+function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
+    Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep))
+end
 
 function isapprox(a::Epoch, b::Epoch)
     a.epoch == b.epoch && a.offset ≈ b.offset
