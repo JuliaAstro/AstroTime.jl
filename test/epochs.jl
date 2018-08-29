@@ -21,6 +21,7 @@
         ep = UTCEpoch(jd, origin=:mjd)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
+        @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Time Scales" begin
         tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
