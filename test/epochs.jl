@@ -8,6 +8,20 @@
         @test ep.epoch == get(seconds(10000centuries))
         @test ep.offset ≈ 2eps()
     end
+    @testset "Julian Dates" begin
+        jd = 0.0
+        ep = UTCEpoch(jd)
+        @test ep == UTCEpoch(2000, 1, 1, 12)
+        @test j2000(ep) == jd
+        jd = 2.451545e6
+        ep = UTCEpoch(jd, origin=:julian)
+        @test ep == UTCEpoch(2000, 1, 1, 12)
+        @test julian(ep) == jd
+        jd = 51544.5
+        ep = UTCEpoch(jd, origin=:mjd)
+        @test ep == UTCEpoch(2000, 1, 1, 12)
+        @test modified_julian(ep) == jd
+    end
     @testset "Time Scales" begin
         tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
         tt = TTEpoch(2018, 8, 14, 10, 2, 51.551247436378276)

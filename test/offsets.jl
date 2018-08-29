@@ -1,3 +1,5 @@
+import AstroTime.AstroDates: DateTime, date, time
+
 @testset "Offsets" begin
     @testset "UTC" begin
         before_leap = UTCEpoch(2012, 6, 30, 23, 59, 59.0)

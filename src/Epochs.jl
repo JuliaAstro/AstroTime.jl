@@ -7,7 +7,57 @@ import Base: -, +, <, ==, isapprox, isless, show
 import Dates
 import Dates: format, parse
 
-import ..AstroDates: julian, j2000, julian_split
+import ..AstroDates:
+    Date,
+    DateTime,
+    Time,
+    calendar,
+    date,
+    day,
+    dayofyear,
+    fractionofday,
+    hour,
+    j2000,
+    julian,
+    julian_split,
+    millisecond,
+    minute,
+    month,
+    second,
+    secondinday,
+    time,
+    year,
+    yearmonthday
+
+export Epoch,
+    CCSDS_EPOCH,
+    FIFTIES_EPOCH,
+    FUTURE_INFINITY,
+    GALILEO_EPOCH,
+    GPS_EPOCH,
+    J2000_EPOCH,
+    JULIAN_EPOCH,
+    MODIFIED_JULIAN_EPOCH,
+    PAST_INFINITY,
+    UNIX_EPOCH,
+    date,
+    day,
+    dayofyear,
+    fractionofday,
+    hour,
+    j2000,
+    julian,
+    julian_split,
+    millisecond,
+    minute,
+    modified_julian,
+    month,
+    now,
+    second,
+    secondinday,
+    time,
+    year,
+    yearmonthday
 
 using ..TimeScales
 using ..AstroDates
@@ -15,12 +65,6 @@ using ..Periods
 
 const J2000_TO_JULIAN = 2.451545e6
 const J2000_TO_MJD = 51544.5
-
-export Epoch,
-    JULIAN_EPOCH, J2000_EPOCH, MODIFIED_JULIAN_EPOCH,
-    FIFTIES_EPOCH, GALILEO_EPOCH, GPS_EPOCH, CCSDS_EPOCH,
-    PAST_INFINITY, FUTURE_INFINITY, UNIX_EPOCH,
-    julian, j2000, julian_split, modified_julian, now
 
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
@@ -86,9 +130,10 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
     offset = (sum - epoch) + residual
 
     ftype = float(T)
-
-    ts_offset = tai_offset(S, Epoch{TAI}(epoch, ftype(offset), zero(ftype)))
-    Epoch{S}(epoch, offset, ts_offset)
+    tai = Epoch{TAI}(epoch, ftype(offset), zero(ftype))
+    ts_offset = tai_offset(S, tai)
+    ep = Epoch{TAI}(tai, -ts_offset)
+    Epoch{S}(ep.epoch, ep.offset, ts_offset)
 end
 
 """
