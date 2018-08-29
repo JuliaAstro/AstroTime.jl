@@ -99,7 +99,22 @@ end
     Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
 
 Construct an `Epoch` with time scale `S` from a Julian date
-(optionally split into `jd1` and `jd2`).
+(optionally split into `jd1` and `jd2`). `origin` determines the
+variant of Julian date that is used. Possible values are:
+
+- `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
+- `:julian`: Julian date, starts at -4712-01-01T12:00
+- `:mjd`: J2000 Julian date, starts at 1858-11-17T00:00
+
+### Examples ###
+
+```jldoctest
+julia> Epoch{UTC}(0.0, 0.5)
+2000-01-02T00:00:00.000 UTC
+
+julia> Epoch{UTC}(2.451545e6, origin=:julian)
+2000-01-01T12:00:00.000 UTC
+```
 """
 function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
     if jd2 > jd1
@@ -275,11 +290,51 @@ isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
 
 for scale in TimeScales.ACRONYMS
     epoch = Symbol(scale, "Epoch")
+    name = string(epoch)
     @eval begin
         const $epoch = Epoch{$scale}
         export $epoch
 
-        @doc @doc(Epoch{$scale}) $epoch
+        """
+            $($name)(ep::Epoch{S}, Δt) where S
+
+        Construct a $($name) which is `ep` shifted by `Δt`
+        seconds.
+
+        ### Example ###
+
+        ```jldoctest
+        julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+        2018-02-06T20:45:00.000 UTC
+
+        julia> UTCEpoch(ep, 20.0)
+        2018-02-06T20:45:20.000 UTC
+        ```
+        """
+        $epoch(::Epoch, ::Any)
+
+        """
+            $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T
+
+        Construct a $($name) from a Julian date (optionally split into
+        `jd1` and `jd2`). `origin` determines the variant of Julian
+        date that is used. Possible values are:
+
+        - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
+        - `:julian`: Julian date, starts at -4712-01-01T12:00
+        - `:mjd`: J2000 Julian date, starts at 1858-11-17T00:00
+
+        ### Examples ###
+
+        ```jldoctest
+        julia> $($name)(0.0, 0.5)
+        2000-01-02T00:00:00.000 $($scale)
+
+        julia> $($name)(2.451545e6, origin=:julian)
+        2000-01-01T12:00:00.000 $($scale)
+        ```
+        """
+        $epoch(::Any, ::Any)
     end
 end
 
