@@ -8,6 +8,20 @@
         @test ep.epoch == get(seconds(10000centuries))
         @test ep.offset ≈ 2eps()
     end
+    @testset "Parsing" begin
+        @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
+        @test Epoch("2000-01-01T00:00:00.000 UTC") == UTCEpoch(2000, 1, 1)
+        @test_throws ArgumentError Epoch("2000-01-01T00:00:00.000")
+    end
+    @testset "Arithmetic" begin
+        ep = UTCEpoch(2000, 1, 1)
+        @test (ep + 1.0seconds) - ep   == 1.0seconds
+        @test (ep + 1.0minutes) - ep   == seconds(1.0minutes)
+        @test (ep + 1.0hours) - ep     == seconds(1.0hours)
+        @test (ep + 1.0days) - ep      == seconds(1.0days)
+        @test (ep + 1.0years) - ep     == seconds(1.0years)
+        @test (ep + 1.0centuries) - ep == seconds(1.0centuries)
+    end
     @testset "Julian Dates" begin
         jd = 0.0
         ep = UTCEpoch(jd)

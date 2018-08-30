@@ -50,6 +50,8 @@ for (acronym, scale) in zip(ACRONYMS, SCALES)
     end
 end
 
+struct NotATimeScale <: TimeScale end
+
 tryparse(s::T) where T<:AbstractString = tryparse(Val(Symbol(s)))
 tryparse(::T) where T = nothing
 

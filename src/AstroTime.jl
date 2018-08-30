@@ -22,7 +22,7 @@ import .Epochs: format
 function __init__()
     Dates.CONVERSION_SPECIFIERS['t'] = TimeScale
     Dates.CONVERSION_SPECIFIERS['D'] = Epochs.DayOfYearToken
-    Dates.CONVERSION_DEFAULTS[TimeScale] = ""
+    Dates.CONVERSION_DEFAULTS[TimeScale] = TimeScales.NotATimeScale()
     Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,

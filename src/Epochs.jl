@@ -208,7 +208,7 @@ Construct an `Epoch` from a string `str`. Optionally a `format` definition can
 be passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
 object or as a string. In addition to the character codes supported by `DateFormat` the character
 code `D` is supported which is parsed as "day of year" (see the example below) and the character
-code `t` which is parsed as the time scale.
+code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTHH:MM:SS.sss ttt`.
 
 **Note:** Please be aware that this constructor requires that the time scale is part of `str`, e.g.
 `2018-37T00:00 UTC`. Otherwise use the explicit constructor, e.g. `Epoch{UTC}`.
@@ -233,7 +233,8 @@ Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat
 Construct an `Epoch` with time scale `S` from a string `str`. Optionally a `format` definition can
 be passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
 object or as a string. In addition to the character codes supported by `DateFormat` the code `D` can
-be used which is parsed as "day of year" (see the example below).
+be used which is parsed as "day of year" (see the example below).  The default format is
+`yyyy-mm-ddTHH:MM:SS.sss`.
 
 ### Example ###
 
@@ -298,6 +299,11 @@ end
 function Epoch(year::Int, month::Int, day::Int, dayofyear::Int,
                hour::Int, minute::Int, second::Int, milliseconds::Int,
                scale::S) where S<:TimeScale
+    if scale === TimeScales.NotATimeScale()
+        throw(ArgumentError("Could not parse the provided string as an `Epoch`." *
+                            " No time scale was provided."))
+    end
+
     if dayofyear != 0
         date = Date(year, dayofyear)
     else
@@ -345,6 +351,19 @@ isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
 
 +(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, get(seconds(p)))
 -(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
+
+"""
+    -(a::Epoch, b::Epoch)
+
+Return the duration between epoch `a` and epoch `b`.
+
+### Examples ###
+
+```jldoctest```
+julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+20.0 seconds
+```
+"""
 -(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
 
 for scale in TimeScales.ACRONYMS
@@ -357,10 +376,11 @@ for scale in TimeScales.ACRONYMS
         """
             $($name)(str[, format])
 
-        Construct a $($name) from a string `str`.  Optionally a `format` definition can be
+        Construct a $($name) from a string `str`. Optionally a `format` definition can be
         passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
         object or as a string. In addition to the character codes supported by `DateFormat`
         the code `D` is supported which is parsed as "day of year" (see the example below).
+        The default format is `yyyy-mm-ddTHH:MM:SS.sss`.
 
         ### Example ###
 
