@@ -35,9 +35,9 @@ function __init__()
         Dates.Millisecond,
         TimeScale,
     )
-    @eval begin
-        Dates.default_format(::Type{Epoch}) = ISOEpochFormat
+    @eval Epochs begin
         global ISOEpochFormat = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
+        Dates.default_format(::Type{Epoch}) = Epochs.ISOEpochFormat
     end
 
     for scale in TimeScales.ACRONYMS

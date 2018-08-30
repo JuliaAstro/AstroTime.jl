@@ -151,22 +151,6 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
     Epoch{S}(ep.epoch, ep.offset, ts_offset)
 end
 
-"""
-    Epoch{S}(ep::Epoch{S}, Δt) where S
-
-Construct a new `Epoch` with time scale `S` which is `ep` shifted by `Δt`
-seconds.
-
-### Example ###
-
-```jldoctest
-julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-2018-02-06T20:45:00.000 UTC
-
-julia> UTCEpoch(ep, 20.0)
-2018-02-06T20:45:20.000 UTC
-```
-"""
 Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, ep.ts_offset, Δt)
 
 function j2000(ep::Epoch, tai_offset)
@@ -216,6 +200,29 @@ function Epoch{S}(date::Date, time::Time) where S
     Epoch{S}(epoch, offset, from_tai)
 end
 
+
+"""
+    Epoch(str[, format])
+
+Construct an `Epoch` from a string `str`. Optionally a `format` definition can
+be passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+object or as a string. In addition to the character codes supported by `DateFormat` the character
+code `D` is supported which is parsed as "day of year" (see the example below) and the character
+code `t` which is parsed as the time scale.
+
+**Note:** Please be aware that this constructor requires that the time scale is part of `str`, e.g.
+`2018-37T00:00 UTC`. Otherwise use the explicit constructor, e.g. `Epoch{UTC}`.
+
+### Example ###
+
+```jldoctest
+julia> Epoch("2018-02-06T20:45:00.0 UTC")
+2018-02-06T20:45:00.000 UTC
+
+julia> Epoch("2018-37T00:00 UTC", "yyyy-DDDTHH:MM ttt")
+2018-02-06T00:00:00.000 UTC
+```
+"""
 Epoch(str::AbstractString, format::Dates.DateFormat=ISOEpochFormat) = parse(Epoch, str, format)
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
@@ -223,17 +230,21 @@ Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat
 """
     Epoch{S}(str[, format]) where S
 
-Construct a new `Epoch` with time scale `S` from a string `str`.
-
-[DateFormat](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+Construct an `Epoch` with time scale `S` from a string `str`. Optionally a `format` definition can
+be passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+object or as a string. In addition to the character codes supported by `DateFormat` the code `D` can
+be used which is parsed as "day of year" (see the example below).
 
 ### Example ###
 
 ```jldoctest
-julia> ep = Epoch{UTC}("2018-02-06T20:45:00.0")
+julia> Epoch{UTC}("2018-02-06T20:45:00.0")
 2018-02-06T20:45:00.000 UTC
 
 julia> Epoch{UTC}("February 6, 2018", "U d, y")
+2018-02-06T00:00:00.000 UTC
+
+julia> Epoch{UTC}("2018-37T00:00", "yyyy-DDDTHH:MM")
 2018-02-06T00:00:00.000 UTC
 ```
 """
@@ -254,6 +265,21 @@ Get the current date and time as a `UTCEpoch`.
 """
 now() = UTCEpoch(Dates.now())
 
+"""
+    Epoch{S}(year, month, day, hour=0, minute=0, second=0.0) where S
+
+Construct an `Epoch` with time scale `S` from date and time components.
+
+### Example ###
+
+```jldoctest
+julia> Epoch{UTC}(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 UTC
+
+julia> Epoch{UTC}(2018, 2, 6)
+2018-02-06T00:00:00.000 UTC
+```
+"""
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
                   minute::Int=0, second::Float64=0.0) where S
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
@@ -280,10 +306,26 @@ function Epoch(year::Int, month::Int, day::Int, dayofyear::Int,
     Epoch{scale}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
-function Epoch{S2}(ep::Epoch{S1}, ts_offset) where {S1, S2}
-    Epoch{S2}(ep.epoch, ep.offset, ts_offset)
+function Epoch{S2}(ep::Epoch{S1}, Δtai) where {S1, S2}
+    Epoch{S2}(ep.epoch, ep.offset, Δtai)
 end
 
+"""
+    Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TTEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TT
+
+julia> TAIEpoch(ep)
+1999-12-31T23:59:27.816 TAI
+```
+"""
 function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep))
 end
@@ -313,22 +355,27 @@ for scale in TimeScales.ACRONYMS
         export $epoch
 
         """
-            $($name)(ep::Epoch{S}, Δt) where S
+            $($name)(str[, format])
 
-        Construct a $($name) which is `ep` shifted by `Δt`
-        seconds.
+        Construct a $($name) from a string `str`.  Optionally a `format` definition can be
+        passed as a [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+        object or as a string. In addition to the character codes supported by `DateFormat`
+        the code `D` is supported which is parsed as "day of year" (see the example below).
 
         ### Example ###
 
         ```jldoctest
-        julia> ep = $($name)(2018, 2, 6, 20, 45, 0.0)
+        julia> $($name)("2018-02-06T20:45:00.0")
         2018-02-06T20:45:00.000 $($scale)
 
-        julia> $($name)(ep, 20.0)
-        2018-02-06T20:45:20.000 $($scale)
+        julia> $($name)("February 6, 2018", "U d, y")
+        2018-02-06T00:00:00.000 $($scale)
+
+        julia> $($name)("2018-37T00:00", "yyyy-DDDTHH:MM")
+        2018-02-06T00:00:00.000 $($scale)
         ```
         """
-        $epoch(::Epoch, ::Any)
+        $epoch(::AbstractString)
 
         """
             $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T
@@ -352,6 +399,23 @@ for scale in TimeScales.ACRONYMS
         ```
         """
         $epoch(::Number, ::Number)
+
+        """
+            $($name)(year, month, day, hour=0, minute=0, second=0.0)
+
+        Construct a $($name) from date and time components.
+
+        ### Example ###
+
+        ```jldoctest
+        julia> $($name)(2018, 2, 6, 20, 45, 0.0)
+        2018-02-06T20:45:00.000 $($scale)
+
+        julia> $($name)(2018, 2, 6)
+        2018-02-06T00:00:00.000 $($scale)
+        ```
+        """
+        $epoch(::Int, ::Int, ::Int)
     end
 end
 
