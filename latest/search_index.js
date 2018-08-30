@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "type",
-    "text": "Epoch(str[, format])\n\nConstruct an Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the character code D is supported which is parsed as \"day of year\" (see the example below) and the character code t which is parsed as the time scale.\n\nNote: Please be aware that this constructor requires that the time scale is part of str, e.g. 2018-37T00:00 UTC. Otherwise use the explicit constructor, e.g. Epoch{UTC}.\n\nExample\n\njulia> Epoch(\"2018-02-06T20:45:00.0 UTC\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch(\"2018-37T00:00 UTC\", \"yyyy-DDDTHH:MM ttt\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch(str[, format])\n\nConstruct an Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the character code D is supported which is parsed as \"day of year\" (see the example below) and the character code t which is parsed as the time scale.  The default format is yyyy-mm-ddTHH:MM:SS.sss ttt.\n\nNote: Please be aware that this constructor requires that the time scale is part of str, e.g. 2018-37T00:00 UTC. Otherwise use the explicit constructor, e.g. Epoch{UTC}.\n\nExample\n\njulia> Epoch(\"2018-02-06T20:45:00.0 UTC\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch(\"2018-37T00:00 UTC\", \"yyyy-DDDTHH:MM ttt\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{S}(str[, format]) where S\n\nConstruct an Epoch with time scale S from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D can be used which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> Epoch{UTC}(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch{S}(str[, format]) where S\n\nConstruct an Epoch with time scale S from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D can be used which is parsed as \"day of year\" (see the example below).  The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> Epoch{UTC}(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -93,7 +93,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TAIEpoch",
     "category": "method",
-    "text": "TAIEpoch(str[, format])\n\nConstruct a TAIEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TAIEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TAI\n\njulia> TAIEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TAI\n\n\n\n\n\n"
+    "text": "TAIEpoch(str[, format])\n\nConstruct a TAIEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> TAIEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TAI\n\njulia> TAIEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TAI\n\n\n\n\n\n"
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TCBEpoch",
     "category": "method",
-    "text": "TCBEpoch(str[, format])\n\nConstruct a TCBEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TCBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCB\n\njulia> TCBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCB\n\n\n\n\n\n"
+    "text": "TCBEpoch(str[, format])\n\nConstruct a TCBEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> TCBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCB\n\njulia> TCBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCB\n\n\n\n\n\n"
 },
 
 {
@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TCGEpoch",
     "category": "method",
-    "text": "TCGEpoch(str[, format])\n\nConstruct a TCGEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TCGEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCG\n\njulia> TCGEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCG\n\n\n\n\n\n"
+    "text": "TCGEpoch(str[, format])\n\nConstruct a TCGEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> TCGEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCG\n\njulia> TCGEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCG\n\n\n\n\n\n"
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TDBEpoch",
     "category": "method",
-    "text": "TDBEpoch(str[, format])\n\nConstruct a TDBEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TDBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TDB\n\njulia> TDBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TDB\n\n\n\n\n\n"
+    "text": "TDBEpoch(str[, format])\n\nConstruct a TDBEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> TDBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TDB\n\njulia> TDBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TDB\n\n\n\n\n\n"
 },
 
 {
@@ -189,7 +189,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TTEpoch",
     "category": "method",
-    "text": "TTEpoch(str[, format])\n\nConstruct a TTEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TTEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TT\n\njulia> TTEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TT\n\n\n\n\n\n"
+    "text": "TTEpoch(str[, format])\n\nConstruct a TTEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> TTEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TT\n\njulia> TTEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TT\n\n\n\n\n\n"
 },
 
 {
@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.UT1Epoch",
     "category": "method",
-    "text": "UT1Epoch(str[, format])\n\nConstruct a UT1Epoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> UT1Epoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UT1\n\njulia> UT1Epoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UT1\n\n\n\n\n\n"
+    "text": "UT1Epoch(str[, format])\n\nConstruct a UT1Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> UT1Epoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UT1\n\njulia> UT1Epoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UT1\n\n\n\n\n\n"
 },
 
 {
@@ -237,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.UTCEpoch",
     "category": "method",
-    "text": "UTCEpoch(str[, format])\n\nConstruct a UTCEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> UTCEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> UTCEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "UTCEpoch(str[, format])\n\nConstruct a UTCEpoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below). The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> UTCEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> UTCEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
