@@ -11,6 +11,8 @@
     @testset "Parsing" begin
         @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
         @test Epoch("2000-01-01T00:00:00.000 UTC") == UTCEpoch(2000, 1, 1)
+        @test UTCEpoch("2000-001", "yyyy-DDD") == UTCEpoch(2000, 1, 1)
+        @test Epoch("2000-001 UTC", "yyyy-DDD ttt") == UTCEpoch(2000, 1, 1)
         @test_throws ArgumentError Epoch("2000-01-01T00:00:00.000")
     end
     @testset "Arithmetic" begin
