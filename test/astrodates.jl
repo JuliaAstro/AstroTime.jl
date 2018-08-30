@@ -1,4 +1,4 @@
-import AstroTime.AstroDates: Date, year, month, day, j2000
+import AstroTime.AstroDates: Date, Time, year, month, day, j2000
 
 const REFERENCES = (
     (-4713, 12, 31, -2451546),
@@ -33,5 +33,14 @@ const REFERENCES = (
         @test month(s) == ref[2]
         @test day(s) == ref[3]
         @test j2000(s) == ref[end]
+        @test j2000(Date(ref[1:3]...)) == ref[end]
     end
+
+    @test_throws ArgumentError Date(2018, 2, 29)
+    @test_throws ArgumentError Date(2018, 0, 1)
+    @test_throws ArgumentError Date(2018, 13, 1)
+    @test_throws ArgumentError Time(24, 59, 59.0)
+    @test_throws ArgumentError Time(23, 60, 59.0)
+    @test_throws ArgumentError Time(23, 59, 61.0)
+    @test_throws ArgumentError Time(86401, 0)
 end
