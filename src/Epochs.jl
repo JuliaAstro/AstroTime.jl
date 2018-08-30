@@ -104,7 +104,7 @@ variant of Julian date that is used. Possible values are:
 
 - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
 - `:julian`: Julian date, starts at -4712-01-01T12:00
-- `:mjd`: J2000 Julian date, starts at 1858-11-17T00:00
+- `:mjd`: Modified Julian date, starts at 1858-11-17T00:00
 
 ### Examples ###
 
@@ -406,7 +406,7 @@ for scale in TimeScales.ACRONYMS
 
         - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
         - `:julian`: Julian date, starts at -4712-01-01T12:00
-        - `:mjd`: J2000 Julian date, starts at 1858-11-17T00:00
+        - `:mjd`: Modified Julian date, starts at 1858-11-17T00:00
 
         ### Examples ###
 
