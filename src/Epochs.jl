@@ -166,14 +166,118 @@ function julian_split(ep::Epoch, tai_offset)
     jd1, jd2
 end
 
+"""
+    j2000(ep)
+
+Returns the J2000 Julian date for `ep`.
+
+### Example ###
+
+```jldoctest
+julia> j2000(UTCEpoch(2000, 1, 1, 12))
+0.0
+```
+"""
 j2000(ep::Epoch) = j2000(ep, ep.ts_offset)
+
+"""
+    julian(ep)
+
+Returns the Julian Date for epoch `ep`.
+
+### Example ###
+
+```jldoctest
+julia> julian(UTCEpoch(2000, 1, 1, 12))
+2.451545e6
+```
+"""
 julian(ep::Epoch) = julian(ep, ep.ts_offset)
+
+"""
+    modified_julian(ep)
+
+Returns the Modified Julian Date for epoch `ep`.
+
+### Example ###
+
+```jldoctest
+julia> modified_julian(UTCEpoch(2000, 1, 1, 12))
+51544.5
+```
+"""
 modified_julian(ep::Epoch) = modified_julian(ep, ep.ts_offset)
+
+"""
+    julian_split(ep)
+
+Returns the two-part Julian date for epoch `ep`, which is a tuple consisting
+of the Julian day number and the fraction of the day.
+
+### Example ###
+
+```jldoctest
+julia> julian_split(UTCEpoch(2000, 1, 2))
+(2.451545e6, 0.5)
+```
+"""
 julian_split(ep::Epoch) = julian_split(ep, ep.ts_offset)
 
+"""
+    j2000(scale, ep)
+
+Returns the J2000 Julian date for `ep` within a specific time `scale`.
+
+### Example ###
+
+```jldoctest
+julia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
+0.0
+```
+"""
 j2000(scale, ep::Epoch) = j2000(ep, tai_offset(scale, ep))
+
+"""
+    julian(ep)
+
+Returns the Julian Date for epoch `ep` within a specific time `scale`.
+
+### Example ###
+
+```jldoctest
+julia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
+2.451545e6
+```
+"""
 julian(scale, ep::Epoch) = julian(ep, tai_offset(scale, ep))
+
+"""
+    modified_julian(scale, ep)
+
+Returns the Modified Julian Date for epoch `ep` within a specific time `scale`.
+
+### Example ###
+
+```jldoctest
+julia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
+51544.5
+```
+"""
 modified_julian(scale, ep::Epoch) = modified_julian(ep, tai_offset(scale, ep))
+
+"""
+    julian_split(scale, ep)
+
+Returns the two-part Julian date for epoch `ep` within a specific time `scale`,
+which is a tuple consisting of the Julian day number and the fraction of the day.
+
+### Example ###
+
+```jldoctest
+julia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
+(2.451545e6, 0.0)
+```
+"""
 julian_split(scale, ep::Epoch) = julian_split(ep, tai_offset(scale, ep))
 
 include("offsets.jl")
