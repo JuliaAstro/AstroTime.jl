@@ -286,8 +286,8 @@ function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
     Epoch{S}(Date(year, month, day), Time(hour, minute, second))
 end
 
-function Epoch{S}(year::Int, month::Int, day::Int, dayofyear::Int,
-                  hour::Int, minute::Int, second::Int, milliseconds::Int) where S
+function Epoch{S}(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
+                  hour::Int64, minute::Int64, second::Int64, milliseconds::Int64) where S
     if dayofyear != 0
         date = Date(year, dayofyear)
     else
@@ -296,8 +296,8 @@ function Epoch{S}(year::Int, month::Int, day::Int, dayofyear::Int,
     Epoch{S}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
-function Epoch(year::Int, month::Int, day::Int, dayofyear::Int,
-               hour::Int, minute::Int, second::Int, milliseconds::Int,
+function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
+               hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
                scale::S) where S<:TimeScale
     if scale === TimeScales.NotATimeScale()
         throw(ArgumentError("Could not parse the provided string as an `Epoch`." *
