@@ -33,6 +33,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "tutorial.html#",
+    "page": "Tutorial",
+    "title": "Tutorial",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "tutorial.html#Tutorial-1",
+    "page": "Tutorial",
+    "title": "Tutorial",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "api.html#",
     "page": "API",
     "title": "API",
