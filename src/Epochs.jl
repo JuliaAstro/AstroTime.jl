@@ -116,7 +116,7 @@ julia> Epoch{UTC}(2.451545e6, origin=:julian)
 2000-01-01T12:00:00.000 UTC
 ```
 """
-function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
+function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
@@ -128,7 +128,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
     elseif origin == :mjd
         jd1 -= J2000_TO_MJD
     else
-        throw(ArgumentError("Unknown Julian epoch: $epoch"))
+        throw(ArgumentError("Unknown Julian epoch: $origin"))
     end
 
     jd1 *= SECONDS_PER_DAY
@@ -220,6 +220,23 @@ Epoch(str::AbstractString, format::Dates.DateFormat=ISOEpochFormat) = parse(Epoc
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
 
+"""
+    Epoch{S}(str[, format]) where S
+
+Construct a new `Epoch` with time scale `S` from a string `str`.
+
+[DateFormat](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+
+### Example ###
+
+```jldoctest
+julia> ep = Epoch{UTC}("2018-02-06T20:45:00.0")
+2018-02-06T20:45:00.000 UTC
+
+julia> Epoch{UTC}("February 6, 2018", "U d, y")
+2018-02-06T00:00:00.000 UTC
+```
+"""
 Epoch{S}(str::AbstractString,
          format::Dates.DateFormat=Dates.default_format(Epoch{S})) where {S} = parse(Epoch{S}, str, format)
 
@@ -304,11 +321,11 @@ for scale in TimeScales.ACRONYMS
         ### Example ###
 
         ```jldoctest
-        julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-        2018-02-06T20:45:00.000 UTC
+        julia> ep = $($name)(2018, 2, 6, 20, 45, 0.0)
+        2018-02-06T20:45:00.000 $($scale)
 
-        julia> UTCEpoch(ep, 20.0)
-        2018-02-06T20:45:20.000 UTC
+        julia> $($name)(ep, 20.0)
+        2018-02-06T20:45:20.000 $($scale)
         ```
         """
         $epoch(::Epoch, ::Any)
@@ -334,7 +351,7 @@ for scale in TimeScales.ACRONYMS
         2000-01-01T12:00:00.000 $($scale)
         ```
         """
-        $epoch(::Any, ::Any)
+        $epoch(::Number, ::Number)
     end
 end
 
