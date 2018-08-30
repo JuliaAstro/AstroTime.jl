@@ -49,19 +49,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#AstroTime.Epochs.Epoch",
+    "page": "API",
+    "title": "AstroTime.Epochs.Epoch",
+    "category": "type",
+    "text": "Epoch(str[, format])\n\nConstruct an Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the character code D is supported which is parsed as \"day of year\" (see the example below) and the character code t which is parsed as the time scale.\n\nNote: Please be aware that this constructor requires that the time scale is part of str, e.g. 2018-37T00:00 UTC. Otherwise use the explicit constructor, e.g. Epoch{UTC}.\n\nExample\n\njulia> Epoch(\"2018-02-06T20:45:00.0 UTC\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch(\"2018-37T00:00 UTC\", \"yyyy-DDDTHH:MM ttt\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+},
+
+{
     "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{AbstractString}, Tuple{S}, Tuple{AbstractString,DateFormat}} where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{S}(str[, format]) where S\n\nConstruct a new Epoch with time scale S from a string str.\n\nDateFormat\n\nExample\n\njulia> ep = Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch{S}(str[, format]) where S\n\nConstruct an Epoch with time scale S from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D can be used which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> Epoch{UTC}(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{S}, Tuple{Epoch{S,T} where T,Any}} where S",
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{Epoch{S1,T} where T}, Tuple{S2}, Tuple{S1}} where S2 where S1",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{S}(ep::Epoch{S}, Δt) where S\n\nConstruct a new Epoch with time scale S which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch{S2}(ep::Epoch{S1}) where {S1, S2}\n\nConvert ep, an Epoch with time scale S1, to an Epoch with time scale S2.\n\nExamples\n\njulia> ep = TTEpoch(2000,1,1)\n2000-01-01T00:00:00.000 TT\n\njulia> TAIEpoch(ep)\n1999-12-31T23:59:27.816 TAI\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{Int64,Int64,Int64}, NTuple{4,Int64}, NTuple{5,Int64}, Tuple{Int64,Int64,Int64,Int64,Int64,Float64}, Tuple{S}} where S",
+    "page": "API",
+    "title": "AstroTime.Epochs.Epoch",
+    "category": "method",
+    "text": "Epoch{S}(year, month, day, hour=0, minute=0, second=0.0) where S\n\nConstruct an Epoch with time scale S from date and time components.\n\nExample\n\njulia> Epoch{UTC}(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(2018, 2, 6)\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -73,11 +89,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.TAIEpoch",
     "category": "method",
-    "text": "TAIEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TAIEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TAI\n\n\n\n\n\n"
+    "text": "TAIEpoch(str[, format])\n\nConstruct a TAIEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TAIEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TAI\n\njulia> TAIEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TAI\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TAIEpoch",
+    "category": "method",
+    "text": "TAIEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a TAIEpoch from date and time components.\n\nExample\n\njulia> TAIEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 TAI\n\n\n\n\n\n"
 },
 
 {
@@ -89,11 +113,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.TCBEpoch",
     "category": "method",
-    "text": "TCBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TCBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TCB\n\n\n\n\n\n"
+    "text": "TCBEpoch(str[, format])\n\nConstruct a TCBEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TCBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCB\n\njulia> TCBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCB\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TCBEpoch",
+    "category": "method",
+    "text": "TCBEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a TCBEpoch from date and time components.\n\nExample\n\njulia> TCBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 TCB\n\n\n\n\n\n"
 },
 
 {
@@ -105,11 +137,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.TCGEpoch",
     "category": "method",
-    "text": "TCGEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCGEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TCGEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TCG\n\n\n\n\n\n"
+    "text": "TCGEpoch(str[, format])\n\nConstruct a TCGEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TCGEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TCG\n\njulia> TCGEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TCG\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TCGEpoch",
+    "category": "method",
+    "text": "TCGEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a TCGEpoch from date and time components.\n\nExample\n\njulia> TCGEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 TCG\n\n\n\n\n\n"
 },
 
 {
@@ -121,11 +161,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.TDBEpoch",
     "category": "method",
-    "text": "TDBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TDBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TDBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TDB\n\n\n\n\n\n"
+    "text": "TDBEpoch(str[, format])\n\nConstruct a TDBEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TDBEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TDB\n\njulia> TDBEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TDB\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TDBEpoch",
+    "category": "method",
+    "text": "TDBEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a TDBEpoch from date and time components.\n\nExample\n\njulia> TDBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 TDB\n\n\n\n\n\n"
 },
 
 {
@@ -137,11 +185,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.TTEpoch",
     "category": "method",
-    "text": "TTEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TTEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TTEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TT\n\n\n\n\n\n"
+    "text": "TTEpoch(str[, format])\n\nConstruct a TTEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> TTEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 TT\n\njulia> TTEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 TT\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TTEpoch",
+    "category": "method",
+    "text": "TTEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a TTEpoch from date and time components.\n\nExample\n\njulia> TTEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 TT\n\n\n\n\n\n"
 },
 
 {
@@ -153,11 +209,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.UT1Epoch",
     "category": "method",
-    "text": "UT1Epoch(ep::Epoch{S}, Δt) where S\n\nConstruct a UT1Epoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UT1Epoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(ep, 20.0)\n2018-02-06T20:45:20.000 UT1\n\n\n\n\n\n"
+    "text": "UT1Epoch(str[, format])\n\nConstruct a UT1Epoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> UT1Epoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UT1\n\njulia> UT1Epoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UT1\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.UT1Epoch",
+    "category": "method",
+    "text": "UT1Epoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a UT1Epoch from date and time components.\n\nExample\n\njulia> UT1Epoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(2018, 2, 6)\n2018-02-06T00:00:00.000 UT1\n\n\n\n\n\n"
 },
 
 {
@@ -169,11 +233,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.UTCEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.UTCEpoch-Tuple{AbstractString}",
     "page": "API",
     "title": "AstroTime.Epochs.UTCEpoch",
     "category": "method",
-    "text": "UTCEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a UTCEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "UTCEpoch(str[, format])\n\nConstruct a UTCEpoch from a string str.  Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D is supported which is parsed as \"day of year\" (see the example below).\n\nExample\n\njulia> UTCEpoch(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> UTCEpoch(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.UTCEpoch-Tuple{Int64,Int64,Int64}",
+    "page": "API",
+    "title": "AstroTime.Epochs.UTCEpoch",
+    "category": "method",
+    "text": "UTCEpoch(year, month, day, hour=0, minute=0, second=0.0)\n\nConstruct a UTCEpoch from date and time components.\n\nExample\n\njulia> UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(2018, 2, 6)\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
