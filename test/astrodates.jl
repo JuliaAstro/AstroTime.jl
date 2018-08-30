@@ -43,4 +43,7 @@ const REFERENCES = (
     @test_throws ArgumentError Time(23, 60, 59.0)
     @test_throws ArgumentError Time(23, 59, 61.0)
     @test_throws ArgumentError Time(86401, 0)
+
+    @test Date(2000, 1) == Date(2000, 1, 1)
+    @test Date(-2000, 1) == Date(-2000, 1, 1)
 end
