@@ -101,7 +101,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> Epoch{UTC}(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> Epoch{UTC}(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}\n\nConstruct an Epoch with time scale S from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> Epoch{UTC}(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> Epoch{UTC}(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TAIEpoch",
     "category": "method",
-    "text": "TAIEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TAIEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TAIEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TAI\n\njulia> TAIEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TAI\n\n\n\n\n\n"
+    "text": "TAIEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TAIEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TAIEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TAI\n\njulia> TAIEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TAI\n\n\n\n\n\n"
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TCBEpoch",
     "category": "method",
-    "text": "TCBEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TCBEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TCBEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TCB\n\njulia> TCBEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TCB\n\n\n\n\n\n"
+    "text": "TCBEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TCBEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TCBEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TCB\n\njulia> TCBEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TCB\n\n\n\n\n\n"
 },
 
 {
@@ -173,7 +173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TCGEpoch",
     "category": "method",
-    "text": "TCGEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TCGEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TCGEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TCG\n\njulia> TCGEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TCG\n\n\n\n\n\n"
+    "text": "TCGEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TCGEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TCGEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TCG\n\njulia> TCGEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TCG\n\n\n\n\n\n"
 },
 
 {
@@ -197,7 +197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TDBEpoch",
     "category": "method",
-    "text": "TDBEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TDBEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TDBEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TDB\n\njulia> TDBEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TDB\n\n\n\n\n\n"
+    "text": "TDBEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TDBEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TDBEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TDB\n\njulia> TDBEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TDB\n\n\n\n\n\n"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.TTEpoch",
     "category": "method",
-    "text": "TTEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TTEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TTEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TT\n\njulia> TTEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TT\n\n\n\n\n\n"
+    "text": "TTEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a TTEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> TTEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 TT\n\njulia> TTEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 TT\n\n\n\n\n\n"
 },
 
 {
@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.UT1Epoch",
     "category": "method",
-    "text": "UT1Epoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UT1Epoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UT1Epoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UT1\n\njulia> UT1Epoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UT1\n\n\n\n\n\n"
+    "text": "UT1Epoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UT1Epoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UT1Epoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UT1\n\njulia> UT1Epoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UT1\n\n\n\n\n\n"
 },
 
 {
@@ -269,7 +269,71 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.UTCEpoch",
     "category": "method",
-    "text": "UTCEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UTCEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UTCEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> UTCEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "UTCEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UTCEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: Modified Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UTCEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> UTCEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.j2000-Tuple{Any,Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.j2000",
+    "category": "method",
+    "text": "j2000(scale, ep)\n\nReturns the J2000 Julian date for ep within a specific time scale.\n\nExample\n\njulia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n0.0\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.j2000-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.j2000",
+    "category": "method",
+    "text": "j2000(ep)\n\nReturns the J2000 Julian date for ep.\n\nExample\n\njulia> j2000(UTCEpoch(2000, 1, 1, 12))\n0.0\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.julian-Tuple{Any,Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.julian",
+    "category": "method",
+    "text": "julian(ep)\n\nReturns the Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n2.451545e6\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.julian-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.julian",
+    "category": "method",
+    "text": "julian(ep)\n\nReturns the Julian Date for epoch ep.\n\nExample\n\njulia> julian(UTCEpoch(2000, 1, 1, 12))\n2.451545e6\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.julian_split-Tuple{Any,Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.julian_split",
+    "category": "method",
+    "text": "julian_split(scale, ep)\n\nReturns the two-part Julian date for epoch ep within a specific time scale, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n(2.451545e6, 0.0)\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.AstroDates.julian_split-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.julian_split",
+    "category": "method",
+    "text": "julian_split(ep)\n\nReturns the two-part Julian date for epoch ep, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(UTCEpoch(2000, 1, 2))\n(2.451545e6, 0.5)\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.modified_julian-Tuple{Any,Epoch}",
+    "page": "API",
+    "title": "AstroTime.Epochs.modified_julian",
+    "category": "method",
+    "text": "modified_julian(scale, ep)\n\nReturns the Modified Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n51544.5\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.modified_julian-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.Epochs.modified_julian",
+    "category": "method",
+    "text": "modified_julian(ep)\n\nReturns the Modified Julian Date for epoch ep.\n\nExample\n\njulia> modified_julian(UTCEpoch(2000, 1, 1, 12))\n51544.5\n\n\n\n\n\n"
 },
 
 {
