@@ -49,6 +49,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{AbstractString}, Tuple{S}, Tuple{AbstractString,DateFormat}} where S",
+    "page": "API",
+    "title": "AstroTime.Epochs.Epoch",
+    "category": "method",
+    "text": "Epoch{S}(str[, format]) where S\n\nConstruct a new Epoch with time scale S from a string str.\n\nDateFormat\n\nExample\n\njulia> ep = Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+},
+
+{
     "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{S}, Tuple{Epoch{S,T} where T,Any}} where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
@@ -57,7 +65,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{T}, Tuple{T}, Tuple{S}, Tuple{T,T}} where T where S",
+    "location": "api.html#AstroTime.Epochs.Epoch-Union{Tuple{T}, Tuple{T}, Tuple{S}, Tuple{T,T}} where T<:Number where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
@@ -65,7 +73,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Epoch,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.TAIEpoch",
+    "category": "method",
+    "text": "TAIEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TAIEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TAI\n\njulia> TAIEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TAI\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Number,Number}",
     "page": "API",
     "title": "AstroTime.Epochs.TAIEpoch",
     "category": "method",
@@ -73,15 +89,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TAIEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Epoch,Any}",
     "page": "API",
-    "title": "AstroTime.Epochs.TAIEpoch",
+    "title": "AstroTime.Epochs.TCBEpoch",
     "category": "method",
-    "text": "TAIEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TAIEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "TCBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TCBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCB\n\njulia> TCBEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TCB\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Number,Number}",
     "page": "API",
     "title": "AstroTime.Epochs.TCBEpoch",
     "category": "method",
@@ -89,15 +105,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCBEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Epoch,Any}",
     "page": "API",
-    "title": "AstroTime.Epochs.TCBEpoch",
+    "title": "AstroTime.Epochs.TCGEpoch",
     "category": "method",
-    "text": "TCBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "TCGEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCGEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TCGEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TCG\n\njulia> TCGEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TCG\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Number,Number}",
     "page": "API",
     "title": "AstroTime.Epochs.TCGEpoch",
     "category": "method",
@@ -105,15 +121,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TCGEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Epoch,Any}",
     "page": "API",
-    "title": "AstroTime.Epochs.TCGEpoch",
+    "title": "AstroTime.Epochs.TDBEpoch",
     "category": "method",
-    "text": "TCGEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TCGEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "TDBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TDBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TDBEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TDB\n\njulia> TDBEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TDB\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Number,Number}",
     "page": "API",
     "title": "AstroTime.Epochs.TDBEpoch",
     "category": "method",
@@ -121,15 +137,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TDBEpoch-Tuple{Epoch,Any}",
+    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Epoch,Any}",
     "page": "API",
-    "title": "AstroTime.Epochs.TDBEpoch",
+    "title": "AstroTime.Epochs.TTEpoch",
     "category": "method",
-    "text": "TDBEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TDBEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "TTEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TTEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = TTEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 TT\n\njulia> TTEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 TT\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Number,Number}",
     "page": "API",
     "title": "AstroTime.Epochs.TTEpoch",
     "category": "method",
@@ -137,35 +153,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.TTEpoch-Tuple{Epoch,Any}",
-    "page": "API",
-    "title": "AstroTime.Epochs.TTEpoch",
-    "category": "method",
-    "text": "TTEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a TTEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{Any,Any}",
-    "page": "API",
-    "title": "AstroTime.Epochs.UT1Epoch",
-    "category": "method",
-    "text": "UT1Epoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UT1Epoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UT1Epoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UT1\n\njulia> UT1Epoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UT1\n\n\n\n\n\n"
-},
-
-{
     "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{Epoch,Any}",
     "page": "API",
     "title": "AstroTime.Epochs.UT1Epoch",
     "category": "method",
-    "text": "UT1Epoch(ep::Epoch{S}, Δt) where S\n\nConstruct a UT1Epoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+    "text": "UT1Epoch(ep::Epoch{S}, Δt) where S\n\nConstruct a UT1Epoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UT1Epoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UT1\n\njulia> UT1Epoch(ep, 20.0)\n2018-02-06T20:45:20.000 UT1\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#AstroTime.Epochs.UTCEpoch-Tuple{Any,Any}",
+    "location": "api.html#AstroTime.Epochs.UT1Epoch-Tuple{Number,Number}",
     "page": "API",
-    "title": "AstroTime.Epochs.UTCEpoch",
+    "title": "AstroTime.Epochs.UT1Epoch",
     "category": "method",
-    "text": "UTCEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UTCEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UTCEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> UTCEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "UT1Epoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UT1Epoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UT1Epoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UT1\n\njulia> UT1Epoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UT1\n\n\n\n\n\n"
 },
 
 {
@@ -174,6 +174,14 @@ var documenterSearchIndex = {"docs": [
     "title": "AstroTime.Epochs.UTCEpoch",
     "category": "method",
     "text": "UTCEpoch(ep::Epoch{S}, Δt) where S\n\nConstruct a UTCEpoch which is ep shifted by Δt seconds.\n\nExample\n\njulia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)\n2018-02-06T20:45:00.000 UTC\n\njulia> UTCEpoch(ep, 20.0)\n2018-02-06T20:45:20.000 UTC\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Epochs.UTCEpoch-Tuple{Number,Number}",
+    "page": "API",
+    "title": "AstroTime.Epochs.UTCEpoch",
+    "category": "method",
+    "text": "UTCEpoch(jd1::T, jd2::T=zero(T); origin=:j2000) where T\n\nConstruct a UTCEpoch from a Julian date (optionally split into jd1 and jd2). origin determines the variant of Julian date that is used. Possible values are:\n\n:j2000: J2000 Julian date, starts at 2000-01-01T12:00\n:julian: Julian date, starts at -4712-01-01T12:00\n:mjd: J2000 Julian date, starts at 1858-11-17T00:00\n\nExamples\n\njulia> UTCEpoch(0.0, 0.5)\n2000-01-02T00:00:00.000 UTC\n\njulia> UTCEpoch(2.451545e6, origin=:julian)\n2000-01-01T12:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
