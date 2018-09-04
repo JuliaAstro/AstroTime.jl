@@ -69,7 +69,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "type",
-    "text": "Epoch(str[, format])\n\nConstruct an Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the character code D is supported which is parsed as \"day of year\" (see the example below) and the character code t which is parsed as the time scale.  The default format is yyyy-mm-ddTHH:MM:SS.sss ttt.\n\nNote: Please be aware that this constructor requires that the time scale is part of str, e.g. 2018-37T00:00 UTC. Otherwise use the explicit constructor, e.g. Epoch{UTC}.\n\nExample\n\njulia> Epoch(\"2018-02-06T20:45:00.0 UTC\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch(\"2018-37T00:00 UTC\", \"yyyy-DDDTHH:MM ttt\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch(str[, format])\n\nConstruct an Epoch from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the character code D is supported which is parsed as \"day of year\" (see the example below) and the character code t which is parsed as the time scale.  The default format is yyyy-mm-ddTHH:MM:SS.sss ttt.\n\nNote: Please be aware that this constructor requires that the time scale is part of str, e.g. 2018-02-06T00:00 UTC. Otherwise use an explicit constructor, e.g. Epoch{UTC}.\n\nExample\n\njulia> Epoch(\"2018-02-06T20:45:00.0 UTC\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch(\"2018-037T00:00 UTC\", \"yyyy-DDDTHH:MM ttt\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -77,7 +77,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
-    "text": "Epoch{S}(str[, format]) where S\n\nConstruct an Epoch with time scale S from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D can be used which is parsed as \"day of year\" (see the example below).  The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> Epoch{UTC}(\"2018-37T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
+    "text": "Epoch{S}(str[, format]) where S\n\nConstruct an Epoch with time scale S from a string str. Optionally a format definition can be passed as a DateFormat object or as a string. In addition to the character codes supported by DateFormat the code D can be used which is parsed as \"day of year\" (see the example below).  The default format is yyyy-mm-ddTHH:MM:SS.sss.\n\nExample\n\njulia> Epoch{UTC}(\"2018-02-06T20:45:00.0\")\n2018-02-06T20:45:00.000 UTC\n\njulia> Epoch{UTC}(\"February 6, 2018\", \"U d, y\")\n2018-02-06T00:00:00.000 UTC\n\njulia> Epoch{UTC}(\"2018-037T00:00\", \"yyyy-DDDTHH:MM\")\n2018-02-06T00:00:00.000 UTC\n\n\n\n\n\n"
 },
 
 {
@@ -277,7 +277,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.j2000",
     "category": "method",
-    "text": "j2000(scale, ep)\n\nReturns the J2000 Julian date for ep within a specific time scale.\n\nExample\n\njulia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n0.0\n\n\n\n\n\n"
+    "text": "j2000(scale, ep)\n\nReturns the J2000 Julian date for epoch ep within a specific time scale.\n\nExample\n\njulia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n0.0\n\n\n\n\n\n"
 },
 
 {
@@ -285,7 +285,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.j2000",
     "category": "method",
-    "text": "j2000(ep)\n\nReturns the J2000 Julian date for ep.\n\nExample\n\njulia> j2000(UTCEpoch(2000, 1, 1, 12))\n0.0\n\n\n\n\n\n"
+    "text": "j2000(ep)\n\nReturns the J2000 Julian date for epoch ep.\n\nExample\n\njulia> j2000(UTCEpoch(2000, 1, 1, 12))\n0.0\n\n\n\n\n\n"
 },
 
 {
@@ -293,7 +293,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.julian",
     "category": "method",
-    "text": "julian(ep)\n\nReturns the Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n2.451545e6\n\n\n\n\n\n"
+    "text": "julian(scale, ep)\n\nReturns the Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n2.451545e6\n\n\n\n\n\n"
 },
 
 {
@@ -345,11 +345,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#AstroTime.Epochs.tai_offset-Tuple{BarycentricDynamicalTime,Any,Any,Any,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(TDB, ep, elong, u, v)\n\nTest\n\n\n\n\n\n"
+},
+
+{
     "location": "api.html#AstroTime.Epochs.tai_offset-Tuple{BarycentricDynamicalTime,Any}",
     "page": "API",
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
-    "text": "tai_offset(TDB, ep)\n\nComputes difference TDB-TAI in seconds at the epoch ep.\n\nThe accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD. Note that an accurate transformation betweem TDB and TT depends on the trajectory of the observer. For two observers fixed on the earth surface the quantity TDB-TT can differ by as much as about 4 microseconds.\n\nReferences\n\nhttps://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB\nIssue #26\n\n\n\n\n\n"
+    "text": "tai_offset(TDB, ep)\n\nReturns the difference TDB-TAI in seconds at the epoch ep.\n\nThis routine is accurate to ~40 microseconds in the interval 1900-2100.\n\nNote: An accurate transformation between TDB and TT depends on the trajectory of the observer. For two observers fixed on Earth\'s surface the quantity TDB-TT can differ by as much as ~4 microseconds. See tai_offset(TDB, ep, elong, u, v).\n\nReferences\n\nhttps://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB\nIssue #26\n\n\n\n\n\n"
 },
 
 {
