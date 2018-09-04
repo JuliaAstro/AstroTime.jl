@@ -317,7 +317,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.j2000",
     "category": "method",
-    "text": "j2000(scale, ep)\n\nReturns the J2000 Julian date for epoch ep within a specific time scale.\n\nExample\n\njulia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n0.0\n\n\n\n\n\n"
+    "text": "j2000(scale, ep)\n\nReturns the J2000 Julian date for epoch ep within a specific time scale.\n\nExample\n\njulia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n0.0 days\n\n\n\n\n\n"
 },
 
 {
@@ -325,7 +325,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.j2000",
     "category": "method",
-    "text": "j2000(ep)\n\nReturns the J2000 Julian date for epoch ep.\n\nExample\n\njulia> j2000(UTCEpoch(2000, 1, 1, 12))\n0.0\n\n\n\n\n\n"
+    "text": "j2000(ep)\n\nReturns the J2000 Julian date for epoch ep.\n\nExample\n\njulia> j2000(UTCEpoch(2000, 1, 1, 12))\n0.0 days\n\n\n\n\n\n"
 },
 
 {
@@ -333,7 +333,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.julian",
     "category": "method",
-    "text": "julian(scale, ep)\n\nReturns the Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n2.451545e6\n\n\n\n\n\n"
+    "text": "julian(scale, ep)\n\nReturns the Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n2.451545e6 days\n\n\n\n\n\n"
 },
 
 {
@@ -341,7 +341,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.julian",
     "category": "method",
-    "text": "julian(ep)\n\nReturns the Julian Date for epoch ep.\n\nExample\n\njulia> julian(UTCEpoch(2000, 1, 1, 12))\n2.451545e6\n\n\n\n\n\n"
+    "text": "julian(ep)\n\nReturns the Julian Date for epoch ep.\n\nExample\n\njulia> julian(UTCEpoch(2000, 1, 1, 12))\n2.451545e6 days\n\n\n\n\n\n"
 },
 
 {
@@ -349,7 +349,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.julian_split",
     "category": "method",
-    "text": "julian_split(scale, ep)\n\nReturns the two-part Julian date for epoch ep within a specific time scale, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n(2.451545e6, 0.0)\n\n\n\n\n\n"
+    "text": "julian_split(scale, ep)\n\nReturns the two-part Julian date for epoch ep within a specific time scale, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n(2.451545e6 days, 0.0 days)\n\n\n\n\n\n"
 },
 
 {
@@ -357,7 +357,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.AstroDates.julian_split",
     "category": "method",
-    "text": "julian_split(ep)\n\nReturns the two-part Julian date for epoch ep, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(UTCEpoch(2000, 1, 2))\n(2.451545e6, 0.5)\n\n\n\n\n\n"
+    "text": "julian_split(ep)\n\nReturns the two-part Julian date for epoch ep, which is a tuple consisting of the Julian day number and the fraction of the day.\n\nExample\n\njulia> julian_split(UTCEpoch(2000, 1, 2))\n(2.451545e6 days, 0.5 days)\n\n\n\n\n\n"
 },
 
 {
@@ -365,7 +365,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.modified_julian",
     "category": "method",
-    "text": "modified_julian(scale, ep)\n\nReturns the Modified Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n51544.5\n\n\n\n\n\n"
+    "text": "modified_julian(scale, ep)\n\nReturns the Modified Julian Date for epoch ep within a specific time scale.\n\nExample\n\njulia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))\n51544.5 days\n\n\n\n\n\n"
 },
 
 {
@@ -373,7 +373,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.modified_julian",
     "category": "method",
-    "text": "modified_julian(ep)\n\nReturns the Modified Julian Date for epoch ep.\n\nExample\n\njulia> modified_julian(UTCEpoch(2000, 1, 1, 12))\n51544.5\n\n\n\n\n\n"
+    "text": "modified_julian(ep)\n\nReturns the Modified Julian Date for epoch ep.\n\nExample\n\njulia> modified_julian(UTCEpoch(2000, 1, 1, 12))\n51544.5 days\n\n\n\n\n\n"
 },
 
 {
