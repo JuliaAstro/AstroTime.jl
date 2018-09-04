@@ -28,15 +28,15 @@
         jd = 0.0
         ep = UTCEpoch(jd)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test j2000(ep) == jd
+        @test j2000(ep) == jd * days
         jd = 2.451545e6
         ep = UTCEpoch(jd, origin=:julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test julian(ep) == jd
+        @test julian(ep) == jd * days
         jd = 51544.5
         ep = UTCEpoch(jd, origin=:mjd)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test modified_julian(ep) == jd
+        @test modified_julian(ep) == jd * days
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Time Scales" begin

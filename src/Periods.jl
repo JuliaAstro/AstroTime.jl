@@ -1,10 +1,10 @@
 module Periods
 
-import Base: -, *, /, get, isapprox, show
+import Base: -, *, /, +, get, isapprox, show
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
-    Period, -, *, /, get,
+    Period, -, *, /, +, get,
     SECONDS_PER_MINUTE,
     SECONDS_PER_HOUR,
     SECONDS_PER_DAY,
@@ -85,6 +85,8 @@ show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
 
 (*)(Δt::T, ::U) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
 
+(+)(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit}= Period{U}(p1.Δt + p2.Δt)
+(-)(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit}= Period{U}(p1.Δt - p2.Δt)
 (-)(p::Period) = Period{p.unit}(-p.Δt)
 (*)(x::T, p::Period) where {T<:Number} = Period{p.unit}(p.Δt * x)
 (*)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt * x)

@@ -63,8 +63,8 @@ using ..TimeScales
 using ..AstroDates
 using ..Periods
 
-const J2000_TO_JULIAN = 2.451545e6
-const J2000_TO_MJD = 51544.5
+const J2000_TO_JULIAN = 2.451545e6days
+const J2000_TO_MJD = 51544.5days
 
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
@@ -124,9 +124,9 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
     if origin == :j2000
         # pass
     elseif origin == :julian
-        jd1 -= J2000_TO_JULIAN
+        jd1 -= get(J2000_TO_JULIAN)
     elseif origin == :mjd
-        jd1 -= J2000_TO_MJD
+        jd1 -= get(J2000_TO_MJD)
     else
         throw(ArgumentError("Unknown Julian epoch: $origin"))
     end
@@ -154,22 +154,22 @@ end
 Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, ep.ts_offset, Δt)
 
 function j2000(ep::Epoch, tai_offset)
-    (ep.offset + tai_offset + ep.epoch) / SECONDS_PER_DAY
+    (ep.offset + tai_offset + ep.epoch) / SECONDS_PER_DAY * days
 end
 julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_JULIAN
 modified_julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_MJD
 
 function julian_split(ep::Epoch, tai_offset)
-    jd = julian(ep, tai_offset)
+    jd = get(julian(ep, tai_offset))
     jd1 = trunc(jd)
     jd2 = jd - jd1
-    jd1, jd2
+    (jd1, jd2) .* days
 end
 
 """
     j2000(ep)
 
-Returns the J2000 Julian date for `ep`.
+Returns the J2000 Julian date for epoch `ep`.
 
 ### Example ###
 
@@ -226,7 +226,7 @@ julian_split(ep::Epoch) = julian_split(ep, ep.ts_offset)
 """
     j2000(scale, ep)
 
-Returns the J2000 Julian date for `ep` within a specific time `scale`.
+Returns the J2000 Julian date for epoch `ep` within a specific time `scale`.
 
 ### Example ###
 
@@ -238,7 +238,7 @@ julia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
 j2000(scale, ep::Epoch) = j2000(ep, tai_offset(scale, ep))
 
 """
-    julian(ep)
+    julian(scale, ep)
 
 Returns the Julian Date for epoch `ep` within a specific time `scale`.
 
@@ -315,7 +315,7 @@ code `D` is supported which is parsed as "day of year" (see the example below) a
 code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTHH:MM:SS.sss ttt`.
 
 **Note:** Please be aware that this constructor requires that the time scale is part of `str`, e.g.
-`2018-37T00:00 UTC`. Otherwise use the explicit constructor, e.g. `Epoch{UTC}`.
+`2018-02-06T00:00 UTC`. Otherwise use an explicit constructor, e.g. `Epoch{UTC}`.
 
 ### Example ###
 
@@ -323,7 +323,7 @@ code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTH
 julia> Epoch("2018-02-06T20:45:00.0 UTC")
 2018-02-06T20:45:00.000 UTC
 
-julia> Epoch("2018-37T00:00 UTC", "yyyy-DDDTHH:MM ttt")
+julia> Epoch("2018-037T00:00 UTC", "yyyy-DDDTHH:MM ttt")
 2018-02-06T00:00:00.000 UTC
 ```
 """
@@ -349,7 +349,7 @@ julia> Epoch{UTC}("2018-02-06T20:45:00.0")
 julia> Epoch{UTC}("February 6, 2018", "U d, y")
 2018-02-06T00:00:00.000 UTC
 
-julia> Epoch{UTC}("2018-37T00:00", "yyyy-DDDTHH:MM")
+julia> Epoch{UTC}("2018-037T00:00", "yyyy-DDDTHH:MM")
 2018-02-06T00:00:00.000 UTC
 ```
 """
@@ -470,6 +470,8 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 """
 -(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
 
+# Generate aliases for all defined time scales so we can use
+# e.g. `TTEpoch` instead of `Epoch{TT}`
 for scale in TimeScales.ACRONYMS
     epoch = Symbol(scale, "Epoch")
     name = string(epoch)

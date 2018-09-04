@@ -23,19 +23,21 @@ tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * ge
 end
 
 @inline function tai_offset(::UniversalTime, ep)
-    jd = julian(UTC, ep)
+    jd = get(julian(UTC, ep))
     tai_offset(UTC, ep) + getΔUT1(jd)
 end
 
 """
     tai_offset(TDB, ep)
 
-Computes difference TDB-TAI in seconds at the epoch `ep`.
+Returns the difference TDB-TAI in seconds at the epoch `ep`.
 
-The accuracy of this routine is approx 40 microseconds in interval 1900-2100 AD.
-Note that an accurate transformation betweem TDB and TT depends on the
-trajectory of the observer. For two observers fixed on the earth surface
-the quantity TDB-TT can differ by as much as about 4 microseconds.
+This routine is accurate to ~40 microseconds in the interval 1900-2100.
+
+**Note:** An accurate transformation between TDB and TT depends on the
+trajectory of the observer. For two observers fixed on Earth's surface
+the quantity TDB-TT can differ by as much as ~4 microseconds. See
+[`tai_offset(TDB, ep, elong, u, v)`](@ref).
 
 ### References ###
 
@@ -44,13 +46,19 @@ the quantity TDB-TT can differ by as much as about 4 microseconds.
 
 """
 @inline function tai_offset(::BarycentricDynamicalTime, ep)
-    dt = j2000(TT, ep)
+    dt = get(j2000(TT, ep))
     g = deg2rad(357.53 + 0.9856003dt)
     tai_offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
 end
 
-function tai_offset(::BarycentricDynamicalTime, ep, ut, elong, u, v)
-    t = get(centuries(j2000(TT, ep) * days)) / 10.0
+"""
+    tai_offset(TDB, ep, elong, u, v)
+
+Test
+"""
+function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
+    ut = fractionofday(UT1Epoch(ep))
+    t = get(centuries(j2000(TT, ep))) / 10.0
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
 
