@@ -45,6 +45,46 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Tutorial",
     "category": "section",
+    "text": "This tutorial will walk you through the features and functionality of AstroTime.jl. Everything in AstroTime.jl revolves around the Epoch data type. Epochs are basically a high-precision, time scale-aware version of the DateTime type from Julia\'s standard library. This means that while DateTime timestamps are always assumed to be based on Universal Time (UT), Epochs can be based on several pre-defined time scales, e.g. International Atomic Time (TAI) or Terrestrial Time (TT), or custom user-defined time scales. Epochs are future-proof, they can cover a range of ten times the age of the universe, and offer sub-nanosecond precision."
+},
+
+{
+    "location": "tutorial.html#Creating-Epochs-1",
+    "page": "Tutorial",
+    "title": "Creating Epochs",
+    "category": "section",
+    "text": "You construct Epoch instances similar to DateTime instance, for example by using date and time components. The main difference is that you need to supply the time scale to be used.using AstroTime\n\nep = Epoch{UTC}(2018, 2, 6, 20, 45, 0.0)\n\n# The following shorthand also works\nep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)"
+},
+
+{
+    "location": "tutorial.html#Working-with-Epochs-and-Periods-1",
+    "page": "Tutorial",
+    "title": "Working with Epochs and Periods",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial.html#Converting-Between-Time-Scales-1",
+    "page": "Tutorial",
+    "title": "Converting Between Time Scales",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial.html#Working-with-Julian-Dates-1",
+    "page": "Tutorial",
+    "title": "Working with Julian Dates",
+    "category": "section",
+    "text": ""
+},
+
+{
+    "location": "tutorial.html#Converting-to-Standard-Library-Types-1",
+    "page": "Tutorial",
+    "title": "Converting to Standard Library Types",
+    "category": "section",
     "text": ""
 },
 
