@@ -163,7 +163,7 @@ function julian_split(ep::Epoch, tai_offset)
     jd = get(julian(ep, tai_offset))
     jd1 = trunc(jd)
     jd2 = jd - jd1
-    (jd1, jd2) .* days
+    (jd1 * days, jd2 * days)
 end
 
 """
@@ -175,7 +175,7 @@ Returns the J2000 Julian date for epoch `ep`.
 
 ```jldoctest
 julia> j2000(UTCEpoch(2000, 1, 1, 12))
-0.0
+0.0 days
 ```
 """
 j2000(ep::Epoch) = j2000(ep, ep.ts_offset)
@@ -189,7 +189,7 @@ Returns the Julian Date for epoch `ep`.
 
 ```jldoctest
 julia> julian(UTCEpoch(2000, 1, 1, 12))
-2.451545e6
+2.451545e6 days
 ```
 """
 julian(ep::Epoch) = julian(ep, ep.ts_offset)
@@ -203,7 +203,7 @@ Returns the Modified Julian Date for epoch `ep`.
 
 ```jldoctest
 julia> modified_julian(UTCEpoch(2000, 1, 1, 12))
-51544.5
+51544.5 days
 ```
 """
 modified_julian(ep::Epoch) = modified_julian(ep, ep.ts_offset)
@@ -218,7 +218,7 @@ of the Julian day number and the fraction of the day.
 
 ```jldoctest
 julia> julian_split(UTCEpoch(2000, 1, 2))
-(2.451545e6, 0.5)
+(2.451545e6 days, 0.5 days)
 ```
 """
 julian_split(ep::Epoch) = julian_split(ep, ep.ts_offset)
@@ -232,7 +232,7 @@ Returns the J2000 Julian date for epoch `ep` within a specific time `scale`.
 
 ```jldoctest
 julia> j2000(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
-0.0
+0.0 days
 ```
 """
 j2000(scale, ep::Epoch) = j2000(ep, tai_offset(scale, ep))
@@ -246,7 +246,7 @@ Returns the Julian Date for epoch `ep` within a specific time `scale`.
 
 ```jldoctest
 julia> julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
-2.451545e6
+2.451545e6 days
 ```
 """
 julian(scale, ep::Epoch) = julian(ep, tai_offset(scale, ep))
@@ -260,7 +260,7 @@ Returns the Modified Julian Date for epoch `ep` within a specific time `scale`.
 
 ```jldoctest
 julia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
-51544.5
+51544.5 days
 ```
 """
 modified_julian(scale, ep::Epoch) = modified_julian(ep, tai_offset(scale, ep))
@@ -275,7 +275,7 @@ which is a tuple consisting of the Julian day number and the fraction of the day
 
 ```jldoctest
 julia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
-(2.451545e6, 0.0)
+(2.451545e6 days, 0.0 days)
 ```
 """
 julian_split(scale, ep::Epoch) = julian_split(ep, tai_offset(scale, ep))
