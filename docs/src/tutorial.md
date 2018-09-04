@@ -1,7 +1,7 @@
 # Tutorial
 
 This tutorial will walk you through the features and functionality of AstroTime.jl.
-Everything in AstroTime.jl revolves around the `Epoch` data type.
+Everything in this package revolves around the `Epoch` data type.
 `Epochs` are basically a high-precision, time scale-aware version of the [`DateTime`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates-1) type from Julia's standard library.
 This means that while `DateTime` timestamps are always assumed to be based on Universal Time (UT), `Epochs` can be created in several pre-defined time scales or custom user-defined time scales.
 
@@ -51,21 +51,21 @@ utc = UTCEpoch("06.02.2018 20:45", df)
 tai = TAIEpoch("06.02.2018 20:45", df)
 ```
 
-There are two additional character codes supported:
+There are two additional character codes supported.
 
-- `t`: This character code is parsed as the time scale, e.g.:
-    ```julia
-    # The time scale can be omitted in the constructor because it is already
-    # defined in the input string
-    julia> Epoch("2018-02-06T20:45:00.000 UTC", "yyyy-mm-ddTHH:MM:SS.sss ttt")
-    2018-02-06T20:45:00.000 UTC
-    ```
-- `D`: This character code is parsed as the day number within a year, e.g.:
-    ```julia
-    # February 6 is day number 37
-    julia> UTCEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.sss")
-    2018-02-06T20:45:00.000 UTC
-    ```
+- `t`: This character code is parsed as the time scale.
+- `D`: This character code is parsed as the day number within a year.
+
+```julia
+# The time scale can be omitted from the constructor because it is already
+# defined in the input string
+julia> Epoch("2018-02-06T20:45:00.000 UTC", "yyyy-mm-ddTHH:MM:SS.sss ttt")
+2018-02-06T20:45:00.000 UTC
+
+# February 6 is day number 37
+julia> UTCEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.sss")
+2018-02-06T20:45:00.000 UTC
+```
 
 When printing `Epochs`, you can format the output in the same way.
 
