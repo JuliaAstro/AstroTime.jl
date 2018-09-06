@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Tutorial",
     "title": "Working with Epochs and Periods",
     "category": "section",
-    "text": ""
+    "text": "You can shift an Epoch in time by adding or subtracting a Period to it."
 },
 
 {
@@ -409,11 +409,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#AstroTime.Periods.Period",
+    "page": "API",
+    "title": "AstroTime.Periods.Period",
+    "category": "type",
+    "text": "Period{U}(Δt)\n\nA Period object represents a time interval of Δt with a TimeUnit of U. Periods can be constructed via the shorthand syntax shown in the examples below.\n\nExamples\n\njulia> 3.0seconds\n3.0 seconds\n\njulia> 1.0minutes\n1.0 minutes\n\njulia> 12hours\n12 hours\n\njulia> days_per_year = 365\n365\njulia> days_per_year * days\n365 days\n\njulia> 10.0years\n10.0 years\n\njulia> 1centuries\n1 century\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.Periods.TimeUnit",
+    "page": "API",
+    "title": "AstroTime.Periods.TimeUnit",
+    "category": "type",
+    "text": "All time units are subtypes of the abstract type TimeUnit. The following time units are defined:\n\nSecond\nMinute\nHour\nDay\nYear\nCentury\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#AstroTime.TimeScales.TimeScale",
+    "page": "API",
+    "title": "AstroTime.TimeScales.TimeScale",
+    "category": "type",
+    "text": "All timescales are subtypes of the abstract type TimeScale. The following timescales are defined:\n\nUTC — Coordinated Universal Time\nUT1 — Universal Time\nTAI — International Atomic Time\nTT — Terrestrial Time\nTCG — Geocentric Coordinate Time\nTCB — Barycentric Coordinate Time\nTDB — Barycentric Dynamical Time\n\n\n\n\n\n"
+},
+
+{
     "location": "api.html#API-1",
     "page": "API",
     "title": "API",
     "category": "section",
-    "text": "DocTestSetup = quote\n    using AstroTime\nendModules = [AstroTime, AstroTime.Epochs]\nPrivate = false"
+    "text": "DocTestSetup = quote\n    using AstroTime\nendModules = [AstroTime, AstroTime.Epochs, AstroTime.Periods, AstroTime.TimeScales]\nPrivate = false"
 },
 
 ]}
