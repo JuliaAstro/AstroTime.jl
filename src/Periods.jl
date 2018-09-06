@@ -68,6 +68,36 @@ const days = Day()
 const years = Year()
 const centuries = Century()
 
+"""
+    Period{U}(Δt)
+
+A `Period` object represents a time interval of `Δt` with a [`TimeUnit`](@ref) of `U`.
+Periods can be constructed via the shorthand syntax shown in the examples below.
+
+### Examples ###
+
+```jldoctest
+julia> 3.0seconds
+3.0 seconds
+
+julia> 1.0minutes
+1.0 minutes
+
+julia> 12hours
+12 hours
+
+julia> days_per_year = 365
+365
+julia> days_per_year * days
+365 days
+
+julia> 10.0years
+10.0 years
+
+julia> 1centuries
+1 century
+```
+"""
 struct Period{U<:TimeUnit,T<:Number}
     unit::Type{U}
     Δt::T
@@ -76,12 +106,37 @@ end
 
 get(p::Period) = p.Δt
 
-show(io::IO, p::Period{Second}) = print(io, "$(get(p)) seconds")
-show(io::IO, p::Period{Minute}) = print(io, "$(get(p)) minutes")
-show(io::IO, p::Period{Hour}) = print(io, "$(get(p)) hours")
-show(io::IO, p::Period{Day}) = print(io, "$(get(p)) days")
-show(io::IO, p::Period{Year}) = print(io, "$(get(p)) years")
-show(io::IO, p::Period{Century}) = print(io, "$(get(p)) centuries")
+plural(p::Period{U, T}) where {U, T} = get(p) == one(T) ? "" : "s"
+
+function show(io::IO, p::Period{Second})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " second" : " seconds")
+end
+
+function show(io::IO, p::Period{Minute})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " minute" : " minutes")
+end
+
+function show(io::IO, p::Period{Hour})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " hour" : " hours")
+end
+
+function show(io::IO, p::Period{Day})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " day" : " days")
+end
+
+function show(io::IO, p::Period{Year})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " year" : " years")
+end
+
+function show(io::IO, p::Period{Century})
+    v = get(p)
+    print(io, v, v isa Integer && v == 1 ? " century" : " centuries")
+end
 
 (*)(Δt::T, ::U) where {T<:Number, U<:TimeUnit} = Period{U}(Δt)
 

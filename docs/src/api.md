@@ -7,6 +7,6 @@ end
 ```
 
 ```@autodocs
-Modules = [AstroTime, AstroTime.Epochs]
+Modules = [AstroTime, AstroTime.Epochs, AstroTime.Periods, AstroTime.TimeScales]
 Private = false
 ```

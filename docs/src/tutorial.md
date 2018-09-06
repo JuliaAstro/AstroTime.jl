@@ -78,6 +78,8 @@ julia> AstroTime.format(ep, "dd.mm.yyyy HH:MM ttt")
 
 ## Working with Epochs and Periods
 
+You can shift an `Epoch` in time by adding or subtracting a [`Period`](@ref) to it.
+
 ## Converting Between Time Scales
 
 ## Working with Julian Dates
