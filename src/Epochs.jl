@@ -304,6 +304,7 @@ function Epoch{S}(date::Date, time::Time) where S
     Epoch{S}(epoch, offset, from_tai)
 end
 
+Dates.default_format(::Type{Epoch}) = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
 
 """
     Epoch(str[, format])
@@ -327,9 +328,11 @@ julia> Epoch("2018-037T00:00 UTC", "yyyy-DDDTHH:MM ttt")
 2018-02-06T00:00:00.000 UTC
 ```
 """
-Epoch(str::AbstractString, format::Dates.DateFormat=ISOEpochFormat) = parse(Epoch, str, format)
+Epoch(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch)) = parse(Epoch, str, format)
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
+
+Dates.default_format(::Type{Epoch{S}}) where {S} = Dates.ISODateTimeFormat
 
 """
     Epoch{S}(str[, format]) where S

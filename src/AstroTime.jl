@@ -24,6 +24,7 @@ function __init__()
     Dates.CONVERSION_SPECIFIERS['D'] = Epochs.DayOfYearToken
     Dates.CONVERSION_DEFAULTS[TimeScale] = TimeScales.NotATimeScale()
     Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
+
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,
         Dates.Month,
@@ -35,27 +36,83 @@ function __init__()
         Dates.Millisecond,
         TimeScale,
     )
-    @eval Epochs begin
-        global ISOEpochFormat = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
-        Dates.default_format(::Type{Epoch}) = Epochs.ISOEpochFormat
-    end
 
-    for scale in TimeScales.ACRONYMS
-        epoch = Symbol(scale, "Epoch")
-        @eval begin
-            Dates.CONVERSION_TRANSLATIONS[$epoch] = (
-                Dates.Year,
-                Dates.Month,
-                Dates.Day,
-                Epochs.DayOfYearToken,
-                Dates.Hour,
-                Dates.Minute,
-                Dates.Second,
-                Dates.Millisecond,
-            )
-            Dates.default_format(::Type{$epoch}) = Dates.ISODateTimeFormat
-        end
-    end
+    Dates.CONVERSION_TRANSLATIONS[TAIEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[UTCEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[UT1Epoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[TTEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[TCGEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[TCBEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[TDBEpoch] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+    )
 end
 
 """
