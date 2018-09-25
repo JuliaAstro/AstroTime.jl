@@ -9,7 +9,13 @@
         @test ep.offset ≈ 2eps()
     end
     @testset "Parsing" begin
+        @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
         @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
+        @test UT1Epoch("2000-01-01T00:00:00.000") == UT1Epoch(2000, 1, 1)
+        @test TTEpoch("2000-01-01T00:00:00.000") == TTEpoch(2000, 1, 1)
+        @test TCGEpoch("2000-01-01T00:00:00.000") == TCGEpoch(2000, 1, 1)
+        @test TCBEpoch("2000-01-01T00:00:00.000") == TCBEpoch(2000, 1, 1)
+        @test TDBEpoch("2000-01-01T00:00:00.000") == TDBEpoch(2000, 1, 1)
         @test Epoch("2000-01-01T00:00:00.000 UTC") == UTCEpoch(2000, 1, 1)
         @test UTCEpoch("2000-001", "yyyy-DDD") == UTCEpoch(2000, 1, 1)
         @test Epoch("2000-001 UTC", "yyyy-DDD ttt") == UTCEpoch(2000, 1, 1)
