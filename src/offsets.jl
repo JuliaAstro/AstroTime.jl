@@ -133,9 +133,9 @@ function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
     tai_offset(TT, ep) + w
 end
 
-tai_offset(::InternationalAtomicTime, date, time) = 0.0
+tai_offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
 
-@inline function tai_offset(::CoordinatedUniversalTime, date, time)
+@inline function tai_offset(::CoordinatedUniversalTime, date::Date, time::Time)
     minute_in_day = hour(time) * 60 + minute(time)
     correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
     offset = findoffset(julian(date) + correction)
@@ -144,12 +144,12 @@ tai_offset(::InternationalAtomicTime, date, time) = 0.0
     getoffset(offset, date, time)
 end
 
-@inline function tai_offset(scale, date, time)
+@inline function tai_offset(scale, date::Date, time::Time, args...)
     ref = Epoch{TAI}(date, time)
     offset = 0.0
-    # Maybe replace this with a simple convergence check
+    # TODO: Maybe replace this with a simple convergence check
     for _ in 1:8
-        offset = -tai_offset(scale, Epoch{TAI}(ref, offset))
+        offset = -tai_offset(scale, Epoch{TAI}(ref, offset), args...)
     end
     offset
 end

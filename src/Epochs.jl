@@ -116,7 +116,7 @@ julia> Epoch{UTC}(2.451545e6, origin=:julian)
 2000-01-01T12:00:00.000 UTC
 ```
 """
-function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
+function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Number}
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
@@ -146,7 +146,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
 
     ftype = float(T)
     tai = Epoch{TAI}(epoch, ftype(offset), zero(ftype))
-    ts_offset = tai_offset(S, tai)
+    ts_offset = tai_offset(S, tai, args...)
     ep = Epoch{TAI}(tai, -ts_offset)
     Epoch{S}(ep.epoch, ep.offset, ts_offset)
 end
@@ -285,9 +285,9 @@ include("accessors.jl")
 
 show(io::IO, ep::Epoch{S}) where {S} = print(io, DateTime(ep), " ", S)
 
-function Epoch{S}(date::Date, time::Time) where S
+function Epoch{S}(date::Date, time::Time, args...) where S
     seconds = second(Float64, time)
-    ts_offset = tai_offset(S, date, time)
+    ts_offset = tai_offset(S, date, time, args...)
 
     sum = seconds + ts_offset
     s′ = sum - ts_offset
@@ -300,7 +300,7 @@ function Epoch{S}(date::Date, time::Time) where S
     offset = (sum - dl) + residual
     epoch  = Int64(60) * ((j2000(date) * Int64(24) + hour(time)) * Int64(60)
                           + minute(time) - Int64(720)) + dl
-    from_tai = tai_offset(S, Epoch{TAI}(epoch, offset, 0.0))
+    from_tai = tai_offset(S, Epoch{TAI}(epoch, offset, 0.0), args...)
     Epoch{S}(epoch, offset, from_tai)
 end
 
@@ -389,8 +389,8 @@ julia> Epoch{UTC}(2018, 2, 6)
 ```
 """
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
-                  minute::Int=0, second::Float64=0.0) where S
-    Epoch{S}(Date(year, month, day), Time(hour, minute, second))
+                  minute::Int=0, second::Float64=0.0, args...) where S
+    Epoch{S}(Date(year, month, day), Time(hour, minute, second), args...)
 end
 
 function Epoch{S}(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
@@ -419,7 +419,7 @@ function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
     Epoch{scale}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
-function Epoch{S2}(ep::Epoch{S1}, Δtai) where {S1, S2}
+function Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, Δtai)
 end
 
@@ -439,8 +439,8 @@ julia> TAIEpoch(ep)
 1999-12-31T23:59:27.816 TAI
 ```
 """
-function Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
-    Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep))
+function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
+    Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep, args...))
 end
 
 Epoch{S, T}(ep::Epoch{S, T}) where {S, T} = ep
@@ -546,16 +546,6 @@ for scale in TimeScales.ACRONYMS
         """
         $epoch(::Int, ::Int, ::Int)
     end
-end
-
-function TDBEpoch(ep::TTEpoch, ut, elong, u, v)
-    offset = tai_offset(TDB, ep, ut, elong, u, v)
-    TDBEpoch(ep, offset)
-end
-
-function TTEpoch(ep::TDBEpoch, ut, elong, u, v)
-    offset = tai_offset(TDB, ep, ut, elong, u, v)
-    TTEpoch(ep, offset)
 end
 
 include("leapseconds.jl")

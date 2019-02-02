@@ -4,6 +4,7 @@ using EarthOrientation
 using Reexport
 
 import Dates
+import MacroTools
 
 export @timescale
 
@@ -116,16 +117,24 @@ function __init__()
 end
 
 """
-    @timescale scale
+    @timescale scale epoch [args...] body
 
-Define a new timescale and the corresponding `Epoch` type alias.
+Define a new time scale, the corresponding `Epoch` type alias, and a function that calculates
+the offset from TAI for the new time scale.
+
+### Arguments ###
+
+- `scale`: The name of the time scale
+- `epoch`: The name of the `Epoch` parameter that is passed to the `tai_offset` function
+- `args`: Optional additional parameters that are passed to the `tai_offset` function
+- `body`: The body of the `tai_offset` function
 
 # Example
 
 ```jldoctest
 julia> @timescale GMT ep tai_offset(UTC, ep)
 
-julia> GMT <: TimeScale
+julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
@@ -133,16 +142,36 @@ Epoch{GMT,T} where T
 ```
 """
 macro timescale(scale::Symbol, ep::Symbol, args...)
-    epoch = Expr(:escape, Symbol(scale, "Epoch"))
-    sc = Expr(:escape, scale)
+    scale_type = Symbol(scale, "Type")
+    epoch_type = Symbol(scale, "Epoch")
     name = String(scale)
-    return quote
-        struct $sc <: TimeScale end
-        const $epoch = Epoch{$sc()}
-        Base.show(io::IO, $sc) = print(io, string(typeof($sc)))
-        AstroTime.TimeScales.tryparse(::Val{Symbol($name)}) = $sc()
 
-        Dates.CONVERSION_TRANSLATIONS[$epoch] = (
+    arglist = [
+        (nothing, scale_type, false, nothing),
+        (ep, Epoch, false, nothing),
+    ]
+    body = args[end]
+    append!(arglist, MacroTools.splitarg.(args[1:end-1]))
+    args = map(x->MacroTools.combinearg(x...), arglist)
+    def = Dict{Symbol, Any}(
+        :name => :((AstroTime.Epochs).tai_offset),
+        :args => map(x->MacroTools.combinearg(x...), arglist),
+        :body => body,
+        :kwargs => Any[],
+        :whereparams => (),
+    )
+    func = esc(MacroTools.combinedef(def))
+
+    MacroTools.@esc scale scale_type epoch_type
+
+    MacroTools.@q begin
+        struct $scale_type <: TimeScale end
+        const $scale = $scale_type()
+        const $epoch_type = Epoch{$scale}
+        Base.show(io::IO, ::$scale_type) = print(io, $name)
+        AstroTime.TimeScales.tryparse(::Val{Symbol($name)}) = $scale
+
+        Dates.CONVERSION_TRANSLATIONS[$epoch_type] = (
             Dates.Year,
             Dates.Month,
             Dates.Day,
@@ -151,10 +180,9 @@ macro timescale(scale::Symbol, ep::Symbol, args...)
             Dates.Second,
             Dates.Millisecond,
         )
-        Dates.default_format(::Type{$epoch}) = Dates.ISODateTimeFormat
-        function AstroTime.Epochs.tai_offset(::$sc, $ep)
-            $(args[end])
-        end
+        Dates.default_format(::Type{$epoch_type}) = Dates.ISODateTimeFormat
+
+        $func
 
         nothing
     end
