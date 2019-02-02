@@ -2,7 +2,7 @@
 
 This tutorial will walk you through the features and functionality of AstroTime.jl.
 Everything in this package revolves around the `Epoch` data type.
-`Epochs` are a high-precision, time scale-aware version of the [`DateTime`](https://docs.julialang.org/en/v1.0/stdlib/Dates) type from Julia's standard library.
+`Epochs` are a high-precision, time-scale aware version of the [`DateTime`](https://docs.julialang.org/en/v1.0/stdlib/Dates) type from Julia's standard library.
 This means that while `DateTime` timestamps are always assumed to be based on Universal Time (UT), `Epochs` can be created in several pre-defined time scales or custom user-defined time scales.
 
 ## Creating Epochs

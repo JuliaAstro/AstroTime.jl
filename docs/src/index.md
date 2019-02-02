@@ -2,12 +2,15 @@
 
 *Astronomical time keeping in Julia*
 
+AstroTime.jl provides a high-precision, time-scale aware, `DateTime`-like data type which supports
+all commonly used astronomical time scales.
+
 ## Installation
 
 The package can be installed through Julia's package manager:
 
 ```julia
-Pkg.clone("https://github.com/JuliaAstro/AstroTime.jl")
+julia> import Pkg; Pkg.add("AstroTime")
 ```
 
 ## Quickstart
@@ -21,7 +24,12 @@ utc = UTCEpoch(tt)
 
 # Transform to TDB (Barycentric Dynamical Time)
 utc = TDBEpoch(utc)
+
+# Shift an Epoch by one day
+another_day = tt + 1days
 ```
 
-Read the [API](@ref) docs.
+## Next Steps
+
+You can either follow the [Tutorial](@ref) or jump straight into the [API](@ref) reference.
 
