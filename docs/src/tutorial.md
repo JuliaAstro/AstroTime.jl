@@ -342,5 +342,5 @@ julia> SCETEpoch(ep, astronomical_unit)
 ```
 
 !!! note
-    At this time, custom epochs with additional parameters cannot be parsed from string.
+    At this time, custom epochs with additional parameters cannot be parsed from strings.
 
