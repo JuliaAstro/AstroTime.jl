@@ -8,13 +8,43 @@ const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 
+
+"""
+    tai_offset(ep)
+
+Returns the offset from TAI for the epoch `ep`.
+"""
 tai_offset(ep::Epoch) = ep.ts_offset
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
+
+"""
+    tai_offset(TT, ep)
+
+Returns the difference TT-TAI in seconds at the epoch `ep`.
+"""
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
+
+"""
+    tai_offset(TCG, ep)
+
+Returns the difference TCG-TAI in seconds at the epoch `ep`.
+"""
 tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
+
+"""
+    tai_offset(TCB, ep)
+
+Returns the difference TCB-TAI in seconds at the epoch `ep`.
+"""
 tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
 
+
+"""
+    tai_offset(UTC, ep)
+
+Returns the difference UTC-TAI in seconds at the epoch `ep`.
+"""
 @inline function tai_offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)
     offset === nothing && return 0.0
@@ -22,6 +52,11 @@ tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * va
     -getoffset(offset, ep)
 end
 
+"""
+    tai_offset(UT1, ep)
+
+Returns the difference UT1-TAI in seconds at the epoch `ep`.
+"""
 @inline function tai_offset(::UniversalTime, ep)
     jd = value(julian(UTC, ep))
     tai_offset(UTC, ep) + getΔUT1(jd)
@@ -34,15 +69,16 @@ Returns the difference TDB-TAI in seconds at the epoch `ep`.
 
 This routine is accurate to ~40 microseconds in the interval 1900-2100.
 
-**Note:** An accurate transformation between TDB and TT depends on the
-trajectory of the observer. For two observers fixed on Earth's surface
-the quantity TDB-TT can differ by as much as ~4 microseconds. See
-[`tai_offset(TDB, ep, elong, u, v)`](@ref).
+!!! note
+    An accurate transformation between TDB and TT depends on the
+    trajectory of the observer. For two observers fixed on Earth's surface
+    the quantity TDB-TT can differ by as much as ~4 microseconds. See
+    [`tai_offset(TDB, ep, elong, u, v)`](@ref).
 
 ### References ###
 
-1. [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
-2. [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
+- [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
+- [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
 @inline function tai_offset(::BarycentricDynamicalTime, ep)
@@ -54,7 +90,19 @@ end
 """
     tai_offset(TDB, ep, elong, u, v)
 
-Test
+Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on Earth.
+
+### Arguments ###
+
+- `ep`: Current epoch
+- `ut: Universal time (UT1, fraction of one day)
+- `elong: Longitude (east positive, radians)
+- `u`: Distance from Earth's spin axis (km)
+- `v`: Distance north of equatorial plane (km)
+
+### References ###
+
+- [ERFA](https://github.com/liberfa/erfa/blob/master/src/dtdb.c)
 """
 function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
     ut = fractionofday(UT1Epoch(ep))
