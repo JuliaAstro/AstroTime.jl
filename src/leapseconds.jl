@@ -19,7 +19,7 @@ end
 @inline function getoffset(t::TAIOffset, ep::Epoch)
     t.slope_tai == 0.0 && return t.offset
 
-    t.offset + get(ep - t.reference) * t.slope_tai
+    t.offset + value(ep - t.reference) * t.slope_tai
 end
 
 @inline function getoffset(to::TAIOffset, d::Date, t::Time)
@@ -58,7 +58,7 @@ for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
     start_offset = offset + (ep - dep) * rate
     stop = TAIEpoch(tai, start_offset)
     slope = rate / SECONDS_PER_DAY
-    leap = get(stop - start) / (1 + slope)
+    leap = value(stop - start) / (1 + slope)
     o = TAIOffset(start, ep + LeapSeconds.MJD_EPOCH,
                   TAIEpoch(start, leap),
                   ref,

@@ -124,9 +124,9 @@ function Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Number}
     if origin == :j2000
         # pass
     elseif origin == :julian
-        jd1 -= get(J2000_TO_JULIAN)
+        jd1 -= value(J2000_TO_JULIAN)
     elseif origin == :mjd
-        jd1 -= get(J2000_TO_MJD)
+        jd1 -= value(J2000_TO_MJD)
     else
         throw(ArgumentError("Unknown Julian epoch: $origin"))
     end
@@ -160,7 +160,7 @@ julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_JULIAN
 modified_julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_MJD
 
 function julian_split(ep::Epoch, tai_offset)
-    jd = get(julian(ep, tai_offset))
+    jd = value(julian(ep, tai_offset))
     jd1 = trunc(jd)
     jd2 = jd - jd1
     (jd1 * days, jd2 * days)
@@ -453,11 +453,11 @@ function ==(a::Epoch, b::Epoch)
     a.epoch == b.epoch && a.offset == b.offset
 end
 
-<(ep1::Epoch, ep2::Epoch) = get(ep1 - ep2) < 0.0
-isless(ep1::Epoch, ep2::Epoch) = isless(get(ep1 - ep2), 0.0)
+<(ep1::Epoch, ep2::Epoch) = value(ep1 - ep2) < 0.0
+isless(ep1::Epoch, ep2::Epoch) = isless(value(ep1 - ep2), 0.0)
 
-+(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, get(seconds(p)))
--(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -get(seconds(p)))
++(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, value(seconds(p)))
+-(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -value(seconds(p)))
 
 """
     -(a::Epoch, b::Epoch)

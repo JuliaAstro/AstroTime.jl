@@ -153,7 +153,7 @@ macro timescale(scale::Symbol, ep::Symbol, args...)
         )
         Dates.default_format(::Type{$epoch}) = Dates.ISODateTimeFormat
         function AstroTime.Epochs.tai_offset(::$sc, $ep)
-            $args[end]
+            $(args[end])
         end
 
         nothing

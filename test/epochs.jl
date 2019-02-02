@@ -5,7 +5,7 @@
         @test ep.offset ≈ 2eps()
 
         ep += 10000centuries
-        @test ep.epoch == get(seconds(10000centuries))
+        @test ep.epoch == value(seconds(10000centuries))
         @test ep.offset ≈ 2eps()
     end
     @testset "Parsing" begin

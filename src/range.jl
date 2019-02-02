@@ -5,7 +5,7 @@ import Base: (:)
 function (:)(start::Epoch{S}, step::Period, stop::Epoch{S}) where S
     step = seconds(step)
     step = start < stop ? step : -step
-    StepRangeLen(start, step, floor(Int, get(stop-start)/get(step))+1)
+    StepRangeLen(start, step, floor(Int, value(stop-start)/value(step))+1)
 end
 
 Base.step(r::StepRangeLen{T}) where {T<:Epoch} = r.step

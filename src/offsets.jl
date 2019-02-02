@@ -12,8 +12,8 @@ tai_offset(ep::Epoch) = ep.ts_offset
 
 tai_offset(::InternationalAtomicTime, ep) = 0.0
 tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
-tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * get(ep - EPOCH_77)
-tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * get(ep - EPOCH_77)
+tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
+tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
 
 @inline function tai_offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)
@@ -23,7 +23,7 @@ tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * ge
 end
 
 @inline function tai_offset(::UniversalTime, ep)
-    jd = get(julian(UTC, ep))
+    jd = value(julian(UTC, ep))
     tai_offset(UTC, ep) + getΔUT1(jd)
 end
 
@@ -46,7 +46,7 @@ the quantity TDB-TT can differ by as much as ~4 microseconds. See
 
 """
 @inline function tai_offset(::BarycentricDynamicalTime, ep)
-    dt = get(j2000(TT, ep))
+    dt = value(j2000(TT, ep))
     g = deg2rad(357.53 + 0.9856003dt)
     tai_offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
 end
@@ -58,7 +58,7 @@ Test
 """
 function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
     ut = fractionofday(UT1Epoch(ep))
-    t = get(centuries(j2000(TT, ep))) / 10.0
+    t = value(centuries(j2000(TT, ep))) / 10.0
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
 

@@ -4,7 +4,7 @@ import Base: -, *, /, +, get, isapprox, show
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
-    Period, -, *, /, +, get,
+    Period, -, *, /, +, value,
     SECONDS_PER_MINUTE,
     SECONDS_PER_HOUR,
     SECONDS_PER_DAY,
@@ -104,37 +104,37 @@ struct Period{U<:TimeUnit,T<:Number}
     Period{U}(Δt::T) where {U<:TimeUnit,T<:Number} = new{U,T}(U, Δt)
 end
 
-get(p::Period) = p.Δt
+value(p::Period) = p.Δt
 
-plural(p::Period{U, T}) where {U, T} = get(p) == one(T) ? "" : "s"
+plural(p::Period{U, T}) where {U, T} = value(p) == one(T) ? "" : "s"
 
 function show(io::IO, p::Period{Second})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " second" : " seconds")
 end
 
 function show(io::IO, p::Period{Minute})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " minute" : " minutes")
 end
 
 function show(io::IO, p::Period{Hour})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " hour" : " hours")
 end
 
 function show(io::IO, p::Period{Day})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " day" : " days")
 end
 
 function show(io::IO, p::Period{Year})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " year" : " years")
 end
 
 function show(io::IO, p::Period{Century})
-    v = get(p)
+    v = value(p)
     print(io, v, v isa Integer && v == 1 ? " century" : " centuries")
 end
 
@@ -148,7 +148,7 @@ end
 (/)(x::T, p::Period) where {T<:Number} = Period{p.unit}(x / p.Δ)
 (/)(p::Period, x::T) where {T<:Number} = Period{p.unit}(p.Δt / x)
 
-isapprox(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit} = get(p1) ≈ get(p2)
+isapprox(p1::Period{U}, p2::Period{U}) where {U<:TimeUnit} = value(p1) ≈ value(p2)
 
 (::Second)(p::Period{Second})  = p
 (::Second)(p::Period{Minute})  = Period{Second}(p.Δt * SECONDS_PER_MINUTE)
