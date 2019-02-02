@@ -19,7 +19,7 @@ import ..AstroDates:
     hour,
     j2000,
     julian,
-    julian_split,
+    julian_twopart,
     millisecond,
     minute,
     month,
@@ -47,7 +47,7 @@ export Epoch,
     hour,
     j2000,
     julian,
-    julian_split,
+    julian_twopart,
     millisecond,
     minute,
     modified_julian,
@@ -104,7 +104,7 @@ variant of Julian date that is used. Possible values are:
 
 - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
 - `:julian`: Julian date, starts at -4712-01-01T12:00
-- `:mjd`: Modified Julian date, starts at 1858-11-17T00:00
+- `:modified_julian`: Modified Julian date, starts at 1858-11-17T00:00
 
 ### Examples ###
 
@@ -125,7 +125,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:N
         # pass
     elseif origin == :julian
         jd1 -= value(J2000_TO_JULIAN)
-    elseif origin == :mjd
+    elseif origin == :modified_julian
         jd1 -= value(J2000_TO_MJD)
     else
         throw(ArgumentError("Unknown Julian epoch: $origin"))
@@ -159,7 +159,7 @@ end
 julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_JULIAN
 modified_julian(ep::Epoch, tai_offset) = j2000(ep, tai_offset) + J2000_TO_MJD
 
-function julian_split(ep::Epoch, tai_offset)
+function julian_twopart(ep::Epoch, tai_offset)
     jd = value(julian(ep, tai_offset))
     jd1 = trunc(jd)
     jd2 = jd - jd1
@@ -209,7 +209,7 @@ julia> modified_julian(UTCEpoch(2000, 1, 1, 12))
 modified_julian(ep::Epoch) = modified_julian(ep, ep.ts_offset)
 
 """
-    julian_split(ep)
+    julian_twopart(ep)
 
 Returns the two-part Julian date for epoch `ep`, which is a tuple consisting
 of the Julian day number and the fraction of the day.
@@ -217,11 +217,11 @@ of the Julian day number and the fraction of the day.
 ### Example ###
 
 ```jldoctest
-julia> julian_split(UTCEpoch(2000, 1, 2))
+julia> julian_twopart(UTCEpoch(2000, 1, 2))
 (2.451545e6 days, 0.5 days)
 ```
 """
-julian_split(ep::Epoch) = julian_split(ep, ep.ts_offset)
+julian_twopart(ep::Epoch) = julian_twopart(ep, ep.ts_offset)
 
 """
     j2000(scale, ep)
@@ -266,7 +266,7 @@ julia> modified_julian(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
 modified_julian(scale, ep::Epoch) = modified_julian(ep, tai_offset(scale, ep))
 
 """
-    julian_split(scale, ep)
+    julian_twopart(scale, ep)
 
 Returns the two-part Julian date for epoch `ep` within a specific time `scale`,
 which is a tuple consisting of the Julian day number and the fraction of the day.
@@ -274,11 +274,11 @@ which is a tuple consisting of the Julian day number and the fraction of the day
 ### Example ###
 
 ```jldoctest
-julia> julian_split(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
+julia> julian_twopart(TAI, TTEpoch(2000, 1, 1, 12, 0, 32.184))
 (2.451545e6 days, 0.0 days)
 ```
 """
-julian_split(scale, ep::Epoch) = julian_split(ep, tai_offset(scale, ep))
+julian_twopart(scale, ep::Epoch) = julian_twopart(ep, tai_offset(scale, ep))
 
 include("offsets.jl")
 include("accessors.jl")
@@ -515,7 +515,7 @@ for scale in TimeScales.ACRONYMS
 
         - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
         - `:julian`: Julian date, starts at -4712-01-01T12:00
-        - `:mjd`: Modified Julian date, starts at 1858-11-17T00:00
+        - `:modified_julian`: Modified Julian date, starts at 1858-11-17T00:00
 
         ### Examples ###
 

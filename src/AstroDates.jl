@@ -302,7 +302,7 @@ millisecond(dt::DateTime) = millisecond(time(dt))
 
 julian(dt::DateTime) = fractionofday(time(dt)) + julian(date(dt))
 j2000(dt::DateTime) = fractionofday(time(dt)) + j2000(date(dt))
-julian_split(dt::DateTime) = julian(date(dt)), fractionofday(time(dt))
+julian_twopart(dt::DateTime) = julian(date(dt)), fractionofday(time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
                                         Dates.hour(dt), Dates.minute(dt),

@@ -40,7 +40,7 @@
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test julian(ep) == jd * days
         jd = 51544.5
-        ep = UTCEpoch(jd, origin=:mjd)
+        ep = UTCEpoch(jd, origin=:modified_julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd * days
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
