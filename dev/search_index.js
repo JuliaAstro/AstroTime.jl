@@ -409,11 +409,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{BarycentricCoordinateTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(TCB, ep)\n\nReturns the difference TCB-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#AstroTime.Epochs.tai_offset-Tuple{BarycentricDynamicalTime,Any,Any,Any,Any}",
     "page": "API",
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
-    "text": "tai_offset(TDB, ep, elong, u, v)\n\nTest\n\n\n\n\n\n"
+    "text": "tai_offset(TDB, ep, elong, u, v)\n\nReturns the difference TDB-TAI in seconds at the epoch ep for an observer on Earth.\n\nArguments\n\nep: Current epoch\n`ut: Universal time (UT1, fraction of one day)\n`elong: Longitude (east positive, radians)\nu: Distance from Earth\'s spin axis (km)\nv: Distance north of equatorial plane (km)\n\nReferences\n\nERFA\n\n\n\n\n\n"
 },
 
 {
@@ -421,7 +429,47 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
-    "text": "tai_offset(TDB, ep)\n\nReturns the difference TDB-TAI in seconds at the epoch ep.\n\nThis routine is accurate to ~40 microseconds in the interval 1900-2100.\n\nNote: An accurate transformation between TDB and TT depends on the trajectory of the observer. For two observers fixed on Earth\'s surface the quantity TDB-TT can differ by as much as ~4 microseconds. See tai_offset(TDB, ep, elong, u, v).\n\nReferences\n\nhttps://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB\nIssue #26\n\n\n\n\n\n"
+    "text": "tai_offset(TDB, ep)\n\nReturns the difference TDB-TAI in seconds at the epoch ep.\n\nThis routine is accurate to ~40 microseconds in the interval 1900-2100.\n\nnote: Note\nAn accurate transformation between TDB and TT depends on the trajectory of the observer. For two observers fixed on Earth\'s surface the quantity TDB-TT can differ by as much as ~4 microseconds. See tai_offset(TDB, ep, elong, u, v).\n\nReferences\n\nhttps://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB\nIssue #26\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{CoordinatedUniversalTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(UTC, ep)\n\nReturns the difference UTC-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(ep)\n\nReturns the offset from TAI for the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{GeocentricCoordinateTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(TCG, ep)\n\nReturns the difference TCG-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{TerrestrialTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(TT, ep)\n\nReturns the difference TT-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.tai_offset-Tuple{UniversalTime,Any}",
+    "page": "API",
+    "title": "AstroTime.Epochs.tai_offset",
+    "category": "method",
+    "text": "tai_offset(UT1, ep)\n\nReturns the difference UT1-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
 },
 
 {
