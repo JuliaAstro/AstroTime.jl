@@ -77,6 +77,14 @@
         @test JULIAN_EPOCH + Inf * seconds == FUTURE_INFINITY
         @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
         @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
+        ep = UTCEpoch(2018, 2, 6, 20, 45, 59.371)
+        @test year(ep) == 2018
+        @test month(ep) == 2
+        @test day(ep) == 6
+        @test hour(ep) == 20
+        @test minute(ep) == 45
+        @test second(ep) == 59.371
+        @test second(Int, ep) == 59
     end
     @testset "Ranges" begin
         rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
