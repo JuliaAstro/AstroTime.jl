@@ -51,19 +51,101 @@ function DateTime(ep::Epoch)
     DateTime(date_comp, time_comp)
 end
 
+"""
+    year(ep::Epoch)
+
+Get the year of the epoch `ep`.
+"""
 year(ep::Epoch) = year(DateTime(ep))
+
+"""
+    month(ep::Epoch)
+
+Get the month of the epoch `ep`.
+"""
 month(ep::Epoch) = month(DateTime(ep))
+
+"""
+    day(ep::Epoch)
+
+Get the day of the epoch `ep`.
+"""
 day(ep::Epoch) = day(DateTime(ep))
+
+"""
+    yearmonthday(ep::Epoch)
+
+Get the year, month, and day of the epoch `ep` as a tuple.
+"""
 yearmonthday(ep::Epoch) = yearmonthday(DateTime(ep))
+
+"""
+    dayofyear(ep::Epoch)
+
+Get the day of the year of the epoch `ep`.
+"""
 dayofyear(ep::Epoch) = dayofyear(DateTime(ep))
+
+"""
+    hour(ep::Epoch)
+
+Get the hour of the epoch `ep`.
+"""
 hour(ep::Epoch) = hour(DateTime(ep))
+
+"""
+    minute(ep::Epoch)
+
+Get the minute of the epoch `ep`.
+"""
 minute(ep::Epoch) = minute(DateTime(ep))
+
+"""
+    second(type, ep::Epoch)
+
+Get the second of the epoch `ep` as a `type`.
+"""
 second(typ, ep::Epoch) = second(typ, DateTime(ep))
+
+"""
+    second(ep::Epoch) -> Float64
+
+Get the second of the epoch `ep` as a `Float64`.
+"""
 second(ep::Epoch) = second(Float64, DateTime(ep))
+
+"""
+    millisecond(ep::Epoch)
+
+Get the number of milliseconds of the epoch `ep`.
+"""
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
+
+"""
+    time(ep::Epoch)
+
+Get the time of the epoch `ep`.
+"""
 time(ep::Epoch) = time(DateTime(ep))
+
+"""
+    date(ep::Epoch)
+
+Get the date of the epoch `ep`.
+"""
 date(ep::Epoch) = date(DateTime(ep))
+
+"""
+    fractionofday(ep::Epoch)
+
+Get the time of the day of the epoch `ep` as a fraction.
+"""
 fractionofday(ep::Epoch) = fractionofday(time(ep))
 
+"""
+    Dates.DatetTime(ep::Epoch)
+
+Convert the epoch `ep` to a `Dates.DateTime`.
+"""
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
 
