@@ -337,6 +337,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#AstroTime.AstroDates.date-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.date",
+    "category": "method",
+    "text": "date(ep::Epoch)\n\nGet the date of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.AstroDates.fractionofday-Tuple{Epoch}",
+    "page": "API",
+    "title": "AstroTime.AstroDates.fractionofday",
+    "category": "method",
+    "text": "fractionofday(ep::Epoch)\n\nGet the time of the day of the epoch ep as a fraction.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#AstroTime.AstroDates.j2000-Tuple{Any,Epoch}",
     "page": "API",
     "title": "AstroTime.AstroDates.j2000",
@@ -470,6 +486,94 @@ var documenterSearchIndex = {"docs": [
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
     "text": "tai_offset(UT1, ep)\n\nReturns the difference UT1-TAI in seconds at the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Base.Libc.time-Tuple{Epoch}",
+    "page": "API",
+    "title": "Base.Libc.time",
+    "category": "method",
+    "text": "time(ep::Epoch)\n\nGet the time of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.day-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.day",
+    "category": "method",
+    "text": "day(ep::Epoch)\n\nGet the day of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.dayofyear-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.dayofyear",
+    "category": "method",
+    "text": "dayofyear(ep::Epoch)\n\nGet the day of the year of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.hour-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.hour",
+    "category": "method",
+    "text": "hour(ep::Epoch)\n\nGet the hour of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.millisecond-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.millisecond",
+    "category": "method",
+    "text": "millisecond(ep::Epoch)\n\nGet the number of milliseconds of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.minute-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.minute",
+    "category": "method",
+    "text": "minute(ep::Epoch)\n\nGet the minute of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.month-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.month",
+    "category": "method",
+    "text": "month(ep::Epoch)\n\nGet the month of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.second-Tuple{Any,Epoch}",
+    "page": "API",
+    "title": "Dates.second",
+    "category": "method",
+    "text": "second(type, ep::Epoch)\n\nGet the second of the epoch ep as a type.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.second-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.second",
+    "category": "method",
+    "text": "second(ep::Epoch) -> Float64\n\nGet the second of the epoch ep as a Float64.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.year-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.year",
+    "category": "method",
+    "text": "year(ep::Epoch)\n\nGet the year of the epoch ep.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#Dates.yearmonthday-Tuple{Epoch}",
+    "page": "API",
+    "title": "Dates.yearmonthday",
+    "category": "method",
+    "text": "yearmonthday(ep::Epoch)\n\nGet the year, month, and day of the epoch ep as a tuple.\n\n\n\n\n\n"
 },
 
 {
