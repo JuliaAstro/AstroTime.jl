@@ -33,7 +33,7 @@ another_day = tt + 1days
 
 ## Documentation
 
-Please refer to the [documentation][docs-url-dev] for additional
+Please refer to the [documentation][docs-url-stable] for additional
 information.
 
 [travis-badge]: https://travis-ci.org/JuliaAstro/AstroTime.jl.svg?branch=master
