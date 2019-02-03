@@ -45,6 +45,6 @@ information.
 [codecov-badge]: http://codecov.io/github/JuliaAstro/AstroTime.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaAstro/AstroTime.jl?branch=master
 [docs-badge-dev]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-url-dev]: https://juliaastro.github.io/AstroTime.jl/dev
+[docs-url-dev]: https://juliaastro.github.io/AstroTime.jl/dev/
 [docs-badge-stable]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-url-stable]: https://juliaastro.github.io/AstroTime.jl/stable
+[docs-url-stable]: https://juliaastro.github.io/AstroTime.jl/stable/
