@@ -437,7 +437,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
-    "text": "tai_offset(TDB, ep, elong, u, v)\n\nReturns the difference TDB-TAI in seconds at the epoch ep for an observer on Earth.\n\nArguments\n\nep: Current epoch\n`ut: Universal time (UT1, fraction of one day)\n`elong: Longitude (east positive, radians)\nu: Distance from Earth\'s spin axis (km)\nv: Distance north of equatorial plane (km)\n\nReferences\n\nERFA\n\n\n\n\n\n"
+    "text": "tai_offset(TDB, ep, elong, u, v)\n\nReturns the difference TDB-TAI in seconds at the epoch ep for an observer on Earth.\n\nArguments\n\nep: Current epoch\nut: Universal time (UT1, fraction of one day)\nelong: Longitude (east positive, radians)\nu: Distance from Earth\'s spin axis (km)\nv: Distance north of equatorial plane (km)\n\nReferences\n\nERFA\n\n\n\n\n\n"
 },
 
 {
