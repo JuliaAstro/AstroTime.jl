@@ -95,8 +95,8 @@ Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on E
 ### Arguments ###
 
 - `ep`: Current epoch
-- `ut: Universal time (UT1, fraction of one day)
-- `elong: Longitude (east positive, radians)
+- `ut`: Universal time (UT1, fraction of one day)
+- `elong`: Longitude (east positive, radians)
 - `u`: Distance from Earth's spin axis (km)
 - `v`: Distance north of equatorial plane (km)
 
