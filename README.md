@@ -2,7 +2,7 @@
 
 *Astronomical time keeping in Julia*
 
-[![Build Status Unix][travis-badge]][travis-url] [![Build Status Windows][av-badge]][av-url] [![Coveralls][coveralls-badge]][coveralls-url] [![Codecov][codecov-badge]][codecov-url] [![Docs Stable][docs-badge-stable]][docs-url-stable] [![Docs Latest][docs-badge-latest]][docs-url-latest]
+[![Build Status Unix][travis-badge]][travis-url] [![Build Status Windows][av-badge]][av-url] [![Coveralls][coveralls-badge]][coveralls-url] [![Codecov][codecov-badge]][codecov-url] [![Docs Stable][docs-badge-stable]][docs-url-stable] [![Docs Dev][docs-badge-dev]][docs-url-dev]
 
 AstroTime.jl provides a high-precision, time-scale aware, `DateTime`-like data type which supports
 all commonly used astronomical time scales.
@@ -33,7 +33,7 @@ another_day = tt + 1days
 
 ## Documentation
 
-Please refer to the [documentation][docs-url-latest] for additional
+Please refer to the [documentation][docs-url-stable] for additional
 information.
 
 [travis-badge]: https://travis-ci.org/JuliaAstro/AstroTime.jl.svg?branch=master
@@ -44,7 +44,7 @@ information.
 [coveralls-url]: https://coveralls.io/github/JuliaAstro/AstroTime.jl?branch=master
 [codecov-badge]: http://codecov.io/github/JuliaAstro/AstroTime.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaAstro/AstroTime.jl?branch=master
-[docs-badge-latest]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-url-latest]: https://juliaastro.github.io/AstroTime.jl/latest
+[docs-badge-dev]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-url-dev]: https://juliaastro.github.io/AstroTime.jl/dev/
 [docs-badge-stable]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-url-stable]: https://juliaastro.github.io/AstroTime.jl/stable
+[docs-url-stable]: https://juliaastro.github.io/AstroTime.jl/stable/
