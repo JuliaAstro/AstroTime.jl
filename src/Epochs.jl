@@ -419,6 +419,22 @@ function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
     Epoch{scale}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
+"""
+    Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2` by overriding the offset between `S2` and `TAI` with `Δtai`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TAIEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TAI
+
+julia> TTEpoch(32.184, ep)
+2000-01-01T00:00:32.184 TAI
+```
+"""
 function Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, Δtai)
 end
@@ -445,12 +461,14 @@ end
 
 Epoch{S, T}(ep::Epoch{S, T}) where {S, T} = ep
 
-function isapprox(a::Epoch, b::Epoch)
-    a.epoch == b.epoch && a.offset ≈ b.offset
+function isapprox(a::Epoch, b::Epoch; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps())
+    a.epoch == b.epoch &&
+    isapprox(a.offset, b.offset; atol=atol, rtol=rtol) &&
+    isapprox(a.ts_offset, b.ts_offset; atol=atol, rtol=rtol)
 end
 
 function ==(a::Epoch, b::Epoch)
-    a.epoch == b.epoch && a.offset == b.offset
+    a.epoch == b.epoch && a.offset == b.offset && a.ts_offset == b.ts_offset
 end
 
 <(ep1::Epoch, ep2::Epoch) = value(ep1 - ep2) < 0.0
@@ -471,7 +489,9 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
--(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
+-(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) +
+                         (a.offset - b.offset) +
+                         (a.ts_offset - b.ts_offset)) * seconds
 
 # Generate aliases for all defined time scales so we can use
 # e.g. `TTEpoch` instead of `Epoch{TT}`

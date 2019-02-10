@@ -30,7 +30,7 @@ end
         @test string(SCET) == "SCET"
         @test typeof(SCET) == SCETType
         scet = SCETEpoch(2000, 1, 1, 0, 8, 19.10478383615643, astronomical_unit)
-        @test SCETEpoch(2000, 1, 1, 0, 8, 19.10478383615643, astronomical_unit) ≈ utc
+        @test TAIEpoch(scet) ≈ TAIEpoch(utc)
         @test SCETEpoch(value(j2000(scet)), 0.0, astronomical_unit) ≈ scet
     end
 end
