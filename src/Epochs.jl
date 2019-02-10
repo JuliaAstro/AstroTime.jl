@@ -432,7 +432,7 @@ julia> ep = TAIEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TAI
 
 julia> TTEpoch(32.184, ep)
-2000-01-01T00:00:32.184 TAI
+2000-01-01T00:00:32.184 TT
 ```
 """
 function Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
