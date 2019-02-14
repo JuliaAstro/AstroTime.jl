@@ -557,7 +557,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Dates.second",
     "category": "method",
-    "text": "second(ep::Epoch) -> Float64\n\nGet the second of the epoch ep as a Float64.\n\n\n\n\n\n"
+    "text": "second(ep::Epoch) -> Int\n\nGet the second of the epoch ep as an Int.\n\n\n\n\n\n"
 },
 
 {
