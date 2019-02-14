@@ -257,8 +257,8 @@ hour(t::Time) = t.hour
 minute(t::Time) = t.minute
 second(::Type{Float64}, t::Time) = t.second
 second(::Type{Int}, t::Time) = floor(Int, t.second)
-second(t::Time) = second(Float64, t)
-millisecond(t::Time) = round(Int, (second(t) - second(Int, t)) * 1000)
+second(t::Time) = second(Int, t)
+millisecond(t::Time) = round(Int, (second(Float64, t) - second(Int, t)) * 1000)
 
 fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
 

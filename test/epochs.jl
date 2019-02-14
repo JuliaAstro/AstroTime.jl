@@ -21,6 +21,11 @@
         @test Epoch("2000-001 UTC", "yyyy-DDD ttt") == UTCEpoch(2000, 1, 1)
         @test_throws ArgumentError Epoch("2000-01-01T00:00:00.000")
     end
+    @testset "Output" begin
+        ep = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        @test AstroTime.format(ep, "yyyy-DDDTHH:MM:SS.sss") == "2018-226T10:02:51.551"
+        @test AstroTime.format(ep, "HH:MM ttt") == "10:02 TAI"
+    end
     @testset "Arithmetic" begin
         ep = UTCEpoch(2000, 1, 1)
         @test (ep + 1.0seconds) - ep   == 1.0seconds
@@ -83,8 +88,9 @@
         @test day(ep) == 6
         @test hour(ep) == 20
         @test minute(ep) == 45
-        @test second(ep) == 59.371
+        @test second(Float64, ep) == 59.371
         @test second(Int, ep) == 59
+        @test millisecond(ep) == 371
     end
     @testset "Ranges" begin
         rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)

@@ -108,11 +108,11 @@ Get the second of the epoch `ep` as a `type`.
 second(typ, ep::Epoch) = second(typ, DateTime(ep))
 
 """
-    second(ep::Epoch) -> Float64
+    second(ep::Epoch) -> Int
 
-Get the second of the epoch `ep` as a `Float64`.
+Get the second of the epoch `ep` as an `Int`.
 """
-second(ep::Epoch) = second(Float64, DateTime(ep))
+second(ep::Epoch) = second(Int, DateTime(ep))
 
 """
     millisecond(ep::Epoch)
