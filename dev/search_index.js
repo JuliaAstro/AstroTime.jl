@@ -153,6 +153,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{S2}, Tuple{S1}, Tuple{Any,Epoch{S1,T} where T}} where S2 where S1",
+    "page": "API",
+    "title": "AstroTime.Epochs.Epoch",
+    "category": "method",
+    "text": "Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}\n\nConvert ep, an Epoch with time scale S1, to an Epoch with time scale S2 by overriding the offset between S2 and TAI with Δtai.\n\nExamples\n\njulia> ep = TAIEpoch(2000,1,1)\n2000-01-01T00:00:00.000 TAI\n\njulia> TTEpoch(32.184, ep)\n2000-01-01T00:00:32.184 TT\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{S2}, Tuple{S1}, Tuple{Epoch{S1,T} where T,Vararg{Any,N} where N}} where S2 where S1",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
@@ -437,7 +445,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "AstroTime.Epochs.tai_offset",
     "category": "method",
-    "text": "tai_offset(TDB, ep, elong, u, v)\n\nReturns the difference TDB-TAI in seconds at the epoch ep for an observer on Earth.\n\nArguments\n\nep: Current epoch\nut: Universal time (UT1, fraction of one day)\nelong: Longitude (east positive, radians)\nu: Distance from Earth\'s spin axis (km)\nv: Distance north of equatorial plane (km)\n\nReferences\n\nERFA\n\n\n\n\n\n"
+    "text": "tai_offset(TDB, ep, elong, u, v)\n\nReturns the difference TDB-TAI in seconds at the epoch ep for an observer on Earth.\n\nArguments\n\nep: Current epoch\nelong: Longitude (east positive, radians)\nu: Distance from Earth\'s spin axis (km)\nv: Distance north of equatorial plane (km)\n\nReferences\n\nERFA\n\n\n\n\n\n"
 },
 
 {
