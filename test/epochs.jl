@@ -7,6 +7,17 @@
         ep += 10000centuries
         @test ep.epoch == value(seconds(10000centuries))
         @test ep.offset ≈ 2eps()
+
+        # Issue 44
+        elong1 = 0.0
+        elong2 = π
+        u = 6371.0
+        tai = TAIEpoch(2000, 1, 1)
+        Δtdb = tai_offset(TDB, tai, elong2, u, 0.0) - tai_offset(TDB, tai, elong1, u, 0.0)
+        tdb1 = TDBEpoch(tai, elong1, u, 0.0)
+        tdb2 = TDBEpoch(tai, elong2, u, 0.0)
+        @test value(tdb2 - tdb1) ≈ Δtdb
+        @test tdb1 != tdb2
     end
     @testset "Parsing" begin
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
@@ -78,8 +89,8 @@
         @test tt - J2000_EPOCH == 0.0seconds
     end
     @testset "Accessors" begin
-        @test JULIAN_EPOCH - Inf * seconds == PAST_INFINITY
-        @test JULIAN_EPOCH + Inf * seconds == FUTURE_INFINITY
+        @test TAIEpoch(JULIAN_EPOCH - Inf * seconds) == PAST_INFINITY
+        @test TAIEpoch(JULIAN_EPOCH + Inf * seconds) == FUTURE_INFINITY
         @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
         @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
         ep = UTCEpoch(2018, 2, 6, 20, 45, 59.371)

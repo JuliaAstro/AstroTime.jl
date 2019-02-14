@@ -66,6 +66,14 @@ using ..Periods
 const J2000_TO_JULIAN = 2.451545e6days
 const J2000_TO_MJD = 51544.5days
 
+@inline function two_sum(a, b)
+    hi = a + b
+    a1 = hi - b
+    b1 = hi - a1
+    lo = (a - a1) + (b - b1)
+    hi, lo
+end
+
 struct Epoch{S, T} <: Dates.AbstractDateTime
     epoch::Int64
     offset::T
@@ -76,17 +84,12 @@ struct Epoch{S, T} <: Dates.AbstractDateTime
 end
 
 function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
-    sum = offset + Δt
+    sum, residual = two_sum(offset, Δt)
 
     if !isfinite(sum)
         offset′ = sum
         epoch′ = sum < 0 ? typemin(Int64) : typemax(Int64)
     else
-        o′ = sum - Δt
-        d′ = sum - o′
-        Δ0 = offset - o′
-        Δd = Δt - d′
-        residual = Δ0 + Δd
         dl = floor(Int64, sum)
         offset′ = (sum - dl) + residual
         epoch′ = epoch + dl
@@ -134,13 +137,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:N
     jd1 *= SECONDS_PER_DAY
     jd2 *= SECONDS_PER_DAY
 
-    sum = jd1 + jd2
-
-    o′ = sum - jd2
-    d′ = sum - o′
-    Δ0 = jd1 - o′
-    Δd = jd2 - d′
-    residual = Δ0 + Δd
+    sum, residual = two_sum(jd1, jd2)
     epoch = floor(Int64, sum)
     offset = (sum - epoch) + residual
 
@@ -289,12 +286,7 @@ function Epoch{S}(date::Date, time::Time, args...) where S
     seconds = second(Float64, time)
     ts_offset = tai_offset(S, date, time, args...)
 
-    sum = seconds + ts_offset
-    s′ = sum - ts_offset
-    t′ = sum - s′
-    Δs = seconds  - s′
-    Δt = ts_offset - t′
-    residual = Δs + Δt
+    sum, residual = two_sum(seconds, ts_offset)
     dl = floor(Int64, sum)
 
     offset = (sum - dl) + residual
@@ -419,6 +411,22 @@ function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
     Epoch{scale}(date, Time(hour, minute, second + 1e-3milliseconds))
 end
 
+"""
+    Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2` by overriding the offset between `S2` and `TAI` with `Δtai`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TAIEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TAI
+
+julia> TTEpoch(32.184, ep)
+2000-01-01T00:00:32.184 TT
+```
+"""
 function Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, Δtai)
 end
@@ -445,12 +453,20 @@ end
 
 Epoch{S, T}(ep::Epoch{S, T}) where {S, T} = ep
 
-function isapprox(a::Epoch, b::Epoch)
-    a.epoch == b.epoch && a.offset ≈ b.offset
+function isapprox(a::Epoch, b::Epoch; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps())
+    sum_a, residual_a = two_sum(a.ts_offset, a.offset)
+    epoch_a = a.epoch + floor(Int64, sum_a)
+    offset_a = (sum_a - epoch_a) + residual_a
+
+    sum_b, residual_b = two_sum(b.ts_offset, b.offset)
+    epoch_b = b.epoch + floor(Int64, sum_b)
+    offset_b = (sum_b - epoch_b) + residual_b
+
+    epoch_a == epoch_b && isapprox(offset_a, offset_b; atol=atol, rtol=rtol)
 end
 
 function ==(a::Epoch, b::Epoch)
-    a.epoch == b.epoch && a.offset == b.offset
+    a.epoch == b.epoch && a.offset == b.offset && a.ts_offset == b.ts_offset
 end
 
 <(ep1::Epoch, ep2::Epoch) = value(ep1 - ep2) < 0.0
@@ -471,7 +487,9 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
--(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
+-(a::Epoch, b::Epoch) = ((a.offset - b.offset) +
+                         (a.ts_offset - b.ts_offset) +
+                         (a.epoch - b.epoch)) * seconds
 
 # Generate aliases for all defined time scales so we can use
 # e.g. `TTEpoch` instead of `Epoch{TT}`

@@ -67,6 +67,7 @@ for (ep, offset, dep, rate) in zip(EPOCHS, OFFSETS, DRIFT_EPOCHS, DRIFT_RATES)
 end
 
 @inline function insideleap(ep::UTCEpoch)
+    ep = TAIEpoch(ep)
     offset = findoffset(ep)
     offset === nothing && return false
 
@@ -74,6 +75,7 @@ end
 end
 
 @inline function getleap(ep::UTCEpoch)
+    ep = TAIEpoch(ep)
     offset = findoffset(ep)
     offset === nothing && return 0.0
 
