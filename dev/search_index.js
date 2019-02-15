@@ -153,19 +153,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{S2}, Tuple{S1}, Tuple{Any,Epoch{S1,T} where T}} where S2 where S1",
-    "page": "API",
-    "title": "AstroTime.Epochs.Epoch",
-    "category": "method",
-    "text": "Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}\n\nConvert ep, an Epoch with time scale S1, to an Epoch with time scale S2 by overriding the offset between S2 and TAI with Δtai.\n\nExamples\n\njulia> ep = TAIEpoch(2000,1,1)\n2000-01-01T00:00:00.000 TAI\n\njulia> TTEpoch(32.184, ep)\n2000-01-01T00:00:32.184 TT\n\n\n\n\n\n"
-},
-
-{
     "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{S2}, Tuple{S1}, Tuple{Epoch{S1,T} where T,Vararg{Any,N} where N}} where S2 where S1",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
     "text": "Epoch{S2}(ep::Epoch{S1}) where {S1, S2}\n\nConvert ep, an Epoch with time scale S1, to an Epoch with time scale S2.\n\nExamples\n\njulia> ep = TTEpoch(2000,1,1)\n2000-01-01T00:00:00.000 TT\n\njulia> TAIEpoch(ep)\n1999-12-31T23:59:27.816 TAI\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{S}, Tuple{Any,Epoch{TAI,T} where T}} where S",
+    "page": "API",
+    "title": "AstroTime.Epochs.Epoch",
+    "category": "method",
+    "text": "Epoch{S}(Δtai, ep::TAIEpoch) where S\n\nConvert ep, a TAIEpoch, to an Epoch with time scale S by overriding the offset between S2 and TAI with Δtai.\n\nExamples\n\njulia> ep = TAIEpoch(2000,1,1)\n2000-01-01T00:00:00.000 TAI\n\njulia> TTEpoch(32.184, ep)\n2000-01-01T00:00:32.184 TT\n\n\n\n\n\n"
 },
 
 {
