@@ -19,7 +19,7 @@ import ERFA
     end
     @testset "TDB" begin
         ep = UTCEpoch(2000, 1, 1)
-        @test TDBEpoch(ep) ≈ TDBEpoch(ep, 0.0, 0.0, 0.0) rtol=1e-4
+        @test TDBEpoch(ep) ≈ TDBEpoch(ep, 0.0, 0.0, 0.0) rtol=1e-3
         jd1, jd2 = value.(julian_twopart(ep))
         ut = fractionofday(UT1Epoch(ep))
         elong, u, v = abs.(randn(3)) * 1000

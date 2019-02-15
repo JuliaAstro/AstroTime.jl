@@ -412,10 +412,10 @@ function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
 end
 
 """
-    Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
+    Epoch{S}(Δtai, ep::TAIEpoch) where S
 
-Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
-scale `S2` by overriding the offset between `S2` and `TAI` with `Δtai`.
+Convert `ep`, a `TAIEpoch`, to an `Epoch` with time scale `S` by overriding
+the offset between `S2` and `TAI` with `Δtai`.
 
 ### Examples ###
 
@@ -427,8 +427,8 @@ julia> TTEpoch(32.184, ep)
 2000-01-01T00:00:32.184 TT
 ```
 """
-function Epoch{S2}(Δtai, ep::Epoch{S1}) where {S1, S2}
-    Epoch{S2}(ep.epoch, ep.offset, Δtai)
+function Epoch{S}(Δtai, ep::Epoch{TAI}) where S
+    Epoch{S}(ep.epoch, ep.offset, Δtai)
 end
 
 """
@@ -451,18 +451,26 @@ function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
     Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep, args...))
 end
 
+Epoch{TAI}(ep::Epoch) = Epoch{TAI}(ep.epoch, ep.offset, 0.0)
+
 Epoch{S, T}(ep::Epoch{S, T}) where {S, T} = ep
 
-function isapprox(a::Epoch, b::Epoch; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps())
+function isapprox(a::T, b::T; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where T <: Epoch
     sum_a, residual_a = two_sum(a.ts_offset, a.offset)
-    epoch_a = a.epoch + floor(Int64, sum_a)
-    offset_a = (sum_a - epoch_a) + residual_a
+    Δep_a = floor(Int64, sum_a)
+    epoch_a = a.epoch + Δep_a
+    offset_a = (sum_a - Δep_a) + residual_a
 
     sum_b, residual_b = two_sum(b.ts_offset, b.offset)
-    epoch_b = b.epoch + floor(Int64, sum_b)
-    offset_b = (sum_b - epoch_b) + residual_b
+    Δep_b = floor(Int64, sum_b)
+    epoch_b = b.epoch + Δep_b
+    offset_b = (sum_b - Δep_b) + residual_b
 
     epoch_a == epoch_b && isapprox(offset_a, offset_b; atol=atol, rtol=rtol)
+end
+
+function isapprox(a::Epoch, b::Epoch; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps())
+    a.epoch == b.epoch && isapprox(a.offset, b.offset; atol=atol, rtol=rtol)
 end
 
 function ==(a::Epoch, b::Epoch)
@@ -487,9 +495,21 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
--(a::Epoch, b::Epoch) = ((a.offset - b.offset) +
-                         (a.ts_offset - b.ts_offset) +
-                         (a.epoch - b.epoch)) * seconds
+function -(a::T, b::T) where T <: Epoch
+    sum_a, residual_a = two_sum(a.ts_offset, a.offset)
+    Δep_a = floor(Int64, sum_a)
+    epoch_a = a.epoch + Δep_a
+    offset_a = (sum_a - Δep_a) + residual_a
+
+    sum_b, residual_b = two_sum(b.ts_offset, b.offset)
+    Δep_b = floor(Int64, sum_b)
+    epoch_b = b.epoch + Δep_b
+    offset_b = (sum_b - Δep_b) + residual_b
+
+    ((epoch_a - epoch_b) + (offset_a - offset_b)) * seconds
+end
+
+-(a::Epoch, b::Epoch) = ((a.epoch - b.epoch) + (a.offset - b.offset)) * seconds
 
 # Generate aliases for all defined time scales so we can use
 # e.g. `TTEpoch` instead of `Epoch{TT}`

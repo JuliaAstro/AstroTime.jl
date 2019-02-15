@@ -13,11 +13,25 @@
         elong2 = π
         u = 6371.0
         tai = TAIEpoch(2000, 1, 1)
-        Δtdb = tai_offset(TDB, tai, elong2, u, 0.0) - tai_offset(TDB, tai, elong1, u, 0.0)
+        tdb_tai1 = tai_offset(TDB, tai, elong1, u, 0.0)
+        tdb_tai2 = tai_offset(TDB, tai, elong2, u, 0.0)
+        Δtdb = tdb_tai2 - tdb_tai1
+        tdb1 = TDBEpoch(tdb_tai1, tai)
+        tdb2 = TDBEpoch(tdb_tai2, tai)
+        @test value(tdb2 - tdb1) ≈ Δtdb
+        @test tdb1 != tdb2
         tdb1 = TDBEpoch(tai, elong1, u, 0.0)
         tdb2 = TDBEpoch(tai, elong2, u, 0.0)
         @test value(tdb2 - tdb1) ≈ Δtdb
         @test tdb1 != tdb2
+
+        t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
+        t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
+        t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
+        @test t1 - t0 == -32.0seconds
+        @test t1 < t0
+        @test t2 - t1 == -32.0seconds
+        @test t2 < t1
     end
     @testset "Parsing" begin
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
@@ -45,6 +59,14 @@
         @test (ep + 1.0days) - ep      == seconds(1.0days)
         @test (ep + 1.0years) - ep     == seconds(1.0years)
         @test (ep + 1.0centuries) - ep == seconds(1.0centuries)
+    end
+    @testset "Conversion" begin
+        tai = TAIEpoch(2000, 1, 1, 12)
+        @test tai.epoch == 0
+        @test tai.offset == 0.0
+        @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
+        @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
+        @test_throws MethodError UTCEpoch(-32.0, TTEpoch(tai))
     end
     @testset "Julian Dates" begin
         jd = 0.0
