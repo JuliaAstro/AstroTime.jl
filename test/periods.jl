@@ -5,12 +5,12 @@
     d = 1.0days
     y = 1.0years
     c = 1.0centuries
-    @test s == Period{Second}(1.0)
-    @test m == Period{Minute}(1.0)
-    @test h == Period{Hour}(1.0)
-    @test d == Period{Day}(1.0)
-    @test y == Period{Year}(1.0)
-    @test c == Period{Century}(1.0)
+    @test s == Period{seconds}(1.0)
+    @test m == Period{minutes}(1.0)
+    @test h == Period{hours}(1.0)
+    @test d == Period{days}(1.0)
+    @test y == Period{years}(1.0)
+    @test c == Period{centuries}(1.0)
 
     @test seconds(s) == 1.0seconds
     @test seconds(m) == 60.0seconds
@@ -53,5 +53,9 @@
     @test centuries(d) == (1.0 / 36525.0)centuries
     @test centuries(y) == (1.0 / 100.0)centuries
     @test centuries(c) == 1.0centuries
+
+    @test zero(Period{years}) == 0.0years
+    @test zero(1years) == 0years
+    @test zero(1.0years) == 0.0years
 end
 
