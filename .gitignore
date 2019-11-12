@@ -3,3 +3,4 @@
 *.jl.mem
 data/
 docs/build/
+Manifest.toml
