@@ -169,7 +169,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{T}, Tuple{T}, Tuple{S}, Tuple{T,T,Vararg{Any,N} where N}} where T<:Number where S",
+    "location": "api/#AstroTime.Epochs.Epoch-Union{Tuple{T}, Tuple{T}, Tuple{S}, Tuple{T,T,Vararg{Any,N} where N}} where T<:Period where S",
     "page": "API",
     "title": "AstroTime.Epochs.Epoch",
     "category": "method",
