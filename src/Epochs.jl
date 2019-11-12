@@ -119,7 +119,9 @@ julia> Epoch{UTC}(2.451545e6, origin=:julian)
 2000-01-01T12:00:00.000 UTC
 ```
 """
-function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Number}
+function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Period}
+    jd1 = float(value(days(jd1)))
+    jd2 = float(value(days(jd2)))
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
@@ -141,7 +143,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:N
     epoch = floor(Int64, sum)
     offset = (sum - epoch) + residual
 
-    ftype = float(T)
+    ftype = float(eltype(T))
     tai = Epoch{TAI}(epoch, ftype(offset), zero(ftype))
     ts_offset = tai_offset(S, tai, args...)
     ep = Epoch{TAI}(tai, -ts_offset)

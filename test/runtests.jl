@@ -31,6 +31,6 @@ end
         @test typeof(SCET) == SCETType
         scet = SCETEpoch(2000, 1, 1, 0, 8, 19.10478383615643, astronomical_unit)
         @test TAIEpoch(scet) ≈ TAIEpoch(utc)
-        @test SCETEpoch(value(j2000(scet)), 0.0, astronomical_unit) ≈ scet
+        @test SCETEpoch(j2000(scet), 0.0days, astronomical_unit) ≈ scet
     end
 end

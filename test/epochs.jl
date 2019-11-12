@@ -69,18 +69,22 @@
         @test_throws MethodError UTCEpoch(-32.0, TTEpoch(tai))
     end
     @testset "Julian Dates" begin
-        jd = 0.0
+        jd = 0.0days
         ep = UTCEpoch(jd)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test j2000(ep) == jd * days
-        jd = 2.451545e6
+        @test j2000(ep) == jd
+        jd = 86400.0seconds
+        ep = UTCEpoch(jd)
+        @test ep == UTCEpoch(2000, 1, 2, 12)
+        @test j2000(ep) == days(jd)
+        jd = 2.451545e6days
         ep = UTCEpoch(jd, origin=:julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test julian(ep) == jd * days
-        jd = 51544.5
+        @test julian(ep) == jd
+        jd = 51544.5days
         ep = UTCEpoch(jd, origin=:modified_julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
-        @test modified_julian(ep) == jd * days
+        @test modified_julian(ep) == jd
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Time Scales" begin
