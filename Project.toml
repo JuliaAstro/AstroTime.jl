@@ -1,0 +1,28 @@
+name = "AstroTime"
+uuid = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+EarthOrientation = "732a3c5d-d6c0-58bc-adb1-1b51709a25e2"
+LeapSeconds = "2f5f767c-a11e-5269-a972-637d4b97c32d"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+
+[compat]
+ERFA = "^0.4.0"
+EarthOrientation = "^0.4.0"
+LeapSeconds = "^0.2.0"
+MacroTools = "^0.5.0"
+MuladdMacro = "^0.2.0"
+Reexport = "^0.2.0"
+RemoteFiles = "^0.3.1"
+julia = "^1.0"
+
+[extras]
+ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
+RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "ERFA", "RemoteFiles"]
