@@ -82,17 +82,20 @@ julia&gt; julian(ep)
 2.4515455e6 days
 
 julia&gt; modified_julian(ep)
-51545.0 days</code></pre><p>To construct an <code>Epoch</code> from a Julian date do this:</p><pre><code class="language-julia">julia&gt; TTEpoch(0.5) # J2000 is the default
+51545.0 days</code></pre><p>To construct an <code>Epoch</code> from a Julian date do this:</p><pre><code class="language-julia">julia&gt; TTEpoch(0.5days) # J2000 is the default
 2000-01-02T00:00:00.000 TT
 
-julia&gt; TTEpoch(0.5, origin=:j2000)
+julia&gt; TTEpoch(0.5days, origin=:j2000)
 2000-01-02T00:00:00.000 TT
 
-julia&gt; TTEpoch(2.4515455e6, origin=:julian)
+julia&gt; TTEpoch(2.4515455e6days, origin=:julian)
 2000-01-02T00:00:00.000 TT
 
-julia&gt; TTEpoch(51545.0, origin=:modified_julian)
-2000-01-02T00:00:00.000 TT</code></pre><p>Some libraries (such as <a href="https://github.com/JuliaAstro/ERFA.jl">ERFA</a>) expect a two-part Julian date as input. You can use <code>julian_twopart(ep)</code> in this case.</p><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>You should not convert an <code>Epoch</code> to a Julian date to do arithmetic because this will result in a loss of accuracy.</p></div></div><h2><a class="nav-anchor" id="Converting-to-Standard-Library-Types-1" href="#Converting-to-Standard-Library-Types-1">Converting to Standard Library Types</a></h2><p><code>Epoch</code> instances satisfy the <code>AbstractDateTime</code> interface specified in the <a href="https://docs.julialang.org/en/v1.0/stdlib/Dates">Dates</a> module of Julia&#39;s standard library.  Thus, you should be able to pass them to other libraries which expect a standard <code>DateTime</code>. Please open an issue on <a href="https://github.com/JuliaAstro/AstroTime.jl/issues">the issue tracker</a> if you encounter any problems with this.</p><p>It is nevertheless possible to convert an <code>Epoch</code> to a <code>DateTime</code> if it should become necessary. Please note that the time scale information will be lost in the process.</p><pre><code class="language-julia">julia&gt; ep = TTEpoch(2000,1,1)
+julia&gt; TTEpoch(51545.0days, origin=:modified_julian)
+2000-01-02T00:00:00.000 TT
+
+julia&gt; TTEpoch(86400.0seconds, origin=:j2000)
+2000-01-02T12:00:00.000 TT</code></pre><p>Some libraries (such as <a href="https://github.com/JuliaAstro/ERFA.jl">ERFA</a>) expect a two-part Julian date as input. You can use <code>julian_twopart(ep)</code> in this case.</p><div class="admonition warning"><div class="admonition-title">Warning</div><div class="admonition-text"><p>You should not convert an <code>Epoch</code> to a Julian date to do arithmetic because this will result in a loss of accuracy.</p></div></div><h2><a class="nav-anchor" id="Converting-to-Standard-Library-Types-1" href="#Converting-to-Standard-Library-Types-1">Converting to Standard Library Types</a></h2><p><code>Epoch</code> instances satisfy the <code>AbstractDateTime</code> interface specified in the <a href="https://docs.julialang.org/en/v1.0/stdlib/Dates">Dates</a> module of Julia&#39;s standard library.  Thus, you should be able to pass them to other libraries which expect a standard <code>DateTime</code>. Please open an issue on <a href="https://github.com/JuliaAstro/AstroTime.jl/issues">the issue tracker</a> if you encounter any problems with this.</p><p>It is nevertheless possible to convert an <code>Epoch</code> to a <code>DateTime</code> if it should become necessary. Please note that the time scale information will be lost in the process.</p><pre><code class="language-julia">julia&gt; ep = TTEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TT
 
 julia&gt; import Dates; Dates.DateTime(ep)
