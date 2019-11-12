@@ -232,17 +232,20 @@ julia> modified_julian(ep)
 To construct an `Epoch` from a Julian date do this:
 
 ```julia
-julia> TTEpoch(0.5) # J2000 is the default
+julia> TTEpoch(0.5days) # J2000 is the default
 2000-01-02T00:00:00.000 TT
 
-julia> TTEpoch(0.5, origin=:j2000)
+julia> TTEpoch(0.5days, origin=:j2000)
 2000-01-02T00:00:00.000 TT
 
-julia> TTEpoch(2.4515455e6, origin=:julian)
+julia> TTEpoch(2.4515455e6days, origin=:julian)
 2000-01-02T00:00:00.000 TT
 
-julia> TTEpoch(51545.0, origin=:modified_julian)
+julia> TTEpoch(51545.0days, origin=:modified_julian)
 2000-01-02T00:00:00.000 TT
+
+julia> TTEpoch(86400.0seconds, origin=:j2000)
+2000-01-02T12:00:00.000 TT
 ```
 
 Some libraries (such as [ERFA](https://github.com/JuliaAstro/ERFA.jl)) expect a two-part Julian date

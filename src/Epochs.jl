@@ -99,7 +99,7 @@ function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
 end
 
 """
-    Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T}
+    Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Period}
 
 Construct an `Epoch` with time scale `S` from a Julian date
 (optionally split into `jd1` and `jd2`). `origin` determines the
@@ -112,10 +112,10 @@ variant of Julian date that is used. Possible values are:
 ### Examples ###
 
 ```jldoctest
-julia> Epoch{UTC}(0.0, 0.5)
+julia> Epoch{UTC}(0.0days, 0.5days)
 2000-01-02T00:00:00.000 UTC
 
-julia> Epoch{UTC}(2.451545e6, origin=:julian)
+julia> Epoch{UTC}(2.451545e6days, origin=:julian)
 2000-01-01T12:00:00.000 UTC
 ```
 """
@@ -547,7 +547,7 @@ for scale in TimeScales.ACRONYMS
         $epoch(::AbstractString)
 
         """
-            $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T
+            $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T<:Period
 
         Construct a $($name) from a Julian date (optionally split into
         `jd1` and `jd2`). `origin` determines the variant of Julian
@@ -560,10 +560,10 @@ for scale in TimeScales.ACRONYMS
         ### Examples ###
 
         ```jldoctest
-        julia> $($name)(0.0, 0.5)
+        julia> $($name)(0.0days, 0.5days)
         2000-01-02T00:00:00.000 $($scale)
 
-        julia> $($name)(2.451545e6, origin=:julian)
+        julia> $($name)(2.451545e6days, origin=:julian)
         2000-01-01T12:00:00.000 $($scale)
         ```
         """
