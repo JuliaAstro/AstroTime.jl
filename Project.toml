@@ -1,5 +1,6 @@
 name = "AstroTime"
 uuid = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
+version = "0.2.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
