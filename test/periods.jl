@@ -57,5 +57,9 @@
     @test zero(Period{years}) == 0.0years
     @test zero(1years) == 0years
     @test zero(1.0years) == 0.0years
+
+    @test unit(1years) == years
+    @test collect(1seconds:3seconds) == [1seconds, 2seconds, 3seconds]
+    @test collect(1.0seconds:3.0seconds) == [1.0seconds, 2.0seconds, 3.0seconds]
 end
 

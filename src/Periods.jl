@@ -1,10 +1,10 @@
 module Periods
 
-import Base: -, *, /, +, get, isapprox, show, zero, eltype
+import Base: -, *, /, +, get, isapprox, show, zero, eltype, (:), isless
 
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
-    Period, -, *, /, +, value,
+    Period, -, *, /, +, value, unit,
     SECONDS_PER_MINUTE,
     SECONDS_PER_HOUR,
     SECONDS_PER_DAY,
@@ -113,32 +113,32 @@ eltype(p::Type{<:Period{U,T}}) where {U, T} = T
 
 plural(p::Period{U, T}) where {U, T} = value(p) == one(T) ? "" : "s"
 
-function show(io::IO, p::Period{Second})
+function show(io::IO, p::Period{seconds})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " second" : " seconds")
 end
 
-function show(io::IO, p::Period{Minute})
+function show(io::IO, p::Period{minutes})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " minute" : " minutes")
 end
 
-function show(io::IO, p::Period{Hour})
+function show(io::IO, p::Period{hours})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " hour" : " hours")
 end
 
-function show(io::IO, p::Period{Day})
+function show(io::IO, p::Period{days})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " day" : " days")
 end
 
-function show(io::IO, p::Period{Year})
+function show(io::IO, p::Period{years})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " year" : " years")
 end
 
-function show(io::IO, p::Period{Century})
+function show(io::IO, p::Period{centuries})
     v = value(p)
     print(io, v, v isa Integer && v == 1 ? " century" : " centuries")
 end
@@ -153,7 +153,19 @@ end
 (/)(x, p::Period) = Period{unit(p)}(x / p.Δ)
 (/)(p::Period, x) = Period{unit(p)}(p.Δt / x)
 
+isless(p1::Period{U}, p2::Period{U}) where {U} = isless(value(p1), value(p2))
 isapprox(p1::Period{U}, p2::Period{U}) where {U} = value(p1) ≈ value(p2)
+
+(:)(start::Period{U,T}, stop::Period{U,T}) where {U,T} = (:)(start, one(T) * U, stop)
+
+function (:)(start::Period{U}, step::Period{U}, stop::Period{U}) where {U}
+    step = start < stop ? step : -step
+    StepRangeLen(start, step, floor(Int, value(stop-start)/value(step))+1)
+end
+
+Period{U,T}(p::Period{U,T}) where {U,T} = p
+
+Base.step(r::StepRangeLen{<:Period}) = r.step
 
 (::Second)(p::Period{seconds})  = p
 (::Second)(p::Period{minutes})  = Period{seconds}(p.Δt * SECONDS_PER_MINUTE)
