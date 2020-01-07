@@ -68,6 +68,8 @@ const days = Day()
 const years = Year()
 const centuries = Century()
 
+Base.broadcastable(u::TimeUnit) = Ref(u)
+
 """
     Period{U}(Δt)
 
@@ -143,7 +145,10 @@ function show(io::IO, p::Period{centuries})
     print(io, v, v isa Integer && v == 1 ? " century" : " centuries")
 end
 
-(*)(Δt::T, unit::TimeUnit) where {T} = Period{unit}(Δt)
+*(Δt::T, unit::TimeUnit) where {T<:Number} = Period{unit}(Δt)
+*(unit::TimeUnit, Δt::T) where {T<:Number} = Period{unit}(Δt)
+*(A::TimeUnit, B::AbstractArray) = broadcast(*, A, B)
+*(A::AbstractArray, B::TimeUnit) = broadcast(*, A, B)
 
 (+)(p1::Period{U}, p2::Period{U}) where {U}= Period{unit(p1)}(p1.Δt + p2.Δt)
 (-)(p1::Period{U}, p2::Period{U}) where {U}= Period{unit(p1)}(p1.Δt - p2.Δt)
