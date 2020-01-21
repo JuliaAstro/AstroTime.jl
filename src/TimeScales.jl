@@ -1,8 +1,10 @@
 module TimeScales
 
+using ItemGraphs: ItemGraph, add_edge!, items
+
 import Dates
 
-export TimeScale
+export TimeScale, find_path
 
 """
 All timescales are subtypes of the abstract type `TimeScale`.
@@ -18,7 +20,7 @@ The following timescales are defined:
 """
 abstract type TimeScale end
 
-const SCALES = (
+const NAMES = (
     :CoordinatedUniversalTime,
     :UniversalTime,
     :InternationalAtomicTime,
@@ -38,17 +40,38 @@ const ACRONYMS = (
     :TDB,
 )
 
-for (acronym, scale) in zip(ACRONYMS, SCALES)
+for (acronym, scale) in zip(ACRONYMS, NAMES)
     name = String(acronym)
     @eval begin
         struct $scale <: TimeScale end
         const $acronym = $scale()
         export $scale, $acronym
 
-        Base.show(io::IO, ::$scale) = print(io, $name)
+        Base.show(io::IO, ::$scale) = print(io, "$($name)")
         tryparse(::Val{Symbol($name)}) = $acronym
     end
 end
+
+const SCALES = ItemGraph{TimeScale}()
+
+add_edge!(SCALES, TAI, TT)
+add_edge!(SCALES, TT, TAI)
+add_edge!(SCALES, TAI, UTC)
+add_edge!(SCALES, UTC, TAI)
+add_edge!(SCALES, TAI, UT1)
+add_edge!(SCALES, UT1, TAI)
+add_edge!(SCALES, TT, UTC)
+add_edge!(SCALES, UTC, TT)
+add_edge!(SCALES, TT, UT1)
+add_edge!(SCALES, UT1, TT)
+add_edge!(SCALES, TT, TCG)
+add_edge!(SCALES, TCG, TT)
+add_edge!(SCALES, TT, TDB)
+add_edge!(SCALES, TDB, TT)
+add_edge!(SCALES, TCB, TDB)
+add_edge!(SCALES, TDB, TCB)
+
+find_path(from, to) = items(SCALES, from, to)
 
 struct NotATimeScale <: TimeScale end
 

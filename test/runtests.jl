@@ -7,17 +7,18 @@ AstroTime.update()
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m
 
-@timescale GMT ep tai_offset(UTC, ep)
-
-@timescale SCET ep distance begin
-    tai_offset(UTC, ep) + distance / speed_of_light
-end
+# @timescale GMT ep tai_offset(UTC, ep)
+#
+# @timescale SCET ep distance begin
+#     tai_offset(UTC, ep) + distance / speed_of_light
+# end
 
 @testset "AstroTime" begin
+    include("timescales.jl")
     include("periods.jl")
     include("astrodates.jl")
     # include("offsets.jl")
-    # include("epochs.jl")
+    include("epochs.jl")
     # @testset "Custom Time Scales" begin
     #     utc = UTCEpoch(2000, 1, 1, 0, 0, 0.1)
     #     gmt = GMTEpoch(2000, 1, 1, 0, 0, 0.1)

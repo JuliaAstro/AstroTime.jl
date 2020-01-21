@@ -1,6 +1,7 @@
+using ..TimeScales: find_path
 using MuladdMacro
 
-export tai_offset
+export offset
 
 include(joinpath("constants", "tdb.jl"))
 
@@ -8,44 +9,54 @@ const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 
+@inbounds function apply_offset(s::Int64, f::Float64, from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
+    path = find_path(from, to)
+    n = length(path)
+    n == 2 && return apply_offset(s, f, offset(s, f, from, to))
+    for i in 1:n-1
+        s, f = apply_offset(s, f, offset(s, f, path[i], path[i+1]))
+    end
+    return s, f
+end
+
+offset(second, fraction, s1, s2) = -offset(second, fraction, s2, s1)
+
+offset(_, _, ::InternationalAtomicTime, ::TerrestrialTime) = 32.184
+
+function offset(second, fraction, ::TerrestrialTime, ::BarycentricDynamicalTime)
+    dt = (fraction + second) / SECONDS_PER_DAY
+    g = deg2rad(357.53 + 0.9856003dt)
+    return 0.001658sin(g) + 0.000014sin(2g)
+end
 
 """
-    tai_offset(ep)
-
-Returns the offset from TAI for the epoch `ep`.
-"""
-tai_offset(ep::Epoch) = ep.ts_offset
-
-tai_offset(::InternationalAtomicTime, ep) = 0.0
-
-"""
-    tai_offset(TT, ep)
+    offset(TT, ep)
 
 Returns the difference TT-TAI in seconds at the epoch `ep`.
 """
-tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
+offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
 
 """
-    tai_offset(TCG, ep)
+    offset(TCG, ep)
 
 Returns the difference TCG-TAI in seconds at the epoch `ep`.
 """
-tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
+offset(::GeocentricCoordinateTime, ep) = offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
 
 """
-    tai_offset(TCB, ep)
+    offset(TCB, ep)
 
 Returns the difference TCB-TAI in seconds at the epoch `ep`.
 """
-tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
+offset(::BarycentricCoordinateTime, ep) = offset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
 
 
 """
-    tai_offset(UTC, ep)
+    offset(UTC, ep)
 
 Returns the difference UTC-TAI in seconds at the epoch `ep`.
 """
-@inline function tai_offset(::CoordinatedUniversalTime, ep)
+@inline function offset(::CoordinatedUniversalTime, ep)
     offset = findoffset(ep)
     offset === nothing && return 0.0
 
@@ -53,17 +64,17 @@ Returns the difference UTC-TAI in seconds at the epoch `ep`.
 end
 
 """
-    tai_offset(UT1, ep)
+    offset(UT1, ep)
 
 Returns the difference UT1-TAI in seconds at the epoch `ep`.
 """
-@inline function tai_offset(::UniversalTime, ep)
+@inline function offset(::UniversalTime, ep)
     jd = value(julian(UTC, ep))
-    tai_offset(UTC, ep) + getΔUT1(jd)
+    offset(UTC, ep) + getΔUT1(jd)
 end
 
 """
-    tai_offset(TDB, ep)
+    offset(TDB, ep)
 
 Returns the difference TDB-TAI in seconds at the epoch `ep`.
 
@@ -73,7 +84,7 @@ This routine is accurate to ~40 microseconds in the interval 1900-2100.
     An accurate transformation between TDB and TT depends on the
     trajectory of the observer. For two observers fixed on Earth's surface
     the quantity TDB-TT can differ by as much as ~4 microseconds. See
-    [`tai_offset(TDB, ep, elong, u, v)`](@ref).
+    [`offset(TDB, ep, elong, u, v)`](@ref).
 
 ### References ###
 
@@ -81,14 +92,14 @@ This routine is accurate to ~40 microseconds in the interval 1900-2100.
 - [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
-@inline function tai_offset(::BarycentricDynamicalTime, ep)
+@inline function offset(::BarycentricDynamicalTime, ep)
     dt = value(j2000(TT, ep))
     g = deg2rad(357.53 + 0.9856003dt)
-    tai_offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
+    offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
 end
 
 """
-    tai_offset(TDB, ep, elong, u, v)
+    offset(TDB, ep, elong, u, v)
 
 Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on Earth.
 
@@ -103,7 +114,7 @@ Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on E
 
 - [ERFA](https://github.com/liberfa/erfa/blob/master/src/dtdb.c)
 """
-function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
+function offset(::BarycentricDynamicalTime, ep, elong, u, v)
     ut = fractionofday(UT1Epoch(ep))
     t = value(centuries(j2000(TT, ep))) / 10.0
     # Convert UT to local solar time in radians.
@@ -177,12 +188,12 @@ function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
     # TDB-TT in seconds.
     w = wt + wf + wj
 
-    tai_offset(TT, ep) + w
+    offset(TT, ep) + w
 end
 
-tai_offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
+offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
 
-@inline function tai_offset(::CoordinatedUniversalTime, date::Date, time::Time)
+@inline function offset(::CoordinatedUniversalTime, date::Date, time::Time)
     minute_in_day = hour(time) * 60 + minute(time)
     correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
     offset = findoffset(julian(date) + correction)
@@ -191,12 +202,13 @@ tai_offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
     getoffset(offset, date, time)
 end
 
-@inline function tai_offset(scale, date::Date, time::Time, args...)
+@inline function offset(scale, date::Date, time::Time, args...)
     ref = Epoch{TAI}(date, time)
     offset = 0.0
     # TODO: Maybe replace this with a simple convergence check
     for _ in 1:8
-        offset = -tai_offset(scale, Epoch{TAI}(ref, offset), args...)
+        offset = -offset(scale, Epoch{TAI}(ref, offset), args...)
     end
     offset
 end
+
