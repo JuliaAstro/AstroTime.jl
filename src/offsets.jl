@@ -1,47 +1,63 @@
 using ..TimeScales: find_path
+using LeapSeconds: offset_tai_utc
 using MuladdMacro
 
-export offset
+export offset, insideleap
 
 include(joinpath("constants", "tdb.jl"))
 
 const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
+const JD77 = -8400.4996275days
 
-@inbounds function apply_offset(s::Int64, f::Float64, from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
+function j2000(second::Int64, fraction::Float64)
+    (fraction + second) / SECONDS_PER_DAY * days
+end
+
+function insideleap(jd0)
+    jd1 = jd0 + 1 / SECONDS_PER_DAY
+    o1 = offset_tai_utc(jd0)
+    o2 = offset_tai_utc(jd1)
+    return o1 != o2
+end
+insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(value(julian(ep)))
+insideleap(::Epoch) = false
+
+@inbounds function apply_offset(second::Int64,
+                                fraction::Float64,
+                                from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
     n = length(path)
-    n == 2 && return apply_offset(s, f, offset(s, f, from, to))
-    for i in 1:n-1
-        s, f = apply_offset(s, f, offset(s, f, path[i], path[i+1]))
+    if n == 2
+        jd = j2000(second, fraction)
+        return apply_offset(second, fraction, offset(jd, from, to))
     end
-    return s, f
+    for i in 1:n-1
+        jd = j2000(second, fraction)
+        second, fraction = apply_offset(second, fraction, offset(jd, path[i], path[i+1]))
+    end
+    return second, fraction
 end
 
-offset(second, fraction, s1, s2) = -offset(second, fraction, s2, s1)
+offset(jd, s1, s2) = -offset(jd, s2, s1)
 
-offset(_, _, ::InternationalAtomicTime, ::TerrestrialTime) = 32.184
-
-function offset(second, fraction, ::TerrestrialTime, ::BarycentricDynamicalTime)
-    dt = (fraction + second) / SECONDS_PER_DAY
-    g = deg2rad(357.53 + 0.9856003dt)
-    return 0.001658sin(g) + 0.000014sin(2g)
-end
 
 """
-    offset(TT, ep)
+    offset(second, fraction, TAI, TT)
 
 Returns the difference TT-TAI in seconds at the epoch `ep`.
 """
-offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
+offset(_, ::InternationalAtomicTime, ::TerrestrialTime) = OFFSET_TAI_TT
 
 """
     offset(TCG, ep)
 
 Returns the difference TCG-TAI in seconds at the epoch `ep`.
 """
-offset(::GeocentricCoordinateTime, ep) = offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
+function offset(jd, ::GeocentricCoordinateTime, ::TerrestrialTime)
+    LG_RATE * value(jd - JD77)
+end
 
 """
     offset(TCB, ep)
@@ -56,11 +72,12 @@ offset(::BarycentricCoordinateTime, ep) = offset(TDB, ep) + LB_RATE * value(ep -
 
 Returns the difference UTC-TAI in seconds at the epoch `ep`.
 """
-@inline function offset(::CoordinatedUniversalTime, ep)
-    offset = findoffset(ep)
-    offset === nothing && return 0.0
-
-    -getoffset(offset, ep)
+@inline function offset(jd, ::CoordinatedUniversalTime, ::InternationalAtomicTime)
+    # offset = findoffset(ep)
+    # offset === nothing && return 0.0
+    #
+    # -getoffset(offset, ep)
+    return offset_tai_utc(value(jd + J2000_TO_JULIAN))
 end
 
 """
@@ -92,10 +109,10 @@ This routine is accurate to ~40 microseconds in the interval 1900-2100.
 - [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
 
 """
-@inline function offset(::BarycentricDynamicalTime, ep)
-    dt = value(j2000(TT, ep))
+@inline function offset(jd, ::TerrestrialTime, ::BarycentricDynamicalTime)
+    dt = value(jd)
     g = deg2rad(357.53 + 0.9856003dt)
-    offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
+    return 0.001658sin(g) + 0.000014sin(2g)
 end
 
 """
@@ -196,19 +213,19 @@ offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
 @inline function offset(::CoordinatedUniversalTime, date::Date, time::Time)
     minute_in_day = hour(time) * 60 + minute(time)
     correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
-    offset = findoffset(julian(date) + correction)
-    offset === nothing && return 0.0
+    off = findoffset(julian(date) + correction)
+    off === nothing && return 0.0
 
-    getoffset(offset, date, time)
+    getoffset(off, date, time)
 end
 
 @inline function offset(scale, date::Date, time::Time, args...)
     ref = Epoch{TAI}(date, time)
-    offset = 0.0
+    off = 0.0
     # TODO: Maybe replace this with a simple convergence check
     for _ in 1:8
-        offset = -offset(scale, Epoch{TAI}(ref, offset), args...)
+        off = -offset(scale, Epoch{InternationalAtomicTime}(ref, offset), args...)
     end
-    offset
+    off
 end
 

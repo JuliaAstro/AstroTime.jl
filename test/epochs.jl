@@ -91,44 +91,721 @@
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Time Scales" begin
-        tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        tt = TTEpoch(tai)
-        # utc = UTCEpoch(tai)
-        # ut1 = UT1Epoch(tai)
-        tdb = TDBEpoch(tai)
-        # tcb = TCBEpoch(tai)
-        # tcg = TCGEpoch(tai)
-
-        @test year(tdb) == 2018
-        @test month(tdb) == 8
-        @test day(tdb) == 14
-        @test hour(tdb) == 10
-        @test minute(tdb) == 3
-        @test second(Float64, tdb) ≈ 23.73420584495539
-
-        # tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # tt = TTEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # utc = UTCEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # ut1 = UT1Epoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # tdb = TDBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # tcb = TCBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        # tcg = TCGEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-
-        # @test tai.epoch == 587512971
-        # @test tai.offset == 0.5512474363782758
-        # @test tt.epoch ==  587512939
-        # @test tt.offset == 0.3672474363782783
-        # @test utc.epoch == 587513008
-        # @test utc.offset == 0.5512474363782758
-        # @test ut1.epoch == 587513008
-        # @test ut1.offset ≈ 0.48504859616502927 rtol=1e-3
-        # @test tdb.epoch == 587512939
-        # @test tdb.offset ≈ 0.3682890196414874 atol=1e-14
-        # @test tcb.epoch == 587512919
-        # @test tcb.offset == 0.005062972974656077
-        # @test tcg.epoch == 587512938
-        # @test tcg.offset == 0.45195931572465753
-
+        @testset "TAI<->TT" begin
+            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+            out_ep = TTEpoch(ep)
+            @test year(out_ep) == 2018
+            @test month(out_ep) == 8
+            @test day(out_ep) == 14
+            @test hour(out_ep) == 10
+            @test minute(out_ep) == 3
+            @test second(Float64, out_ep) ≈ 2.3735247436378273e+01 atol=1e-12
+            in_ep = TAIEpoch(out_ep)
+            @test year(in_ep) == 2018
+            @test month(in_ep) == 8
+            @test day(in_ep) == 14
+            @test hour(in_ep) == 10
+            @test minute(in_ep) == 2
+            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        end
+        @testset "TAI<->UTC" begin
+            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+            out_ep = UTCEpoch(ep)
+            @test year(out_ep) == 2018
+            @test month(out_ep) == 8
+            @test day(out_ep) == 14
+            @test hour(out_ep) == 10
+            @test minute(out_ep) == 2
+            @test second(Float64, out_ep) ≈ 1.4551247436378276e+01 atol=1e-12
+            in_ep = TAIEpoch(out_ep)
+            @test year(in_ep) == 2018
+            @test month(in_ep) == 8
+            @test day(in_ep) == 14
+            @test hour(in_ep) == 10
+            @test minute(in_ep) == 2
+            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        end
+        @testset "TAI<->TDB" begin
+            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+            out_ep = TDBEpoch(ep)
+            @test year(out_ep) == 2018
+            @test month(out_ep) == 8
+            @test day(out_ep) == 14
+            @test hour(out_ep) == 10
+            @test minute(out_ep) == 3
+            @test second(Float64, out_ep) ≈ 2.3734205844955390e+01 atol=1e-12
+            in_ep = TAIEpoch(out_ep)
+            @test year(in_ep) == 2018
+            @test month(in_ep) == 8
+            @test day(in_ep) == 14
+            @test hour(in_ep) == 10
+            @test minute(in_ep) == 2
+            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        end
+        # @testset "TAI<->TCB" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 4.4097432701198270e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TAI<->TCG" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 2.4650535580099750e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TAI<->UT1" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 1.4617328996852756e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->TAI" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 1.9367247436378280e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->UTC" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.2367247436378280e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->TDB" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.1550205853115330e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->TCB" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 1.1913432210338932e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->TCG" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.2466535557669786e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TT<->UT1" begin
+        #     ep = TTEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.2433329223481640e+01 atol=1e-12
+        #     in_ep = TTEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->TAI" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 2.8551247436378276e+01 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->TT" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 7.3524743637827330e-01 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->TDB" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 7.3420583557444980e-01 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->TCB" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 2.1097433265509650e+01 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->TCG" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 1.6505356058861196e+00 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UTC<->UT1" begin
+        #     ep = UTCEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.1617328736316390e+01 atol=1e-12
+        #     in_ep = UTCEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->TAI" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 1.9368289019641487e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->TT" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.1552289019641485e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->UTC" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.2368289019641490e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->TCB" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 1.1914473793618030e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->TCG" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.2467577140933720e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TDB<->UT1" begin
+        #     ep = TDBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.2434370806737520e+01 atol=1e-12
+        #     in_ep = TDBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->TAI" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 5.9005062972974656e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->TT" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 3.1189062972974654e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->UTC" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 2.2005062972974656e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->TDB" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 3.1188021394874360e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->TCG" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 3.2104351080075170e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCB<->UT1" begin
+        #     ep = TCBEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 2.2071144903463825e+01 atol=1e-12
+        #     in_ep = TCBEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->TAI" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 1.8451959315724658e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->TT" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.0635959315724655e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->UTC" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.1451959315724660e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->TDB" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.0634917732693770e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->TCB" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 1.0998144075725655e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TCG<->UT1" begin
+        #     ep = TCGEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UT1Epoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 1
+        #     @test second(Float64, out_ep) ≈ 4.1518041109273234e+01 atol=1e-12
+        #     in_ep = TCGEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->TAI" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TAIEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 2.8485166135974850e+01 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->TT" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 6.6916613597484800e-01 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->UTC" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 5.1485166135974850e+01 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->TDB" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 6.6812453518777910e-01 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->TCB" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 2.1031351964098377e+01 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "UT1<->TCG" begin
+        #     ep = UT1Epoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TCGEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 4
+        #     @test second(Float64, out_ep) ≈ 1.5844543054366440e+00 atol=1e-12
+        #     in_ep = UT1Epoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        #
         tt = TTEpoch(2000, 1, 1, 12)
         @test tt - J2000_EPOCH == 0.0seconds
     end
@@ -155,45 +832,51 @@
     #     rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
     #     @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
     # end
-    # @testset "Leap Seconds" begin
-    #     @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
-    #
-    #     # Test transformation to calendar date during pre-leap second era
-    #     @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
-    #
-    #     let
-    #         before = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
-    #         start = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
-    #         during = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
-    #         after = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
-    #
-    #         @test before.epoch == 394372833
-    #         @test before.offset == 0.0
-    #         @test before.ts_offset == -34.0
-    #
-    #         @test start.epoch == 394372834
-    #         @test start.offset == 0.0
-    #         @test start.ts_offset == -35.0
-    #
-    #         @test during.epoch == 394372834
-    #         @test during.offset == 0.5
-    #         @test during.ts_offset == -35.0
-    #
-    #         @test after.epoch == 394372835
-    #         @test after.offset == 0.0
-    #         @test after.ts_offset == -35.0
-    #
-    #         @test !insideleap(before)
-    #         @test insideleap(start)
-    #         @test insideleap(during)
-    #         @test !insideleap(after)
-    #
-    #         # Test transformation to calendar date during leap second
-    #         @test string(before) == "2012-06-30T23:59:59.000 UTC"
-    #         @test string(start) == "2012-06-30T23:59:60.000 UTC"
-    #         @test string(during) == "2012-06-30T23:59:60.500 UTC"
-    #         @test string(after) == "2012-07-01T00:00:00.000 UTC"
-    #     end
-    # end
+    @testset "Leap Seconds" begin
+        @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
+
+        # Test transformation to calendar date during pre-leap second era
+        @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
+
+        before = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
+        start = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
+        during = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
+        after = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
+
+        before_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 59.0) .* days
+        start_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 60.0) .* days
+        during_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 60.5) .* days
+        after_jd = ERFA.dtf2d("UTC", 2012, 7, 1, 0, 0, 0.0) .* days
+
+        before_exp = UTCEpoch(before_jd..., origin=:julian)
+        start_exp = UTCEpoch(start_jd..., origin=:julian)
+        during_exp = UTCEpoch(during_jd..., origin=:julian)
+        after_exp = UTCEpoch(after_jd..., origin=:julian)
+
+        @test before == before_exp
+        @test start == start_exp
+        @test during == during_exp
+        @test after == after_exp
+
+        @test !insideleap(before_exp)
+        @test insideleap(start_exp)
+        @test insideleap(during_exp)
+        @test !insideleap(after_exp)
+
+        @test !insideleap(before)
+        @test insideleap(start)
+        @test insideleap(during)
+        @test !insideleap(after)
+
+        # Test transformation to calendar date during leap second
+        @test string(before_exp) == "2012-06-30T23:59:59.000 UTC"
+        @test string(start_exp) == "2012-06-30T23:59:60.000 UTC"
+        @test string(during_exp) == "2012-06-30T23:59:60.500 UTC"
+        @test string(after_exp) == "2012-07-01T00:00:00.000 UTC"
+        @test string(before) == "2012-06-30T23:59:59.000 UTC"
+        @test string(start) == "2012-06-30T23:59:60.000 UTC"
+        @test string(during) == "2012-06-30T23:59:60.500 UTC"
+        @test string(after) == "2012-07-01T00:00:00.000 UTC"
+    end
 end
 

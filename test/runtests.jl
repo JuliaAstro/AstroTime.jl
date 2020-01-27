@@ -2,7 +2,7 @@ using AstroTime
 using Test
 using ERFA
 
-AstroTime.update()
+# AstroTime.update()
 
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m

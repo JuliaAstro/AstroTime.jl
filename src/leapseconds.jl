@@ -6,10 +6,10 @@ insideleap(ep::Epoch{S}) where {S} = false
 getleap(ep::Epoch{S}) where {S} = 0.0
 
 struct TAIOffset
-    date::TAIEpoch{Float64}
+    date::TAIEpoch
     jd::Float64
-    start::TAIEpoch{Float64}
-    reference::TAIEpoch{Float64}
+    start::TAIEpoch
+    reference::TAIEpoch
     leap::Float64
     offset::Float64
     slope_utc::Float64
