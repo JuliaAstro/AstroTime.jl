@@ -63,8 +63,8 @@ using ..TimeScales
 using ..AstroDates
 using ..Periods
 
-const J2000_TO_JULIAN = 2.451545e6 * days
-const J2000_TO_MJD = 51544.5 * days
+const J2000_TO_JULIAN = 2.451545e6days
+const J2000_TO_MJD = 51544.5days
 
 @inline function two_sum(a, b)
     hi = a + b
