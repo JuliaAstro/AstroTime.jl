@@ -1,6 +1,16 @@
 using AstroTime
 using Test
 using ERFA
+using RemoteFiles: @RemoteFile, download, path
+using SPICE: furnsh, et2utc, utc2et
+
+
+const BASE_URL = "https://raw.githubusercontent.com/AndrewAnnex/SpiceyPyTestKernels/master/"
+const KERNEL_DIR = joinpath(@__DIR__, "kernels")
+@RemoteFile LSK BASE_URL * "naif0012.tls" dir=KERNEL_DIR
+
+download(LSK)
+furnsh(path(LSK))
 
 # AstroTime.update()
 

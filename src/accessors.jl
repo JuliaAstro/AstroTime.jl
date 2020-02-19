@@ -55,8 +55,7 @@ function DateTime(ep::Epoch)
     time_comp = Time(time, offset2000B)
 
     if insideleap(ep)
-        # leap = getleap(ep)
-        leap = offset_tai_utc(value(julian(ep)))
+        leap = getleap(ep)
         h = hour(time_comp)
         m = minute(time_comp)
         s = second(Float64, time_comp) + leap

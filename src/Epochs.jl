@@ -36,6 +36,8 @@ export Epoch,
     GALILEO_EPOCH,
     GPS_EPOCH,
     J2000_EPOCH,
+    J2000_TO_JULIAN,
+    J2000_TO_MJD,
     JULIAN_EPOCH,
     MODIFIED_JULIAN_EPOCH,
     PAST_INFINITY,
@@ -298,20 +300,15 @@ include("accessors.jl")
 show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))
 
 function Epoch{S}(date::Date, time::Time, args...) where S
-    seconds = second(Float64, time)
-    # ts_offset = tai_offset(S, date, time, args...)
-
-    # sum, residual = two_sum(seconds, ts_offset)
-    sum = seconds
-    residual = 0.0
-    dl = floor(Int64, sum)
-
-    offset = (sum - dl) + residual
-    epoch  = Int64(60) * ((j2000(date) * Int64(24) + hour(time)) * Int64(60)
-                          + minute(time) - Int64(720)) + dl
-    # from_tai = tai_offset(S, Epoch{TAI}(epoch, offset, 0.0), args...)
-    # Epoch{S}(epoch, offset, from_tai)
-    Epoch{S}(epoch, offset)
+    leap = getleap(S(), date)
+    # We care only about discontinuities
+    leap = ifelse(abs(leap) == 1.0, leap, 0.0)
+    s, fraction = divrem(second(Float64, time) - leap, 1.0)
+    daysecs = Int64((j2000(date) - 0.5) * SECONDS_PER_DAY)
+    hoursecs = Int64(hour(time) * SECONDS_PER_HOUR)
+    minutesecs = Int64(minute(time) * SECONDS_PER_MINUTE)
+    seconds = Int64(s) + minutesecs + hoursecs + daysecs
+    return Epoch{S}(Int64(seconds), fraction)
 end
 
 Dates.default_format(::Type{Epoch}) = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
@@ -580,8 +577,8 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
     end
 end
 
-# include("leapseconds.jl")
-# include("range.jl")
+include("leapseconds.jl")
+include("range.jl")
 
 const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = TTEpoch(AstroDates.J2000_EPOCH, AstroDates.H12)
