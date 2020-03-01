@@ -78,27 +78,27 @@ end
 
 struct Epoch{S<:TimeScale} <: Dates.AbstractDateTime
     scale::S
-    seconds::Int64
+    second::Int64
     fraction::Float64
-    Epoch{S}(seconds::Int64, fraction::Float64) where {S<:TimeScale} = new{S}(S(), seconds, fraction)
+    Epoch{S}(second::Int64, fraction::Float64) where {S<:TimeScale} = new{S}(S(), second, fraction)
 end
 
-@inline function apply_offset(seconds::Int64, fraction::Float64, offset::Float64)
+@inline function apply_offset(second::Int64, fraction::Float64, offset::Float64)
     sum, residual = two_sum(fraction, offset)
     if !isfinite(sum)
         fraction′ = sum
-        seconds′ = sum < 0 ? typemin(Int64) : typemax(Int64)
+        second′ = sum < 0 ? typemin(Int64) : typemax(Int64)
     else
         int_secs = floor(Int64, sum)
         fraction′ = sum - int_secs + residual
-        seconds′ = seconds + int_secs
+        second′ = second + int_secs
     end
-    return seconds′, fraction′
+    return second′, fraction′
 end
 
 function Epoch{S}(ep::Epoch{S}, Δt) where {S<:TimeScale}
-    seconds, fraction = apply_offset(ep.seconds, ep.fraction, Δt)
-    Epoch{S}(seconds, fraction)
+    second, fraction = apply_offset(ep.second, ep.fraction, Δt)
+    Epoch{S}(second, fraction)
 end
 
 # function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
@@ -186,7 +186,7 @@ julia> j2000(UTCEpoch(2000, 1, 1, 12))
 ```
 """
 function j2000(ep::Epoch, unit=days)
-    unit((ep.fraction + ep.seconds) * seconds)
+    unit((ep.fraction + ep.second) * seconds)
 end
 
 """
@@ -304,11 +304,11 @@ function Epoch{S}(date::Date, time::Time, args...) where S
     # We care only about discontinuities
     leap = ifelse(abs(leap) == 1.0, leap, 0.0)
     s, fraction = divrem(second(Float64, time) - leap, 1.0)
-    daysecs = Int64((j2000(date) - 0.5) * SECONDS_PER_DAY)
-    hoursecs = Int64(hour(time) * SECONDS_PER_HOUR)
-    minutesecs = Int64(minute(time) * SECONDS_PER_MINUTE)
-    seconds = Int64(s) + minutesecs + hoursecs + daysecs
-    return Epoch{S}(Int64(seconds), fraction)
+    daysec = Int64((j2000(date) - 0.5) * SECONDS_PER_DAY)
+    hoursec = Int64(hour(time) * SECONDS_PER_HOUR)
+    minutesec = Int64(minute(time) * SECONDS_PER_MINUTE)
+    sec = Int64(s) + minutesec + hoursec + daysec
+    return Epoch{S}(sec, fraction)
 end
 
 Dates.default_format(::Type{Epoch}) = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
@@ -463,8 +463,8 @@ julia> TAIEpoch(ep)
 ```
 """
 function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
-    seconds, fraction = apply_offset(ep.seconds, ep.fraction, S1(), S2())
-    Epoch{S2}(seconds, fraction)
+    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
+    Epoch{S2}(second, fraction)
 end
 # function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
 #     Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep, args...))
@@ -475,11 +475,11 @@ end
 Epoch{S}(ep::Epoch{S}) where {S} = ep
 
 function isapprox(a::Epoch{S}, b::Epoch{S}; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where S <: TimeScale
-    a.seconds == b.seconds && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)
+    a.second == b.second && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)
 end
 
 function ==(a::Epoch, b::Epoch)
-    a.seconds == b.seconds && a.fraction == b.fraction
+    a.second == b.second && a.fraction == b.fraction
 end
 
 <(ep1::Epoch, ep2::Epoch) = value(ep1 - ep2) < 0.0
@@ -500,7 +500,7 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
--(a::Epoch, b::Epoch) = ((a.seconds - b.seconds) + (a.fraction - b.fraction)) * seconds
+-(a::Epoch, b::Epoch) = ((a.second - b.second) + (a.fraction - b.fraction)) * seconds
 
 # Generate aliases for all defined time scales so we can use
 # e.g. `TTEpoch` instead of `Epoch{TT}`
@@ -577,7 +577,7 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
     end
 end
 
-include("leapseconds.jl")
+# include("leapseconds.jl")
 include("range.jl")
 
 const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)

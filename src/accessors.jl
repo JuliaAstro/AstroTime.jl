@@ -40,7 +40,7 @@ function DateTime(ep::Epoch)
     # FIXME
     carry = floor(Int64, ep.fraction)
     offset2000B = ep.fraction - carry
-    offset2000A = ep.seconds + carry + Int64(43200)
+    offset2000A = ep.second + carry + Int64(43200)
     if offset2000B < 0
         offset2000A -= 1
         offset2000B += 1
@@ -55,7 +55,7 @@ function DateTime(ep::Epoch)
     time_comp = Time(time, offset2000B)
 
     if insideleap(ep)
-        leap = getleap(ep)
+        @show leap = getleap(ep)
         h = hour(time_comp)
         m = minute(time_comp)
         s = second(Float64, time_comp) + leap

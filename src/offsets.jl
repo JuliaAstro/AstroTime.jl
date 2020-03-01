@@ -29,37 +29,29 @@ function getleap(::CoordinatedUniversalTime, date::Date)
     getleap(j2000(date) + value(J2000_TO_JULIAN))
 end
 getleap(::TimeScale, ::Date) = 0.0
-# getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
-# getleap(::Epoch) = 0.0
+getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
+getleap(::Epoch) = 0.0
 
-# function insideleap(jd0::Float64)
-#     jd1 = jd0 + 1 / SECONDS_PER_DAY
-#     o1 = offset_tai_utc(jd0)
-#     o2 = offset_tai_utc(jd1)
-#     return o1 != o2
-# end
-# insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
-# insideleap(::Epoch) = false
+function insideleap(jd0::Float64)
+    @show getleap(jd0)
+    jd1 = jd0 + 1 / SECONDS_PER_DAY
+    o1 = offset_tai_utc(jd0)
+    o2 = offset_tai_utc(jd1)
+    return o1 != o2
+end
+insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
+insideleap(::Epoch) = false
 
 @inbounds function apply_offset(second::Int64,
                                 fraction::Float64,
                                 from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
-    n = length(path)
-    if n == 2
-        jd = j2000(second, fraction)
-        return apply_offset(second, fraction, getoffset(from, to, second, fraction))
-    end
-    for i in 1:n-1
-        jd = j2000(second, fraction)
+    for i in 1:length(path) - 1
         offset = getoffset(path[i], path[i+1], second, fraction)
         second, fraction = apply_offset(second, fraction, offset)
     end
     return second, fraction
 end
-
-# offset(jd, s1, s2) = -offset(jd, s2, s1)
-
 
 """
     getoffset(second, fraction, TAI, TT)
@@ -142,7 +134,6 @@ This routine is accurate to ~40 microseconds in the interval 1900-2100.
                            second, fraction)
     tt = fraction + second
     g = m₀ + m₁ * tt
-    @show k * sin(g + eb * sin(g))
     return k * sin(g + eb * sin(g))
 end
 

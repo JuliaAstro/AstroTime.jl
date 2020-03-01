@@ -7,11 +7,11 @@ end
 @testset "Epochs" begin
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
-        @test ep.seconds == 0
+        @test ep.second == 0
         @test ep.fraction ≈ 2eps()
 
         ep += 10000centuries
-        @test ep.seconds == value(seconds(10000centuries))
+        @test ep.second == value(seconds(10000centuries))
         @test ep.fraction ≈ 2eps()
 
         # Issue 44
@@ -97,57 +97,57 @@ end
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Time Scales" begin
-        @testset "TAI<->TT" begin
-            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
-            out_ep = TTEpoch(ep)
-            @test year(out_ep) == 2018
-            @test month(out_ep) == 8
-            @test day(out_ep) == 14
-            @test hour(out_ep) == 10
-            @test minute(out_ep) == 3
-            @test second(Float64, out_ep) ≈ 2.3735247436378273e+01 atol=1e-12
-            in_ep = TAIEpoch(out_ep)
-            @test year(in_ep) == 2018
-            @test month(in_ep) == 8
-            @test day(in_ep) == 14
-            @test hour(in_ep) == 10
-            @test minute(in_ep) == 2
-            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
-        end
-        @testset "TAI<->UTC" begin
-            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
-            out_ep = UTCEpoch(ep)
-            @test year(out_ep) == 2018
-            @test month(out_ep) == 8
-            @test day(out_ep) == 14
-            @test hour(out_ep) == 10
-            @test minute(out_ep) == 2
-            @test second(Float64, out_ep) ≈ 1.4551247436378276e+01 atol=1e-12
-            in_ep = TAIEpoch(out_ep)
-            @test year(in_ep) == 2018
-            @test month(in_ep) == 8
-            @test day(in_ep) == 14
-            @test hour(in_ep) == 10
-            @test minute(in_ep) == 2
-            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
-        end
-        @testset "TAI<->TDB" begin
-            ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
-            out_ep = TDBEpoch(ep)
-            @test year(out_ep) == 2018
-            @test month(out_ep) == 8
-            @test day(out_ep) == 14
-            @test hour(out_ep) == 10
-            @test minute(out_ep) == 3
-            @test second(Float64, out_ep) ≈ 2.3734205844955390e+01 atol=1e-12
-            in_ep = TAIEpoch(out_ep)
-            @test year(in_ep) == 2018
-            @test month(in_ep) == 8
-            @test day(in_ep) == 14
-            @test hour(in_ep) == 10
-            @test minute(in_ep) == 2
-            @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
-        end
+        # @testset "TAI<->TT" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TTEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 2.3735247436378273e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TAI<->UTC" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = UTCEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 2
+        #     @test second(Float64, out_ep) ≈ 1.4551247436378276e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
+        # @testset "TAI<->TDB" begin
+        #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
+        #     out_ep = TDBEpoch(ep)
+        #     @test year(out_ep) == 2018
+        #     @test month(out_ep) == 8
+        #     @test day(out_ep) == 14
+        #     @test hour(out_ep) == 10
+        #     @test minute(out_ep) == 3
+        #     @test second(Float64, out_ep) ≈ 2.3734205844955390e+01 atol=1e-12
+        #     in_ep = TAIEpoch(out_ep)
+        #     @test year(in_ep) == 2018
+        #     @test month(in_ep) == 8
+        #     @test day(in_ep) == 14
+        #     @test hour(in_ep) == 10
+        #     @test minute(in_ep) == 2
+        #     @test second(Float64, in_ep) ≈ 5.1551247436378276e+01 atol=1e-12
+        # end
         # @testset "TAI<->TCB" begin
         #     ep = TAIEpoch(2018, 8, 14, 10, 2, 5.1551247436378276e+01)
         #     out_ep = TCBEpoch(ep)
@@ -842,83 +842,42 @@ end
         # @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
 
         # Test transformation to calendar date during pre-leap second era
-        # @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
+        @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
 
-        before = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 59.0))
-        start = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.0))
-        during = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.5))
-        after = TDBEpoch(UTCEpoch(2012, 7, 1, 0, 0, 0.0))
+        before_utc = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
+        start_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
+        during_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
+        after_utc = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
+        before_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 59.0))
+        start_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.0))
+        during_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.5))
+        after_tdb = TDBEpoch(UTCEpoch(2012, 7, 1, 0, 0, 0.0))
 
         before_exp = spice_utc_tdb("2012-06-30T23:59:59.0")
         start_exp = spice_utc_tdb("2012-06-30T23:59:60.0")
         during_exp = spice_utc_tdb("2012-06-30T23:59:60.5")
         after_exp = spice_utc_tdb("2012-07-01T00:00:00.0")
 
-        @test before_exp.second == before.seconds
-        @test before_exp.fraction ≈ before.fraction atol=1e-8
-        @test start_exp.second == start.seconds
-        @test start_exp.fraction ≈ start.fraction atol=1e-8
-        @test during_exp.second == during.seconds
-        @test during_exp.fraction ≈ during.fraction atol=1e-8
-        @test after_exp.second == after.seconds
-        @test after_exp.fraction ≈ after.fraction atol=1e-8
+        # SPICE is a lot less precise
+        @test before_tdb.second == before_exp.second
+        @test before_tdb.fraction ≈ before_exp.fraction atol=1e-7
+        @test start_tdb.second == start_exp.second
+        @test start_tdb.fraction ≈ start_exp.fraction atol=1e-7
+        @test during_tdb.second == during_exp.second
+        @test during_tdb.fraction ≈ during_exp.fraction atol=1e-7
+        @test after_tdb.second == after_exp.second
+        @test after_tdb.fraction ≈ after_exp.fraction atol=1e-7
 
-        # before_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 59.0) .* days
-        # start_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 60.0) .* days
-        # during_jd = ERFA.dtf2d("UTC", 2012, 6, 30, 23, 59, 60.5) .* days
-        # after_jd = ERFA.dtf2d("UTC", 2012, 7, 1, 0, 0, 0.0) .* days
-
-        # before_exp = UTCEpoch(before_jd..., origin=:julian)
-        # start_exp = UTCEpoch(start_jd..., origin=:julian)
-        # during_exp = UTCEpoch(during_jd..., origin=:julian)
-        # after_exp = UTCEpoch(after_jd..., origin=:julian)
-
-        # @show before.seconds
-        # @show before.fraction
-        # @show before_exp.seconds
-        # @show before_exp.fraction
-        # @show start.seconds
-        # @show start.fraction
-        # @show start_exp.seconds
-        # @show start_exp.fraction
-        # @show during.seconds
-        # @show during.fraction
-        # @show during_exp.seconds
-        # @show during_exp.fraction
-        # @show after.seconds
-        # @show after.fraction
-        # @show after_exp.seconds
-        # @show after_exp.fraction
-        #
-        # @test before ≈ before_exp atol=1e-3
-        # @test start ≈ start_exp atol=1e-3
-        # @test during ≈ during_exp atol=1e-3
-        # @test after ≈ after_exp atol=1e-3
-        #
-        # @test !insideleap(value(sum(before_jd)))
-        # @test insideleap(value(sum(start_jd)))
-        # @test insideleap(value(sum(during_jd)))
-        # @test !insideleap(value(sum(after_jd)))
-
-        # @test !insideleap(before_exp)
-        # @test insideleap(start_exp)
-        # @test insideleap(during_exp)
-        # @test !insideleap(after_exp)
-        #
-        # @test !insideleap(before)
-        # @test insideleap(start)
-        # @test insideleap(during)
-        # @test !insideleap(after)
+        @test !insideleap(before_utc)
+        @test insideleap(start_utc)
+        @test insideleap(during_utc)
+        @test !insideleap(after_utc)
 
         # Test transformation to calendar date during leap second
-        # @test string(before_exp) == "2012-06-30T23:59:59.000 UTC"
-        # @test string(start_exp) == "2012-06-30T23:59:60.000 UTC"
-        # @test string(during_exp) == "2012-06-30T23:59:60.500 UTC"
-        # @test string(after_exp) == "2012-07-01T00:00:00.000 UTC"
-        # @test string(before) == "2012-06-30T23:59:59.000 UTC"
-        # @test string(start) == "2012-06-30T23:59:60.000 UTC"
-        # @test string(during) == "2012-06-30T23:59:60.500 UTC"
-        # @test string(after) == "2012-07-01T00:00:00.000 UTC"
+        @test string(before_utc) == "2012-06-30T23:59:59.000 UTC"
+        @test string(start_utc) == "2012-06-30T23:59:60.000 UTC"
+        @test string(during_utc) == "2012-06-30T23:59:60.500 UTC"
+        @test string(after_utc) == "2012-07-01T00:00:00.000 UTC"
     end
 end
 
