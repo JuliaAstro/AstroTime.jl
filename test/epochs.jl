@@ -4,6 +4,24 @@ function spice_utc_tdb(str)
     return (second=Int64(second), fraction=fraction)
 end
 
+function twopart_secondfraction(jd1, jd2)
+    jd1 -= value(J2000_TO_JULIAN)
+    jd1 *= SECONDS_PER_DAY
+    jd2 *= SECONDS_PER_DAY
+    s1, f1 = divrem(jd1, 1.0)
+    s2, f2 = divrem(jd2, 1.0)
+    f, residual = AstroTime.Epochs.two_sum(f1, f2)
+    s3, fraction = divrem(f, 1.0)
+    second = Int64(s1 + s2 + s3)
+    fraction += residual
+    return (second=second, fraction=fraction)
+end
+
+function erfa_second_fraction(scale, year, month, day, hour, minute, second)
+    jd1, jd2 = ERFA.dtf2d(scale, year, month, day, hour, minute, second)
+    return twopart_secondfraction(jd1, jd2)
+end
+
 @testset "Epochs" begin
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
@@ -839,10 +857,21 @@ end
     #     @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
     # end
     @testset "Leap Seconds" begin
-        # @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
+        @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
 
         # Test transformation to calendar date during pre-leap second era
+        ep61 = UTCEpoch(1961, 3, 5, 23, 4, 12.0)
+        ep61_exp = erfa_second_fraction("UTC", 1961, 3, 5, 23, 4, 12.0)
+        @test ep61.second == ep61_exp.second
+        @test ep61.fraction ≈ ep61_exp.fraction
         @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
+
+        ep61_tai = TAIEpoch(ep61)
+        jd_utc = ERFA.dtf2d("UTC", 1961, 3, 5, 23, 4, 12.0)
+        jd_tai = ERFA.utctai(jd_utc...)
+        ep61_tai_exp = twopart_secondfraction(jd_tai...)
+        @test ep61_tai.second == ep61_tai_exp.second
+        @test ep61_tai.fraction ≈ ep61_tai_exp.fraction
 
         before_utc = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
         start_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.0)

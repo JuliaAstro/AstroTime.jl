@@ -22,23 +22,24 @@ function getleap(jd0::Float64)
     drift12 = offset_tai_utc(jd + 0.5)
     drift24 = offset_tai_utc(jd + 1.5)
 
-    leap = drift24 - (2.0drift12 - drift0)
-    return leap
+    return drift24 - (2.0drift12 - drift0)
 end
+
 function getleap(::CoordinatedUniversalTime, date::Date)
     getleap(j2000(date) + value(J2000_TO_JULIAN))
 end
+
 getleap(::TimeScale, ::Date) = 0.0
 getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
 getleap(::Epoch) = 0.0
 
 function insideleap(jd0::Float64)
-    @show getleap(jd0)
     jd1 = jd0 + 1 / SECONDS_PER_DAY
     o1 = offset_tai_utc(jd0)
     o2 = offset_tai_utc(jd1)
     return o1 != o2
 end
+
 insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
 insideleap(::Epoch) = false
 

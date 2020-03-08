@@ -55,6 +55,7 @@ function DateTime(ep::Epoch)
     time_comp = Time(time, offset2000B)
 
     leap = getleap(ep)
+    leap = ifelse(abs(leap) == 1.0, leap, 0.0)
     if !iszero(leap)
         h = hour(time_comp)
         m = minute(time_comp)
