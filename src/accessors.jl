@@ -54,8 +54,8 @@ function DateTime(ep::Epoch)
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, offset2000B)
 
-    if insideleap(ep)
-        @show leap = getleap(ep)
+    leap = getleap(ep)
+    if !iszero(leap)
         h = hour(time_comp)
         m = minute(time_comp)
         s = second(Float64, time_comp) + leap
