@@ -12,7 +12,7 @@ const KERNEL_DIR = joinpath(@__DIR__, "kernels")
 download(LSK)
 furnsh(path(LSK))
 
-# AstroTime.update()
+AstroTime.update()
 
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m

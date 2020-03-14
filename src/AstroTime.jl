@@ -1,9 +1,9 @@
 module AstroTime
 
-using EarthOrientation
 using Reexport
 
 import Dates
+import EarthOrientation
 import MacroTools
 
 export @timescale

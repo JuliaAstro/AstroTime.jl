@@ -1,4 +1,5 @@
 using ..TimeScales: find_path
+using EarthOrientation: getΔUT1
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
@@ -10,6 +11,7 @@ const OFFSET_TAI_TT = 32.184
 const LG_RATE = 6.969290134e-10
 const LB_RATE = 1.550519768e-8
 const JD77 = -8400.4996275days
+const JD77_SEC = -7.25803167816e8
 
 function j2000(second::Int64, fraction::Float64)
     (fraction + second) / SECONDS_PER_DAY * days
@@ -68,8 +70,14 @@ getoffset(::TerrestrialTime, ::InternationalAtomicTime, _, _) = -OFFSET_TAI_TT
 Returns the difference TCG-TAI in seconds at the epoch `ep`.
 """
 function getoffset(::GeocentricCoordinateTime, ::TerrestrialTime, second, fraction)
-    jd = j2000(second, fraction)
-    LG_RATE * value(jd - JD77)
+    dt = second - JD77_SEC + fraction
+    return -LG_RATE * dt
+end
+
+function getoffset(::TerrestrialTime, ::GeocentricCoordinateTime, second, fraction)
+    rate = LG_RATE / (1.0 - LG_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
 end
 
 """
@@ -77,8 +85,16 @@ end
 
 Returns the difference TCB-TAI in seconds at the epoch `ep`.
 """
-getoffset(::BarycentricCoordinateTime, ep) = getoffset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
+function getoffset(::BarycentricCoordinateTime, ::BarycentricDynamicalTime, second, fraction)
+    dt = second - JD77_SEC + fraction
+    return -LB_RATE * dt
+end
 
+function getoffset(::BarycentricDynamicalTime, ::BarycentricCoordinateTime, second, fraction)
+    rate = LB_RATE / (1.0 - LB_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
 
 """
     getoffset(UTC, ep)
@@ -102,9 +118,17 @@ end
 
 Returns the difference UT1-TAI in seconds at the epoch `ep`.
 """
-@inline function getoffset(::UniversalTime, ep)
-    jd = value(julian(UTC, ep))
-    getoffset(UTC, ep) + getΔUT1(jd)
+@inline function getoffset(::CoordinatedUniversalTime, ::UniversalTime,
+                           second, fraction)
+    utc = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    return getΔUT1(utc)
+end
+
+@inline function getoffset(::UniversalTime, ::CoordinatedUniversalTime,
+                           second, fraction)
+    ut1 = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    utc = ut1 - getΔUT1(ut1) / SECONDS_PER_DAY
+    return -getΔUT1(utc)
 end
 
 const k = 1.657e-3

@@ -1,6 +1,5 @@
 module Epochs
 
-using EarthOrientation: getΔUT1
 using LeapSeconds: offset_tai_utc
 
 import Base: -, +, <, ==, isapprox, isless, show
