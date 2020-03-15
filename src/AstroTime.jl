@@ -141,33 +141,17 @@ julia> GMTEpoch
 Epoch{GMT,T} where T
 ```
 """
-macro timescale(scale::Symbol, ep::Symbol, args...)
+macro timescale(scale::Symbol, parent::Symbol)
     scale_type = Symbol(scale, "Type")
     epoch_type = Symbol(scale, "Epoch")
     name = String(scale)
-
-    arglist = [
-        (nothing, scale_type, false, nothing),
-        (ep, Epoch, false, nothing),
-    ]
-    body = args[end]
-    append!(arglist, MacroTools.splitarg.(args[1:end-1]))
-    args = map(x->MacroTools.combinearg(x...), arglist)
-    def = Dict{Symbol, Any}(
-        :name => :((AstroTime.Epochs).tai_offset),
-        :args => map(x->MacroTools.combinearg(x...), arglist),
-        :body => body,
-        :kwargs => Any[],
-        :whereparams => (),
-    )
-    func = esc(MacroTools.combinedef(def))
 
     MacroTools.@esc scale scale_type epoch_type
 
     MacroTools.@q begin
         struct $scale_type <: TimeScale end
         const $scale = $scale_type()
-        const $epoch_type = Epoch{$scale}
+        const $epoch_type = Epoch{$scale_type}
         Base.show(io::IO, ::$scale_type) = print(io, $name)
         AstroTime.TimeScales.tryparse(::Val{Symbol($name)}) = $scale
 
@@ -182,7 +166,7 @@ macro timescale(scale::Symbol, ep::Symbol, args...)
         )
         Dates.default_format(::Type{$epoch_type}) = Dates.ISODateTimeFormat
 
-        $func
+        add_scale_pair!($scale, $parent)
 
         nothing
     end

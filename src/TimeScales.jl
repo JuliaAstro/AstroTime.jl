@@ -4,7 +4,7 @@ using ItemGraphs: ItemGraph, add_edge!, items
 
 import Dates
 
-export TimeScale, find_path
+export TimeScale, find_path, add_scale_pair!
 
 """
 All timescales are subtypes of the abstract type `TimeScale`.
@@ -54,18 +54,17 @@ end
 
 const SCALES = ItemGraph{TimeScale}()
 
-add_edge!(SCALES, TAI, TT)
-add_edge!(SCALES, TT, TAI)
-add_edge!(SCALES, TAI, UTC)
-add_edge!(SCALES, UTC, TAI)
-add_edge!(SCALES, UTC, UT1)
-add_edge!(SCALES, UT1, UTC)
-add_edge!(SCALES, TT, TCG)
-add_edge!(SCALES, TCG, TT)
-add_edge!(SCALES, TT, TDB)
-add_edge!(SCALES, TDB, TT)
-add_edge!(SCALES, TCB, TDB)
-add_edge!(SCALES, TDB, TCB)
+function add_scale_pair!(s1, s2)
+    add_edge!(SCALES, s1, s2)
+    add_edge!(SCALES, s2, s1)
+end
+
+add_scale_pair!(TAI, TT)
+add_scale_pair!(TAI, UTC)
+add_scale_pair!(UTC, UT1)
+add_scale_pair!(TT, TCG)
+add_scale_pair!(TT, TDB)
+add_scale_pair!(TCB, TDB)
 
 find_path(from, to) = items(SCALES, from, to)
 
