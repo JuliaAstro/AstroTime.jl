@@ -3,19 +3,123 @@ using EarthOrientation: getΔUT1
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
-export getoffset, insideleap
+export getoffset, insideleap, NoOffsetError
 
-include(joinpath("constants", "tdb.jl"))
+struct NoOffsetError <: Base.Exception
+    in_scale::String
+    out_scale::String
+    in_type::String
+    out_type::String
+end
 
-const OFFSET_TAI_TT = 32.184
-const LG_RATE = 6.969290134e-10
-const LB_RATE = 1.550519768e-8
-const JD77 = -8400.4996275days
-const JD77_SEC = -7.25803167816e8
+function Base.showerror(io::IO, err::NoOffsetError)
+    ins = err.in_scale
+    out = err.out_scale
+    it = err.in_type
+    ot = err.out_type
+    print(io, "No conversion '$ins->$out' available. ",
+          "If one of these is a custom time scale, you may need to define ",
+          "`AstroTime.Epochs.getoffset(::$it, ::$ot, second, fraction, args...)`.")
+end
+
+function getoffset(s1::TimeScale, s2::TimeScale, _, _)
+    err = NoOffsetError(string(s1), string(s2),
+                        string(typeof(s1)), string(typeof(s2)))
+    throw(err)
+end
 
 function j2000(second::Int64, fraction::Float64)
     (fraction + second) / SECONDS_PER_DAY * days
 end
+
+function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
+    path = find_path(from, to)
+    total_offset = 0.0
+    for i in 1:length(path) - 1
+        offset = getoffset(path[i], path[i+1], second, fraction)
+        total_offset += offset
+        second, fraction = apply_offset(second, fraction, offset)
+    end
+    return total_offset
+end
+
+function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
+    return getoffset(S(), scale, ep.second, ep.fraction, args...)
+end
+
+@inbounds function apply_offset(second::Int64,
+                                fraction::Float64,
+                                from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
+    path = find_path(from, to)
+    for i in 1:length(path) - 1
+        offset = getoffset(path[i], path[i+1], second, fraction)
+        second, fraction = apply_offset(second, fraction, offset)
+    end
+    return second, fraction
+end
+
+######
+# TT #
+######
+
+const OFFSET_TAI_TT = 32.184
+
+"""
+    getoffset(second, fraction, TAI, TT)
+
+Returns the difference TT-TAI in seconds at the epoch `ep`.
+"""
+getoffset(::InternationalAtomicTime, ::TerrestrialTime, _, _) = OFFSET_TAI_TT
+getoffset(::TerrestrialTime, ::InternationalAtomicTime, _, _) = -OFFSET_TAI_TT
+
+#######
+# TCG #
+#######
+
+const JD77_SEC = -7.25803167816e8
+const LG_RATE = 6.969290134e-10
+
+"""
+    getoffset(TCG, ep)
+
+Returns the difference TCG-TAI in seconds at the epoch `ep`.
+"""
+function getoffset(::GeocentricCoordinateTime, ::TerrestrialTime, second, fraction)
+    dt = second - JD77_SEC + fraction
+    return -LG_RATE * dt
+end
+
+function getoffset(::TerrestrialTime, ::GeocentricCoordinateTime, second, fraction)
+    rate = LG_RATE / (1.0 - LG_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
+
+#######
+# TCB #
+#######
+
+const LB_RATE = 1.550519768e-8
+
+"""
+    getoffset(TCB, ep)
+
+Returns the difference TCB-TAI in seconds at the epoch `ep`.
+"""
+function getoffset(::BarycentricCoordinateTime, ::BarycentricDynamicalTime, second, fraction)
+    dt = second - JD77_SEC + fraction
+    return -LB_RATE * dt
+end
+
+function getoffset(::BarycentricDynamicalTime, ::BarycentricCoordinateTime, second, fraction)
+    rate = LB_RATE / (1.0 - LB_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
+
+#######
+# UTC #
+#######
 
 function getleap(jd0::Float64)
     jd, frac = divrem(jd0, 1.0)
@@ -45,72 +149,6 @@ end
 insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
 insideleap(::Epoch) = false
 
-function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
-    path = find_path(from, to)
-    total_offset = 0.0
-    for i in 1:length(path) - 1
-        offset = getoffset(path[i], path[i+1], second, fraction)
-        total_offset += offset
-        second, fraction = apply_offset(second, fraction, offset)
-    end
-    return total_offset
-end
-
-function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
-    return getoffset(S(), scale, ep.second, ep.fraction, args...)
-end
-
-@inbounds function apply_offset(second::Int64,
-                                fraction::Float64,
-                                from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
-    path = find_path(from, to)
-    for i in 1:length(path) - 1
-        offset = getoffset(path[i], path[i+1], second, fraction)
-        second, fraction = apply_offset(second, fraction, offset)
-    end
-    return second, fraction
-end
-
-"""
-    getoffset(second, fraction, TAI, TT)
-
-Returns the difference TT-TAI in seconds at the epoch `ep`.
-"""
-getoffset(::InternationalAtomicTime, ::TerrestrialTime, _, _) = OFFSET_TAI_TT
-getoffset(::TerrestrialTime, ::InternationalAtomicTime, _, _) = -OFFSET_TAI_TT
-
-"""
-    getoffset(TCG, ep)
-
-Returns the difference TCG-TAI in seconds at the epoch `ep`.
-"""
-function getoffset(::GeocentricCoordinateTime, ::TerrestrialTime, second, fraction)
-    dt = second - JD77_SEC + fraction
-    return -LG_RATE * dt
-end
-
-function getoffset(::TerrestrialTime, ::GeocentricCoordinateTime, second, fraction)
-    rate = LG_RATE / (1.0 - LG_RATE)
-    dt = second - JD77_SEC + fraction
-    return rate * dt
-end
-
-"""
-    getoffset(TCB, ep)
-
-Returns the difference TCB-TAI in seconds at the epoch `ep`.
-"""
-function getoffset(::BarycentricCoordinateTime, ::BarycentricDynamicalTime, second, fraction)
-    dt = second - JD77_SEC + fraction
-    return -LB_RATE * dt
-end
-
-function getoffset(::BarycentricDynamicalTime, ::BarycentricCoordinateTime, second, fraction)
-    rate = LB_RATE / (1.0 - LB_RATE)
-    dt = second - JD77_SEC + fraction
-    return rate * dt
-end
-
 """
     getoffset(UTC, ep)
 
@@ -127,6 +165,10 @@ end
     jd = value(j2000(second, fraction) + J2000_TO_JULIAN)
     return -offset_tai_utc(jd)
 end
+
+#######
+# UT1 #
+#######
 
 """
     getoffset(UT1, ep)
@@ -145,6 +187,10 @@ end
     utc = ut1 - getΔUT1(ut1) / SECONDS_PER_DAY
     return -getΔUT1(utc)
 end
+
+#######
+# TDB #
+#######
 
 const k = 1.657e-3
 const eb = 1.671e-2
@@ -189,6 +235,8 @@ end
     end
     return offset
 end
+
+include(joinpath("constants", "tdb.jl"))
 
 """
     getoffset(TDB, ep, elong, u, v)
