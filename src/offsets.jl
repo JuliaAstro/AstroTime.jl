@@ -47,15 +47,32 @@ function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
     return getoffset(S(), scale, ep.second, ep.fraction, args...)
 end
 
-@inbounds function apply_offset(second::Int64,
-                                fraction::Float64,
-                                from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
+@inline function apply_offset(second::Int64,
+                              fraction::Float64,
+                              from::S1,
+                              to::S2)::Tuple{Int64, Float64} where {S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
+    return _apply_offset((second, fraction), path...)
+end
+
+@inline function _apply_offset(second::Int64,
+                              fraction::Float64,
+                              from::S1,
+                              to::S2)::Tuple{Int64,Float64} where {S1<:TimeScale, S2<:TimeScale}
+    return apply_offset(second, fraction, getoffset(from, to, second, fraction))
+end
+
+@generated function _apply_offset(sf, path...)
+    expr = :(sf)
     for i in 1:length(path) - 1
-        offset = getoffset(path[i], path[i+1], second, fraction)
-        second, fraction = apply_offset(second, fraction, offset)
+        s1 = path[i]
+        s2 = path[i+1]
+        expr = :(_apply_offset($expr..., $s1(), $s2()))
     end
-    return second, fraction
+    return quote
+        Base.@_inline_meta
+        $expr
+    end
 end
 
 ######
