@@ -17,27 +17,6 @@ function DateTime(ep::Epoch)
         end
     end
 
-    # sum = ep.offset + ep.ts_offset
-    # o′ = sum - ep.ts_offset
-    # d′ = sum - o′
-    # Δo = ep.offset - o′
-    # Δd = ep.ts_offset - d′
-    # residual = Δo + Δd
-    #
-    # carry = floor(Int64, sum)
-    # offset2000B = (sum - carry) + residual
-    # offset2000A = ep.epoch + carry + Int64(43200)
-    # if offset2000B < 0
-    #     offset2000A -= 1
-    #     offset2000B += 1
-    # end
-    # time = offset2000A % Int64(86400)
-    # if time < 0
-    #     time += Int64(86400)
-    # end
-    # date = Int((offset2000A - time) ÷ Int64(86400))
-
-    # FIXME
     carry = floor(Int64, ep.fraction)
     offset2000B = ep.fraction - carry
     offset2000A = ep.second + carry + Int64(43200)

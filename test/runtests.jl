@@ -24,7 +24,6 @@ const astronomical_unit = 149597870700.0 # m
 # end
 
 @testset "AstroTime" begin
-    include("timescales.jl")
     include("periods.jl")
     include("astrodates.jl")
     include("epochs.jl")
