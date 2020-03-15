@@ -52,6 +52,7 @@ end
                               from::S1,
                               to::S2)::Tuple{Int64, Float64} where {S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
+    length(path) == 2 && return _apply_offset(second, fraction, from, to)
     return _apply_offset((second, fraction), path...)
 end
 
