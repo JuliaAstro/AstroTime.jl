@@ -82,7 +82,7 @@ struct Epoch{S<:TimeScale} <: Dates.AbstractDateTime
     Epoch{S}(second::Int64, fraction::Float64) where {S<:TimeScale} = new{S}(S(), second, fraction)
 end
 
-@inline function apply_offset(second::Int64, fraction::Float64, offset::Float64)
+@inline function apply_offset(second::Int64, fraction::Float64, offset)
     sum, residual = two_sum(fraction, offset)
     if !isfinite(sum)
         fraction′ = sum
@@ -442,13 +442,13 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
     Epoch{S2}(second, fraction)
 end
 
-function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
+function Epoch{S2}(ep::Epoch{S1}, args...) where {S1<:TimeScale, S2<:TimeScale}
     offset = getoffset(S1(), S2(), ep.second, ep.fraction, args...)
     second, fraction = apply_offset(ep.second, ep.fraction, offset)
     Epoch{S2}(second, fraction)
 end
 
-Epoch{S}(ep::Epoch{S}) where {S} = ep
+Epoch{S}(ep::Epoch{S}) where {S<:TimeScale} = ep
 
 function isapprox(a::Epoch{S}, b::Epoch{S}; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where S <: TimeScale
     a.second == b.second && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)

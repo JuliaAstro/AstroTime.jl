@@ -145,14 +145,14 @@ end
         @test second(Int, ep) == 59
         @test millisecond(ep) == 371
     end
-    # @testset "Ranges" begin
-    #     rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
-    #     @test length(rng) == 32
-    #     @test first(rng) == UTCEpoch(2018, 1, 1)
-    #     @test last(rng) == UTCEpoch(2018, 2, 1)
-    #     rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
-    #     @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
-    # end
+    @testset "Ranges" begin
+        rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
+        @test length(rng) == 32
+        @test first(rng) == UTCEpoch(2018, 1, 1)
+        @test last(rng) == UTCEpoch(2018, 2, 1)
+        rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
+        @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
+    end
     @testset "Leap Seconds" begin
         @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
 
