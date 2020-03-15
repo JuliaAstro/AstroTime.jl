@@ -27,7 +27,6 @@ const astronomical_unit = 149597870700.0 # m
     include("timescales.jl")
     include("periods.jl")
     include("astrodates.jl")
-    include("offsets.jl")
     include("epochs.jl")
     # @testset "Custom Time Scales" begin
     #     utc = UTCEpoch(2000, 1, 1, 0, 0, 0.1)

@@ -36,26 +36,26 @@ end
         elong1 = 0.0
         elong2 = π
         u = 6371.0
-        tai = TAIEpoch(2000, 1, 1)
-        # tdb_tai1 = tai_offset(TDB, tai, elong1, u, 0.0)
-        # tdb_tai2 = tai_offset(TDB, tai, elong2, u, 0.0)
-        # Δtdb = tdb_tai2 - tdb_tai1
-        # tdb1 = TDBEpoch(tdb_tai1, tai)
-        # tdb2 = TDBEpoch(tdb_tai2, tai)
-        # @test value(tdb2 - tdb1) ≈ Δtdb
-        # @test tdb1 != tdb2
-        # tdb1 = TDBEpoch(tai, elong1, u, 0.0)
-        # tdb2 = TDBEpoch(tai, elong2, u, 0.0)
-        # @test value(tdb2 - tdb1) ≈ Δtdb
-        # @test tdb1 != tdb2
-        #
-        # t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
-        # t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
-        # t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
-        # @test t1 - t0 == -32.0seconds
-        # @test t1 < t0
-        # @test t2 - t1 == -32.0seconds
-        # @test t2 < t1
+        tt = TTEpoch(2000, 1, 1)
+        tdb_tt1 = getoffset(TT, TDB, tt.second, tt.fraction, elong1, u, 0.0)
+        tdb_tt2 = getoffset(TT, TDB, tt.second, tt.fraction, elong2, u, 0.0)
+        Δtdb = tdb_tt2 - tdb_tt1
+        tdb1 = TDBEpoch(tdb_tt1, tt)
+        tdb2 = TDBEpoch(tdb_tt2, tt)
+        @test value(tdb2 - tdb1) ≈ Δtdb
+        @test tdb1 != tdb2
+        tdb1 = TDBEpoch(tt, elong1, u, 0.0)
+        tdb2 = TDBEpoch(tt, elong2, u, 0.0)
+        @test value(tdb2 - tdb1) ≈ Δtdb
+        @test tdb1 != tdb2
+
+        t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
+        t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
+        t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
+        @test_throws MethodError t1 - t0 == -32.0seconds
+        @test_throws MethodError t1 < t0
+        @test t2 - t1 == -32.0seconds
+        @test t2 < t1
     end
     @testset "Parsing" begin
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
@@ -85,15 +85,28 @@ end
         @test (ep + 1.0centuries) - ep == seconds(1.0centuries)
     end
     @testset "Conversion" begin
+        include("conversions.jl")
+
         tt = TTEpoch(2000, 1, 1, 12)
         @test tt - J2000_EPOCH == 0.0seconds
-        include("conversions.jl")
-    #     tai = TAIEpoch(2000, 1, 1, 12)
-    #     @test tai.epoch == 0
-    #     @test tai.offset == 0.0
-    #     @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
-    #     @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
-    #     @test_throws MethodError UTCEpoch(-32.0, TTEpoch(tai))
+        tai = TAIEpoch(2000, 1, 1, 12)
+        @test tai.second == 0
+        @test tai.fraction == 0.0
+        @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
+        @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
+    end
+    @testset "TDB" begin
+        ep = TTEpoch(2000, 1, 1)
+        @test TDBEpoch(ep) ≈ TDBEpoch(ep, 0.0, 0.0, 0.0) rtol=1e-3
+        jd1, jd2 = value.(julian_twopart(ep))
+        ut = fractionofday(UT1Epoch(ep))
+        elong, u, v = abs.(randn(3)) * 1000
+        exp = ERFA.dtdb(jd1, jd2, ut, elong, u, v)
+        act = getoffset(ep, TDB, elong, u, v)
+        @test act ≈ exp
+        second, fraction = 394372865, 0.1839999999999975
+        offset = getoffset(TT, TDB, second, fraction)
+        @test offset ≈ 0.105187547186749e-3
     end
     @testset "Julian Dates" begin
         jd = 0.0days

@@ -100,21 +100,6 @@ function Epoch{S}(ep::Epoch{S}, Δt) where {S<:TimeScale}
     Epoch{S}(second, fraction)
 end
 
-# function Epoch{S}(epoch::Int64, offset, ts_offset, Δt) where S
-#     sum, residual = two_sum(offset, Δt)
-#
-#     if !isfinite(sum)
-#         offset′ = sum
-#         epoch′ = sum < 0 ? typemin(Int64) : typemax(Int64)
-#     else
-#         dl = floor(Int64, sum)
-#         offset′ = (sum - dl) + residual
-#         epoch′ = epoch + dl
-#     end
-#
-#     Epoch{S}(epoch′, offset′, ts_offset)
-# end
-
 """
     Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Period}
 
@@ -160,17 +145,7 @@ function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:P
     epoch = floor(Int64, sum)
     offset = (sum - epoch) + residual
     return Epoch{S}(epoch, offset)
-    #
-    # ftype = float(eltype(T))
-    # tai = Epoch{TAI}(epoch, ftype(offset), zero(ftype))
-    # ts_offset = tai_offset(S, tai, args...)
-    # ep = Epoch{TAI}(tai, -ts_offset)
-    # Epoch{S}(ep.epoch, ep.offset, ts_offset)
 end
-
-# Epoch{S}(ep::Epoch{S}, Δt) where {S} = Epoch{S}(ep.epoch, ep.offset, ep.ts_offset, Δt)
-
-
 
 """
     j2000(ep)
@@ -441,9 +416,10 @@ julia> TTEpoch(32.184, ep)
 2000-01-01T00:00:32.184 TT
 ```
 """
-# function Epoch{S}(Δtai, ep::Epoch{TAI}) where S
-#     Epoch{S}(ep.epoch, ep.offset, Δtai)
-# end
+function Epoch{S2}(offset, ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
+    second, fraction = apply_offset(ep.second, ep.fraction, offset)
+    Epoch{S2}(second, fraction)
+end
 
 """
     Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
@@ -465,11 +441,12 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
     second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
     Epoch{S2}(second, fraction)
 end
-# function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
-#     Epoch{S2}(ep.epoch, ep.offset, tai_offset(S2, ep, args...))
-# end
 
-# Epoch{TAI}(ep::Epoch) = Epoch{TAI}(ep.epoch, ep.offset, 0.0)
+function Epoch{S2}(ep::Epoch{S1}, args...) where {S1, S2}
+    offset = getoffset(S1(), S2(), ep.second, ep.fraction, args...)
+    second, fraction = apply_offset(ep.second, ep.fraction, offset)
+    Epoch{S2}(second, fraction)
+end
 
 Epoch{S}(ep::Epoch{S}) where {S} = ep
 
@@ -499,7 +476,9 @@ julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
--(a::Epoch, b::Epoch) = ((a.second - b.second) + (a.fraction - b.fraction)) * seconds
+function -(a::Epoch{S}, b::Epoch{S}) where S<:TimeScale
+    return ((a.second - b.second) + (a.fraction - b.fraction)) * seconds
+end
 
 # Generate aliases for all defined time scales so we can use
 # e.g. `TTEpoch` instead of `Epoch{TT}`
@@ -576,7 +555,6 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
     end
 end
 
-# include("leapseconds.jl")
 include("range.jl")
 
 const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)

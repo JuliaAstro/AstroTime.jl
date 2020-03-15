@@ -45,6 +45,21 @@ end
 insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
 insideleap(::Epoch) = false
 
+function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
+    path = find_path(from, to)
+    total_offset = 0.0
+    for i in 1:length(path) - 1
+        offset = getoffset(path[i], path[i+1], second, fraction)
+        total_offset += offset
+        second, fraction = apply_offset(second, fraction, offset)
+    end
+    return total_offset
+end
+
+function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
+    return getoffset(S(), scale, ep.second, ep.fraction, args...)
+end
+
 @inbounds function apply_offset(second::Int64,
                                 fraction::Float64,
                                 from::S1, to::S2) where {S1<:TimeScale, S2<:TimeScale}
@@ -191,9 +206,10 @@ Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on E
 
 - [ERFA](https://github.com/liberfa/erfa/blob/master/src/dtdb.c)
 """
-function getoffset(::BarycentricDynamicalTime, ep, elong, u, v)
-    ut = fractionofday(UT1Epoch(ep))
-    t = value(centuries(j2000(TT, ep))) / 10.0
+function getoffset(::BarycentricDynamicalTime, ::TerrestrialTime, second, fraction, elong, u, v)
+    tt = TTEpoch(second, fraction)
+    ut = fractionofday(UT1Epoch(tt))
+    t = (second + fraction) / (SECONDS_PER_CENTURY * 10.0)
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
 
@@ -264,29 +280,18 @@ function getoffset(::BarycentricDynamicalTime, ep, elong, u, v)
 
     # TDB-TT in seconds.
     w = wt + wf + wj
-
-    offset(TT, ep) + w
+    return -w
 end
 
-# offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
-offset(::TimeScale, date::Date, time::Time) = 0.0
-
-@inline function offset(::CoordinatedUniversalTime, date::Date, time::Time)
-    minute_in_day = hour(time) * 60 + minute(time)
-    correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
-    off = findoffset(julian(date) + correction)
-    off === nothing && return 0.0
-
-    getoffset(off, date, time)
+@inline function getoffset(::TerrestrialTime, ::BarycentricDynamicalTime,
+                           second, fraction, elong, u, v)
+    tt1, tt2 = second, fraction
+    tdb1, tdb2 = tt1, tt2
+    offset = 0.0
+    for _ in 1:3
+        offset = -getoffset(TDB, TT, tdb1, tdb2, elong, u, v)
+        tdb1, tdb2 = apply_offset(tt1, tt2, offset)
+    end
+    return offset
 end
-
-# @inline function offset(scale, date::Date, time::Time, args...)
-#     ref = Epoch{TAI}(date, time)
-#     off = 0.0
-#     # TODO: Maybe replace this with a simple convergence check
-#     for _ in 1:8
-#         off = -offset(scale, Epoch{InternationalAtomicTime}(ref, offset), args...)
-#     end
-#     off
-# end
 
