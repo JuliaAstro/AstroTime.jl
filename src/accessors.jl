@@ -17,9 +17,8 @@ function DateTime(ep::Epoch)
         end
     end
 
-    carry = floor(Int64, ep.fraction)
-    offset2000B = ep.fraction - carry
-    offset2000A = ep.second + carry + Int64(43200)
+    offset2000B = ep.fraction
+    offset2000A = ep.second + Int64(43200)
     if offset2000B < 0
         offset2000A -= 1
         offset2000B += 1
