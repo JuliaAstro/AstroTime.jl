@@ -345,8 +345,7 @@ function getoffset(::BarycentricDynamicalTime, ::TerrestrialTime, second, fracti
         0.03638e-6 * t * t
 
     # TDB-TT in seconds.
-    w = wt + wf + wj
-    return -w
+    return -(wt + wf + wj)
 end
 
 @inline function getoffset(::TerrestrialTime, ::BarycentricDynamicalTime,
