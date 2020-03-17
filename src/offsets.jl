@@ -28,7 +28,7 @@ function getoffset(s1::TimeScale, s2::TimeScale, _, _)
     throw(err)
 end
 
-function j2000(second::Int64, fraction::Float64)
+function j2000(second, fraction)
     (fraction + second) / SECONDS_PER_DAY * days
 end
 
@@ -48,18 +48,18 @@ function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
 end
 
 @inline function apply_offset(second::Int64,
-                              fraction::Float64,
+                              fraction::T,
                               from::S1,
-                              to::S2)::Tuple{Int64, Float64} where {S1<:TimeScale, S2<:TimeScale}
+                              to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
     length(path) == 2 && return _apply_offset(second, fraction, from, to)
     return _apply_offset((second, fraction), path...)
 end
 
 @inline function _apply_offset(second::Int64,
-                              fraction::Float64,
+                              fraction::T,
                               from::S1,
-                              to::S2)::Tuple{Int64,Float64} where {S1<:TimeScale, S2<:TimeScale}
+                              to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
     return apply_offset(second, fraction, getoffset(from, to, second, fraction))
 end
 
@@ -139,7 +139,7 @@ end
 # UTC #
 #######
 
-function getleap(jd0::Float64)
+function getleap(jd0)
     jd, frac = divrem(jd0, 1.0)
     jd += ifelse(frac >= 0.5, 1, -1) * 0.5
     drift0 = offset_tai_utc(jd)
@@ -157,7 +157,7 @@ getleap(::TimeScale, ::Date) = 0.0
 getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
 getleap(::Epoch) = 0.0
 
-function insideleap(jd0::Float64)
+function insideleap(jd0)
     jd1 = jd0 + 1 / SECONDS_PER_DAY
     o1 = offset_tai_utc(jd0)
     o2 = offset_tai_utc(jd1)

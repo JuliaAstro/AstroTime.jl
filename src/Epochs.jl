@@ -75,14 +75,18 @@ const J2000_TO_MJD = 51544.5days
     hi, lo
 end
 
-struct Epoch{S<:TimeScale} <: Dates.AbstractDateTime
+struct Epoch{S<:TimeScale, T} <: Dates.AbstractDateTime
     scale::S
     second::Int64
-    fraction::Float64
-    Epoch{S}(second::Int64, fraction::Float64) where {S<:TimeScale} = new{S}(S(), second, fraction)
+    fraction::T
+    function Epoch{S}(second::Int64, fraction::T) where {S<:TimeScale, T}
+        return new{S, T}(S(), second, fraction)
+    end
 end
 
-@inline function apply_offset(second::Int64, fraction::Float64, offset)
+Epoch{S,T}(ep::Epoch{S,T}) where {S,T} = ep
+
+@inline function apply_offset(second::Int64, fraction, offset)
     sum, residual = two_sum(fraction, offset)
     if !isfinite(sum)
         fraction′ = sum

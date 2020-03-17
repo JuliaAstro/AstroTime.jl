@@ -1,3 +1,5 @@
+using Measurements
+
 function spice_utc_tdb(str)
     et = utc2et(str)
     second, fraction = divrem(et, 1.0)
@@ -204,6 +206,30 @@ end
         @test string(start_utc) == "2012-06-30T23:59:60.000 UTC"
         @test string(during_utc) == "2012-06-30T23:59:60.500 UTC"
         @test string(after_utc) == "2012-07-01T00:00:00.000 UTC"
+    end
+    @testset "Parametrization" begin
+        ep_f64 = UTCEpoch(2000, 1, 1)
+        ep_err = UTCEpoch(ep_f64.second, 1.0 ± 1.1)
+        Δt = (30 ± 0.1) * seconds
+        @test typeof(Δt) == Period{Second,Measurement{Float64}}
+        @test typeof(ep_f64) == Epoch{CoordinatedUniversalTime,Float64}
+        @test typeof(ep_err) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_f64 + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_err + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        jd1_err = (0.0 ± 0.001) * days
+        jd2_err = (0.5 ± 0.001) * days
+        ep_jd1 = UTCEpoch(jd1_err)
+        @test typeof(ep_jd1) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ep_jd2 = UTCEpoch(jd1_err, jd2_err)
+        @test typeof(ep_jd2) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ut1_err = UT1Epoch(ep_f64.second, 1.0 ± 1.1)
+        tcg_err = TCGEpoch(ut1_err)
+        tcb_err = TCBEpoch(ut1_err)
+        @test typeof(ut1_err) == Epoch{UniversalTime,Measurement{Float64}}
+        @test typeof(tcg_err) == Epoch{GeocentricCoordinateTime,Measurement{Float64}}
+        @test typeof(tcb_err) == Epoch{BarycentricCoordinateTime,Measurement{Float64}}
+        @test typeof(UT1Epoch(tcg_err)) == Epoch{UniversalTime,Measurement{Float64}}
+        @test typeof(UT1Epoch(tcb_err)) == Epoch{UniversalTime,Measurement{Float64}}
     end
 end
 
