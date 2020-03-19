@@ -25,8 +25,7 @@ julia = "^1"
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"
-RemoteFiles = "cbe49d4c-5af1-5b60-bb70-0a60aa018e1b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "ERFA", "Measurements", "SPICE", "RemoteFiles"]
+test = ["Test", "ERFA", "Measurements", "SPICE"]

@@ -1,10 +1,10 @@
 module TimeScales
 
-using ItemGraphs: ItemGraph, add_edge!, items
+using ItemGraphs: ItemGraph, add_edge!, add_vertex!, items
 
 import Dates
 
-export TimeScale, find_path, add_scale_pair!
+export TimeScale, find_path, link_scales!, register_scale!
 
 """
 All timescales are subtypes of the abstract type `TimeScale`.
@@ -54,17 +54,21 @@ end
 
 const SCALES = ItemGraph{TimeScale}()
 
-function add_scale_pair!(s1, s2)
-    add_edge!(SCALES, s1, s2)
-    add_edge!(SCALES, s2, s1)
+function register_scale!(s)
+    add_vertex!(SCALES, s)
 end
 
-add_scale_pair!(TAI, TT)
-add_scale_pair!(TAI, UTC)
-add_scale_pair!(UTC, UT1)
-add_scale_pair!(TT, TCG)
-add_scale_pair!(TT, TDB)
-add_scale_pair!(TCB, TDB)
+function link_scales!(s1, s2; oneway=false)
+    add_edge!(SCALES, s1, s2)
+    oneway || add_edge!(SCALES, s2, s1)
+end
+
+link_scales!(TAI, TT)
+link_scales!(TAI, UTC)
+link_scales!(UTC, UT1)
+link_scales!(TT, TCG)
+link_scales!(TT, TDB)
+link_scales!(TCB, TDB)
 
 find_path(from, to) = items(SCALES, from, to)
 

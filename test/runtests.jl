@@ -1,37 +1,39 @@
 using AstroTime
 using Test
 using ERFA
-using RemoteFiles: @RemoteFile, download, path
 using SPICE: furnsh, et2utc, utc2et
 
-
-const BASE_URL = "https://raw.githubusercontent.com/AndrewAnnex/SpiceyPyTestKernels/master/"
-const KERNEL_DIR = joinpath(@__DIR__, "kernels")
-@RemoteFile LSK BASE_URL * "naif0012.tls" dir=KERNEL_DIR
-
-download(LSK)
-furnsh(path(LSK))
-
-AstroTime.update()
+furnsh(joinpath("data", "naif0012.tls"))
+AstroTime.load_eop(joinpath("data", "finals.csv"),
+                   joinpath("data", "finals2000A.csv"))
 
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m
 
 @timescale GMT UTC
-AstroTime.Epochs.getoffset(::GMTType, ::CoordinatedUniversalTime, _, _) = 0.0
-AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::GMTType, _, _) = 0.0
+AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime, _, _) = 0.0
+AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::GMTScale, _, _) = 0.0
 
 @timescale SCET UTC
-function AstroTime.Epochs.getoffset(::SCETType, ::CoordinatedUniversalTime,
+function AstroTime.Epochs.getoffset(::SCETScale, ::CoordinatedUniversalTime,
                                     _, _, distance)
     return distance / speed_of_light
 end
-function AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::SCETType,
+function AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::SCETScale,
                                     _, _, distance)
     return -distance / speed_of_light
 end
 
 @timescale Dummy TDB
+
+@timescale Lonely
+@timescale Together Lonely
+function AstroTime.Epochs.getoffset(::LonelyScale, ::TogetherScale, _, _)
+    return 5.0
+end
+function AstroTime.Epochs.getoffset(::TogetherScale, ::LonelyScale, _, _)
+    return -5.0
+end
 
 @testset "AstroTime" begin
     include("periods.jl")
@@ -44,12 +46,12 @@ end
         @test gmt == GMTEpoch(utc)
 
         @test string(GMT) == "GMT"
-        @test typeof(GMT) == GMTType
+        @test typeof(GMT) == GMTScale
         @test string(gmt) == "2000-01-01T00:00:00.100 GMT"
         @test find_path(GMT, UTC) == [GMT, UTC]
 
         @test string(SCET) == "SCET"
-        @test typeof(SCET) == SCETType
+        @test typeof(SCET) == SCETScale
         @test find_path(SCET, UTC) == [SCET, UTC]
         scet = SCETEpoch(2000, 1, 1, 0, 0, 0.1)
         utc_exp = UTCEpoch(2000, 1, 1, 0, 8, 19.10478383615643)
@@ -57,10 +59,16 @@ end
         @test SCETEpoch(utc_exp, astronomical_unit) ≈ scet
 
         @test string(Dummy) == "Dummy"
-        @test typeof(Dummy) == DummyType
+        @test typeof(Dummy) == DummyScale
         @test find_path(Dummy, UTC) == [Dummy, TDB, TT, TAI, UTC]
         dummy = DummyEpoch(2000, 1, 1)
         @test_throws NoOffsetError UTCEpoch(dummy)
         @test_throws NoOffsetError TDBEpoch(dummy)
+
+        lonely = LonelyEpoch(2000, 1, 1)
+        together = TogetherEpoch(lonely)
+        @test together == TogetherEpoch(2000, 1, 1, 0, 0, 5.0)
+        @test lonely == LonelyEpoch(together)
+        @test find_path(LonelyScale(), TDB) == []
     end
 end

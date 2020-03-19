@@ -1,5 +1,5 @@
 using ..TimeScales: find_path
-using EarthOrientation: getΔUT1
+using EarthOrientation: getΔUT1, EOP_DATA, get
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
@@ -194,16 +194,16 @@ end
 Returns the difference UT1-TAI in seconds at the epoch `ep`.
 """
 @inline function getoffset(::CoordinatedUniversalTime, ::UniversalTime,
-                           second, fraction)
+                           second, fraction, eop=get(EOP_DATA))
     utc = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    return getΔUT1(utc)
+    return getΔUT1(eop, utc)
 end
 
 @inline function getoffset(::UniversalTime, ::CoordinatedUniversalTime,
-                           second, fraction)
+                           second, fraction, eop=get(EOP_DATA))
     ut1 = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    utc = ut1 - getΔUT1(ut1) / SECONDS_PER_DAY
-    return -getΔUT1(utc)
+    utc = ut1 - getΔUT1(eop, ut1) / SECONDS_PER_DAY
+    return -getΔUT1(eop, utc)
 end
 
 #######

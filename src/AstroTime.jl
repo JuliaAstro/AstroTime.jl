@@ -141,14 +141,21 @@ julia> GMTEpoch
 Epoch{GMT,T} where T
 ```
 """
-macro timescale(scale::Symbol, parent::Symbol)
-    scale_type = Symbol(scale, "Type")
+macro timescale(scale::Symbol, parent=nothing, oneway=false)
+    scale_type = Symbol(scale, "Scale")
     epoch_type = Symbol(scale, "Epoch")
     name = String(scale)
 
     MacroTools.@esc scale scale_type epoch_type
 
-    MacroTools.@q begin
+    if parent === nothing
+        reg_expr = MacroTools.@q(register_scale!($scale))
+    else
+        MacroTools.@esc parent
+        reg_expr = MacroTools.@q(link_scales!($scale, $parent, oneway=$oneway))
+    end
+
+    return MacroTools.@q begin
         struct $scale_type <: TimeScale end
         const $scale = $scale_type()
         const $epoch_type = Epoch{$scale_type}
@@ -166,10 +173,14 @@ macro timescale(scale::Symbol, parent::Symbol)
         )
         Dates.default_format(::Type{$epoch_type}) = Dates.ISODateTimeFormat
 
-        add_scale_pair!($scale, $parent)
+        $reg_expr
 
         nothing
     end
+end
+
+function load_eop(files...)
+    EarthOrientation.push!(EarthOrientation.EOP_DATA, files...)
 end
 
 function update()
