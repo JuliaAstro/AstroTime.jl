@@ -75,5 +75,6 @@ end
 
         @test find_path(TDB, OneWay) == [TDB, OneWay]
         @test find_path(OneWay, TDB) == []
+        @test_throws NoPathError TDBEpoch(OneWayEpoch(2000, 1, 1))
     end
 end

@@ -3,7 +3,22 @@ using EarthOrientation: getΔUT1, EOP_DATA, get
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
-export getoffset, insideleap, NoOffsetError
+export
+    NoOffsetError,
+    NoPathError,
+    getoffset,
+    insideleap
+
+struct NoPathError <: Base.Exception
+    in_scale::String
+    out_scale::String
+end
+
+function Base.showerror(io::IO, err::NoPathError)
+    ins = err.in_scale
+    out = err.out_scale
+    print(io, "No conversion path between '$ins' and '$out' available.")
+end
 
 struct NoOffsetError <: Base.Exception
     in_scale::String
@@ -33,10 +48,14 @@ function j2000(second, fraction)
 end
 
 function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
-    path = find_path(from, to)
+    path = find_path(S(), scale)
+    isempty(path) && throw(NoPathError(string(S()), string(scale)))
+    length(path) == 2 && return getoffset(S(), scale, ep.second, ep.fraction)
     total_offset = 0.0
+    second = ep.second
+    fraction = ep.fraction
     for i in 1:length(path) - 1
-        offset = getoffset(path[i], path[i+1], second, fraction)
+        offset::Float64 = getoffset(path[i], path[i+1], second, fraction)
         total_offset += offset
         second, fraction = apply_offset(second, fraction, offset)
     end
@@ -52,6 +71,7 @@ end
                               from::S1,
                               to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
+    isempty(path) && throw(NoPathError(string(from), string(to)))
     length(path) == 2 && return _apply_offset(second, fraction, from, to)
     return _apply_offset((second, fraction), path...)
 end

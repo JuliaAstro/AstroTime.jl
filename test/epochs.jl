@@ -96,6 +96,19 @@ end
         @test tai.fraction == 0.0
         @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
         @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
+
+        ut1 = UT1Epoch(2000, 1, 1)
+        ut1_utc = getoffset(ut1, UTC)
+        utc = UTCEpoch(ut1)
+        utc_tai = getoffset(utc, TAI)
+        tai = TAIEpoch(utc)
+        tai_tt = getoffset(tai, TT)
+        tt = TTEpoch(tai)
+        tt_tdb = getoffset(tt, TDB)
+        tdb = TDBEpoch(tt)
+        tdb_tcb = getoffset(tdb, TCB)
+        tcb = TCBEpoch(tdb)
+        @test getoffset(ut1, TCB) == ut1_utc + utc_tai + tai_tt + tt_tdb + tdb_tcb
     end
     @testset "TDB" begin
         ep = TTEpoch(2000, 1, 1)
