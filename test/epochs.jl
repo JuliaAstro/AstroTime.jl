@@ -54,7 +54,7 @@ end
         t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
         t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
         t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
-        @test_throws MethodError t1 - t0 == -32.0seconds
+        @test_throws MethodError t1 - t0
         @test_throws MethodError t1 < t0
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
