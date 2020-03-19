@@ -35,6 +35,8 @@ function AstroTime.Epochs.getoffset(::TogetherScale, ::LonelyScale, _, _)
     return -5.0
 end
 
+@timescale OneWay TDB true
+
 @testset "AstroTime" begin
     include("periods.jl")
     include("astrodates.jl")
@@ -69,6 +71,9 @@ end
         together = TogetherEpoch(lonely)
         @test together == TogetherEpoch(2000, 1, 1, 0, 0, 5.0)
         @test lonely == LonelyEpoch(together)
-        @test find_path(LonelyScale(), TDB) == []
+        @test find_path(Lonely, TDB) == []
+
+        @test find_path(TDB, OneWay) == [TDB, OneWay]
+        @test find_path(OneWay, TDB) == []
     end
 end

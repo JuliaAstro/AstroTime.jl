@@ -152,7 +152,7 @@ macro timescale(scale::Symbol, parent=nothing, oneway=false)
         reg_expr = MacroTools.@q(register_scale!($scale))
     else
         MacroTools.@esc parent
-        reg_expr = MacroTools.@q(link_scales!($scale, $parent, oneway=$oneway))
+        reg_expr = MacroTools.@q(link_scales!($parent, $scale, oneway=$oneway))
     end
 
     return MacroTools.@q begin

@@ -18,7 +18,6 @@ LeapSeconds = "^1.1"
 MacroTools = "^0.5.0"
 MuladdMacro = "^0.2.0"
 Reexport = "^0.2.0"
-RemoteFiles = "^0.3.1"
 julia = "^1"
 
 [extras]
