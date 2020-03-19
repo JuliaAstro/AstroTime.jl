@@ -63,16 +63,28 @@
     @test collect(1.0seconds:3.0seconds) == [1.0seconds, 2.0seconds, 3.0seconds]
 
     @test string(1seconds) == "1 second"
+    @test string(Int32(1) * seconds) == "1 second"
+    @test string(1.0seconds) == "1.0 seconds"
     @test string(2seconds) == "2 seconds"
     @test string(1minutes) == "1 minute"
+    @test string(Int32(1) * minutes) == "1 minute"
+    @test string(1.0minutes) == "1.0 minutes"
     @test string(2minutes) == "2 minutes"
     @test string(1hours) == "1 hour"
+    @test string(Int32(1) * hours) == "1 hour"
+    @test string(1.0hours) == "1.0 hours"
     @test string(2hours) == "2 hours"
     @test string(1days) == "1 day"
+    @test string(Int32(1) * days) == "1 day"
+    @test string(1.0days) == "1.0 days"
     @test string(2days) == "2 days"
     @test string(1years) == "1 year"
+    @test string(Int32(1) * years) == "1 year"
+    @test string(1.0years) == "1.0 years"
     @test string(2years) == "2 years"
     @test string(1centuries) == "1 century"
+    @test string(Int32(1) * centuries) == "1 century"
+    @test string(1.0centuries) == "1.0 centuries"
     @test string(2centuries) == "2 centuries"
 end
 

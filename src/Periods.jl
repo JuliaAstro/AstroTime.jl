@@ -113,36 +113,23 @@ zero(p::Type{<:Period{U,T}}) where {U, T} = Period(U(), zero(T))
 eltype(p::Period) = typeof(value(p))
 eltype(p::Type{<:Period{U,T}}) where {U, T} = T
 
-plural(p::Period{U, T}) where {U, T} = value(p) == one(T) ? "" : "s"
+name(::Second, val::Integer) = ifelse(val == one(val), "second", "seconds")
+name(::Second, ::Any) = "seconds"
+name(::Minute, val::Integer) = ifelse(val == one(val), "minute", "minutes")
+name(::Minute, ::Any) = "minutes"
+name(::Hour, val::Integer) = ifelse(val == one(val), "hour", "hours")
+name(::Hour, ::Any) = "hours"
+name(::Day, val::Integer) = ifelse(val == one(val), "day", "days")
+name(::Day, ::Any) = "days"
+name(::Year, val::Integer) = ifelse(val == one(val), "year", "years")
+name(::Year, ::Any) = "years"
+name(::Century, val::Integer) = ifelse(val == one(val), "century", "centuries")
+name(::Century, ::Any) = "centuries"
 
-function show(io::IO, p::Period{Second})
+function show(io::IO, p::Period)
+    u = unit(p)
     v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " second" : " seconds")
-end
-
-function show(io::IO, p::Period{Minute})
-    v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " minute" : " minutes")
-end
-
-function show(io::IO, p::Period{Hour})
-    v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " hour" : " hours")
-end
-
-function show(io::IO, p::Period{Day})
-    v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " day" : " days")
-end
-
-function show(io::IO, p::Period{Year})
-    v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " year" : " years")
-end
-
-function show(io::IO, p::Period{Century})
-    v = value(p)
-    print(io, v, v isa Integer && v == 1 ? " century" : " centuries")
+    print(io, v, " ", name(u, v))
 end
 
 *(Δt::T, unit::TimeUnit) where {T<:Number} = Period(unit, Δt)
