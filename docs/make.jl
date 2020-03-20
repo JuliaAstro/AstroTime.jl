@@ -9,6 +9,7 @@ makedocs(
     format = Documenter.HTML(
 	prettyurls = get(ENV, "CI", nothing) == "true",
     ),
+    modules = [AstroTime],
     sitename = "AstroTime.jl",
     authors = "Helge Eichhorn and the AstroTime.jl contributors",
     pages = [
