@@ -21,6 +21,7 @@ makedocs(
 	    "Epochs" => joinpath("api", "epochs.md"),
 	],
     ],
+    strict = true,
 )
 
 deploydocs(

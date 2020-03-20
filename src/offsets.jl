@@ -337,7 +337,7 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(AstroTime.load_test_eop())
 julia> getoffset(UTC, UT1, 0, 0.0)
 0.3550253556501879
 ```
@@ -358,7 +358,7 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 
 # Example
 
-```jldoctest
+```jldoctest; setup=:(AstroTime.load_test_eop())
 julia> getoffset(UT1, UTC, 0, 0.0)
 -0.3550253592514352
 ```
