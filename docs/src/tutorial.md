@@ -22,9 +22,9 @@ Out of the box, the following time scales are defined:
 ```julia
 using AstroTime
 
-ep = Epoch{UTC}(2018, 2, 6, 20, 45, 0.0)
+ep = Epoch{CoordinatedUniversalTime}(2018, 2, 6, 20, 45, 0.0)
 
-# The following shorthand also works
+# The following shorthand syntax also works
 ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 
 # Or in another time scale
@@ -87,7 +87,7 @@ with a time unit.
 julia> 23 * seconds
 23 seconds
 
-julia> 1hour # You can use Julia's factor juxtaposition syntax and omit the `*`
+julia> 1hours # You can use Julia's factor juxtaposition syntax and omit the `*`
 1 hour
 ```
 
@@ -167,18 +167,6 @@ julia> tai = TAIEpoch(utc) # Convert to TAI
 2018-02-06T20:45:37.000 TAI
 ```
 
-Internally, epochs are defined with respect to Internation Atomic Time (TAI).
-Which makes comparisons and other operations across time scales possible.
-
-```julia
-# These two epoch correspond to the same point on the TAI time scale
-utc = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-tt = TTEpoch(2018, 2, 6, 20, 46, 9.184)
-
-utc == tt
-# true
-```
-
 ### High-Precision Conversions and Custom Offsets
 
 Some time scale transformations depend on measured quantities which cannot be accurately
@@ -198,10 +186,10 @@ which overrides the default algorithms.
 # the position of the observer on Earth
 
 tt = TTEpoch(2018, 2, 6, 20, 46, 9.184)
-dtai = tai_offset(TDB, tt, elong, u, v)
+dt = getoffset(tt, TDB, elong, u, v)
 
 # Use the custom offset for the transformation
-tdb = TDBEpoch(dtai, tt)
+tdb = TDBEpoch(dt, tt)
 ```
 
 ## Working with Julian Dates
@@ -278,31 +266,45 @@ julia> import Dates; Dates.DateTime(ep)
 ## Defining Custom Time Scales
 
 AstroTime.jl enables you to create your own first-class time scales via the [`@timescale`](@ref) macro.
-The `@timescale` macro will define the necessary structs and a method for [`tai_offset`](@ref) that
-will determine the offset between atomic time and the newly defined time scale.
-
-You need to provide at least three parameters to the macro: The name of the time scale, an epoch type
-parameter for the offset function, and the body of the offset function.
+The macro will define the necessary structs and register the new time scale.
 
 Let's start with a simple example and assume that you want to define `GMT` as an alias for `UTC`.
+You need to provide the name of the time scale and optionally a "parent" time scale to which it is linked.
 
 ```julia
-@timescale GMT ep begin
-    tai_offset(UTC, ep)
-end
+@timescale GMT UTC
 ```
 
-Here `GMT` is the name of the new time scale and `ep` is the required epoch parameter that is passed
-to the new `tai_offset` method (you could actually call anything you want).
-The `begin` block at the end is the body of the new `tai_offset` method.
-Since `GMT` has the same offset as `UTC`, you can just return the value from the `tai_offset` method
-for `UTC` here.
-The resulting method will look like this:
+At this point, you can already use the new time scale to create epochs.
 
 ```julia
-function AstroTime.Epochs.tai_offset(::typeof(GMT), ep)
-    tai_offset(UTC, ep)
-end
+julia> GMT
+GMT
+
+julia> typeof(GMT)
+GMTScale
+
+julia> gmt = GMTEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 GMT
+```
+
+Conversion to other `Epoch` types will not yet work for the newly created time
+because you need to provide the necessary methods for `getoffset`.
+If you are unsure which methods are needed, you can try to transform the epoch
+and the resulting error message will provide a hint.
+
+```julia
+julia> UTCEpoch(gmt)
+ERROR: No conversion 'GMT->UTC' available. If one of these is a custom time scale, you may need to define `AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime, second, fraction, args...)`.
+```
+
+To enable transformations between `GMT` and `UTC` in both directions you need
+to define the following methods.
+Since `GMT` is the same offset as `UTC`, these can just return zero.
+
+```julia
+AstroTime.Epochs.getoffset(::GMTType, ::CoordinatedUniversalTime, second, fraction) = 0.0
+AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::GMTType, second, fraction) = 0.0
 ```
 
 You can now use `GMTEpoch` like any other epoch type, e.g.
@@ -310,24 +312,60 @@ You can now use `GMTEpoch` like any other epoch type, e.g.
 ```julia
 julia> ep = UTCEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 UTC
+
 julia> GMTEpoch(ep)
 2000-01-01T00:00:00.000 GMT
 ```
 
-The `@timescale` macro also accepts additional parameters for offset calculation.
-Let's assume that you want to define a time scale that determines the
-[Spacecraft Event Time](https://en.wikipedia.org/wiki/Spacecraft_Event_Time) which
-takes the one-way light time into account.
+For a more complex example, let's reimplement the Geocentric Coordinate
+Time (TCG) scale.
+It is a linear transformation from Terrestrial Time (TT), i.e. the
+transformation is dependent on the point in time in the current time scale
+(the `second` and `fraction` arguments to `getoffset`).
 
-You can use the following definition which takes another parameter `distance` into
-account which is the distance of the spacecraft from Earth.
+```julia
+@timescale CustomTCG TT
+
+# The reference point
+const JD77_SEC = -7.25803167816e8
+# The linear rate of change
+const LG_RATE = 6.969290134e-10
+
+function getoffset(::CustomTCGScale, ::TerrestrialTime, second, fraction)
+    # `second` is the number of full seconds since 2000-01-01
+    # `fraction` is the fraction of the current second
+    dt = second - JD77_SEC + fraction
+    return -LG_RATE * dt
+end
+
+function getoffset(::TerrestrialTime, ::CustomTCGScale, second, fraction)
+    # The inverse rate for the backwards transformation
+    rate = LG_RATE / (1.0 - LG_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
+
+```
+
+Let's assume that you want to define a time scale that determines the
+[Spacecraft Event Time](https://en.wikipedia.org/wiki/Spacecraft_Event_Time)
+which takes the one-way light time into account.
+
+You could use the following definitions adding the `distance` parameter
+which is the distance of the spacecraft from Earth.
 
 ```julia
 const speed_of_light = 299792458.0 # m/s
 
-@timescale SCET ep distance begin
-    # Add the one-way light time to UTC offset
-    tai_offset(UTC, ep) + distance / speed_of_light
+@timescale SCET UTC
+
+function AstroTime.Epochs.getoffset(::SCETType, ::CoordinatedUniversalTime,
+                                    second, fraction, distance)
+    return distance / speed_of_light
+end
+function AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::SCETType,
+                                    second, fraction, distance)
+    return -distance / speed_of_light
 end
 ```
 
@@ -338,8 +376,10 @@ For example, for a spacecraft that is one astronomical unit away from Earth:
 ```julia
 julia> astronomical_unit = 149597870700.0 # m
 149597870700.0
+
 julia> ep = UTCEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 UTC
+
 julia> SCETEpoch(ep, astronomical_unit)
 2000-01-01T00:08:19.005 SCET
 ```
