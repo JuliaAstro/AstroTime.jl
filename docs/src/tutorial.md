@@ -387,3 +387,16 @@ julia> SCETEpoch(ep, astronomical_unit)
 !!! note
     At this time, custom epochs with additional parameters cannot be parsed from strings.
 
+You can also introduce time scales that are disjoint from AstroTime.jl's
+default graph of time scales by defining a time scale without a parent.
+
+```julia
+julia> @timescale Disjoint
+
+julia> typeof(Disjoint) = DisjointScale
+```
+
+By defining additional time scales connected to this scale and the appropriate
+`getoffset` methods, you can create your own graph of time scales that is
+completely independent of the defaults provided by the library.
+
