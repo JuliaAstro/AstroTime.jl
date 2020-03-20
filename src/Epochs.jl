@@ -418,7 +418,7 @@ Return the duration between epoch `a` and epoch `b`.
 
 ### Examples ###
 
-```jldoctest```
+```jldoctest
 julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```

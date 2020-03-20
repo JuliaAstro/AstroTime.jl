@@ -46,7 +46,6 @@ end
 function j2000(second, fraction)
     (fraction + second) / SECONDS_PER_DAY * days
 end
-
 function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
     path = find_path(S(), scale)
     isempty(path) && throw(NoPathError(string(S()), string(scale)))
@@ -62,6 +61,15 @@ function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
     return total_offset
 end
 
+
+"""
+    getoffset(ep::Epoch, scale::TimeScale)
+
+For a given epoch `ep` return the offset between its time scale and
+another time `scale` in seconds.
+
+# Example
+"""
 function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
     return getoffset(S(), scale, ep.second, ep.fraction, args...)
 end
@@ -77,9 +85,9 @@ end
 end
 
 @inline function _apply_offset(second::Int64,
-                              fraction::T,
-                              from::S1,
-                              to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
+                               fraction::T,
+                               from::S1,
+                               to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
     return apply_offset(second, fraction, getoffset(from, to, second, fraction))
 end
 

@@ -4,19 +4,23 @@ using ItemGraphs: ItemGraph, add_edge!, add_vertex!, items
 
 import Dates
 
-export TimeScale, find_path, link_scales!, register_scale!
+export
+    TimeScale,
+    find_path,
+    link_scales!,
+    register_scale!
 
 """
 All timescales are subtypes of the abstract type `TimeScale`.
 The following timescales are defined:
 
-* `UTC` — Coordinated Universal Time
-* `UT1` — Universal Time
-* `TAI` — International Atomic Time
-* `TT` — Terrestrial Time
-* `TCG` — Geocentric Coordinate Time
-* `TCB` — Barycentric Coordinate Time
-* `TDB` — Barycentric Dynamical Time
+* [`UTC`](@ref) — Coordinated Universal Time
+* [`UT1`](@ref) — Universal Time
+* [`TAI`](@ref) — International Atomic Time
+* [`TT`](@ref) — Terrestrial Time
+* [`TCG`](@ref) — Geocentric Coordinate Time
+* [`TCB`](@ref) — Barycentric Coordinate Time
+* [`TDB`](@ref) — Barycentric Dynamical Time
 """
 abstract type TimeScale end
 
@@ -40,15 +44,39 @@ const ACRONYMS = (
     :TDB,
 )
 
-for (acronym, scale) in zip(ACRONYMS, NAMES)
-    name = String(acronym)
+for (acronym, name) in zip(ACRONYMS, NAMES)
+    acro_str = String(acronym)
+    name_str = String(name)
+    name_split = join(split(name_str, r"(?=[A-Z])"), " ")
+    wiki = replace(name_split, " "=>"_")
     @eval begin
-        struct $scale <: TimeScale end
-        const $acronym = $scale()
-        export $scale, $acronym
+        """
+            $($name_str)
 
-        Base.show(io::IO, ::$scale) = print(io, "$($name)")
-        tryparse(::Val{Symbol($name)}) = $acronym
+        A type representing the $($name_split) ($($acro_str)) time scale.
+
+        # References
+
+        - [Wikipedia](https://en.wikipedia.org/wiki/$($wiki))
+        """
+        struct $name <: TimeScale end
+
+        """
+            $($acro_str)
+
+        The singleton instance of the [`$($name_str)`](@ref) type representing
+        the $($name_split) ($($acro_str)) time scale.
+
+        # References
+
+        - [Wikipedia](https://en.wikipedia.org/wiki/$($wiki))
+        """
+        const $acronym = $name()
+
+        export $name, $acronym
+
+        Base.show(io::IO, ::$name) = print(io, "$($acro_str)")
+        tryparse(::Val{Symbol($acro_str)}) = $acronym
     end
 end
 
