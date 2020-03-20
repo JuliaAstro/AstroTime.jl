@@ -31,5 +31,5 @@ another_day = tt + 1days
 
 ## Next Steps
 
-You can either follow the [Tutorial](@ref) or jump straight into the [API](@ref) reference.
+Follow the [Tutorial](@ref) to get an in-depth look at AstroTime.jl's functionality.
 
