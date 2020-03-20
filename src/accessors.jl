@@ -4,10 +4,13 @@ import ..AstroDates: DateTime, year, month, day,
     hour, minute, second, millisecond,
     time, date, fractionofday, yearmonthday, dayofyear
 
-export timescale
-
 timescale(ep::Epoch) = ep.scale
 
+"""
+    DateTime(ep::Epoch)
+
+Convert the epoch `ep` to an `AstroDates.DateTime`.
+"""
 function DateTime(ep::Epoch)
     if !isfinite(ep.fraction)
         if ep.fraction < 0
@@ -136,7 +139,7 @@ Get the time of the day of the epoch `ep` as a fraction.
 fractionofday(ep::Epoch) = fractionofday(time(ep))
 
 """
-    Dates.DatetTime(ep::Epoch)
+    Dates.DateTime(ep::Epoch)
 
 Convert the epoch `ep` to a `Dates.DateTime`.
 """

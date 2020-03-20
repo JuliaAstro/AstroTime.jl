@@ -117,28 +117,33 @@ function __init__()
 end
 
 """
-    @timescale scale epoch [args...] body
+    @timescale scale [parent[, oneway]]
 
-Define a new time scale, the corresponding `Epoch` type alias, and a function that calculates
-the offset from TAI for the new time scale.
+Define a new time scale and the corresponding `Epoch` type alias.
 
 ### Arguments ###
 
 - `scale`: The name of the time scale
-- `epoch`: The name of the `Epoch` parameter that is passed to the `tai_offset` function
-- `args`: Optional additional parameters that are passed to the `tai_offset` function
-- `body`: The body of the `tai_offset` function
+- `parent`: The "parent" time scale to which it should be linked (optional)
+- `oneway`: If `true`, only the transformation from `parent` to `scale` is
+    registered (optional, default: `false`)
 
 # Example
 
 ```jldoctest
-julia> @timescale GMT ep tai_offset(UTC, ep)
+julia> @timescale GMT UTC
 
 julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMT,T} where T
+Epoch{GMTScale,T} where T
+
+julia> find_path(TAI, GMT)
+3-element Array{TimeScale,1}:
+ TAI
+ UTC
+ GMT
 ```
 """
 macro timescale(scale::Symbol, parent=nothing, oneway=false)

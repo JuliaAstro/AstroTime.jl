@@ -41,6 +41,7 @@ export Epoch,
     MODIFIED_JULIAN_EPOCH,
     PAST_INFINITY,
     UNIX_EPOCH,
+    DateTime,
     date,
     day,
     dayofyear,
@@ -57,8 +58,10 @@ export Epoch,
     second,
     secondinday,
     time,
+    timescale,
     year,
-    yearmonthday
+    yearmonthday,
+    -
 
 using ..TimeScales
 using ..AstroDates
@@ -111,17 +114,17 @@ Construct an `Epoch` with time scale `S` from a Julian date
 (optionally split into `jd1` and `jd2`). `origin` determines the
 variant of Julian date that is used. Possible values are:
 
-- `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
-- `:julian`: Julian date, starts at -4712-01-01T12:00
-- `:modified_julian`: Modified Julian date, starts at 1858-11-17T00:00
+- `:j2000`: J2000 Julian date, starts at `2000-01-01T12:00`
+- `:julian`: Julian date, starts at `-4712-01-01T12:00`
+- `:modified_julian`: Modified Julian date, starts at `1858-11-17T00:00`
 
 ### Examples ###
 
 ```jldoctest
-julia> Epoch{UTC}(0.0days, 0.5days)
+julia> Epoch{CoordinatedUniversalTime}(0.0days, 0.5days)
 2000-01-02T00:00:00.000 UTC
 
-julia> Epoch{UTC}(2.451545e6days, origin=:julian)
+julia> Epoch{CoordinatedUniversalTime}(2.451545e6days, origin=:julian)
 2000-01-01T12:00:00.000 UTC
 ```
 """
@@ -154,7 +157,7 @@ end
 """
     j2000(ep)
 
-Returns the J2000 Julian date for epoch `ep`.
+Return the J2000 Julian date for epoch `ep`.
 
 ### Example ###
 
@@ -170,7 +173,7 @@ end
 """
     julian(ep)
 
-Returns the Julian Date for epoch `ep`.
+Return the Julian Date for epoch `ep`.
 
 ### Example ###
 
@@ -184,7 +187,7 @@ julian(ep::Epoch, unit=days) = j2000(ep, unit) + unit(J2000_TO_JULIAN)
 """
     modified_julian(ep)
 
-Returns the Modified Julian Date for epoch `ep`.
+Return the Modified Julian Date for epoch `ep`.
 
 ### Example ###
 
@@ -198,7 +201,7 @@ modified_julian(ep::Epoch, unit=days) = j2000(ep, unit) + unit(J2000_TO_MJD)
 """
     julian_twopart(ep)
 
-Returns the two-part Julian date for epoch `ep`, which is a tuple consisting
+Return the two-part Julian date for epoch `ep`, which is a tuple consisting
 of the Julian day number and the fraction of the day.
 
 ### Example ###
@@ -274,13 +277,13 @@ be used which is parsed as "day of year" (see the example below).  The default f
 ### Example ###
 
 ```jldoctest
-julia> Epoch{UTC}("2018-02-06T20:45:00.0")
+julia> Epoch{CoordinatedUniversalTime}("2018-02-06T20:45:00.0")
 2018-02-06T20:45:00.000 UTC
 
-julia> Epoch{UTC}("February 6, 2018", "U d, y")
+julia> Epoch{CoordinatedUniversalTime}("February 6, 2018", "U d, y")
 2018-02-06T00:00:00.000 UTC
 
-julia> Epoch{UTC}("2018-037T00:00", "yyyy-DDDTHH:MM")
+julia> Epoch{CoordinatedUniversalTime}("2018-037T00:00", "yyyy-DDDTHH:MM")
 2018-02-06T00:00:00.000 UTC
 ```
 """
@@ -309,10 +312,10 @@ Construct an `Epoch` with time scale `S` from date and time components.
 ### Example ###
 
 ```jldoctest
-julia> Epoch{UTC}(2018, 2, 6, 20, 45, 0.0)
+julia> Epoch{CoordinatedUniversalTime}(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 UTC
 
-julia> Epoch{UTC}(2018, 2, 6)
+julia> Epoch{CoordinatedUniversalTime}(2018, 2, 6)
 2018-02-06T00:00:00.000 UTC
 ```
 """
@@ -449,13 +452,13 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
 
         ```jldoctest
         julia> $($name)("2018-02-06T20:45:00.0")
-        2018-02-06T20:45:00.000 $($scale)
+        2018-02-06T20:45:00.000 $($acronym)
 
         julia> $($name)("February 6, 2018", "U d, y")
-        2018-02-06T00:00:00.000 $($scale)
+        2018-02-06T00:00:00.000 $($acronym)
 
         julia> $($name)("2018-37T00:00", "yyyy-DDDTHH:MM")
-        2018-02-06T00:00:00.000 $($scale)
+        2018-02-06T00:00:00.000 $($acronym)
         ```
         """
         $epoch(::AbstractString)
@@ -467,18 +470,18 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
         `jd1` and `jd2`). `origin` determines the variant of Julian
         date that is used. Possible values are:
 
-        - `:j2000`: J2000 Julian date, starts at 2000-01-01T12:00
-        - `:julian`: Julian date, starts at -4712-01-01T12:00
-        - `:modified_julian`: Modified Julian date, starts at 1858-11-17T00:00
+        - `:j2000`: J2000 Julian date, starts at `2000-01-01T12:00`
+        - `:julian`: Julian date, starts at `-4712-01-01T12:00`
+        - `:modified_julian`: Modified Julian date, starts at `1858-11-17T00:00`
 
         ### Examples ###
 
         ```jldoctest
         julia> $($name)(0.0days, 0.5days)
-        2000-01-02T00:00:00.000 $($scale)
+        2000-01-02T00:00:00.000 $($acronym)
 
         julia> $($name)(2.451545e6days, origin=:julian)
-        2000-01-01T12:00:00.000 $($scale)
+        2000-01-01T12:00:00.000 $($acronym)
         ```
         """
         $epoch(::Number, ::Number)
@@ -492,10 +495,10 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
 
         ```jldoctest
         julia> $($name)(2018, 2, 6, 20, 45, 0.0)
-        2018-02-06T20:45:00.000 $($scale)
+        2018-02-06T20:45:00.000 $($acronym)
 
         julia> $($name)(2018, 2, 6)
-        2018-02-06T00:00:00.000 $($scale)
+        2018-02-06T00:00:00.000 $($acronym)
         ```
         """
         $epoch(::Int, ::Int, ::Int)
