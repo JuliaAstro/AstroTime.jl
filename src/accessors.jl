@@ -21,20 +21,15 @@ function DateTime(ep::Epoch)
         end
     end
 
-    offset2000B = ep.fraction
-    offset2000A = ep.second + Int64(43200)
-    if offset2000B < 0
-        offset2000A -= 1
-        offset2000B += 1
-    end
-    time = offset2000A % Int64(86400)
+    sec = ep.second + Int64(43200)
+    time = sec % Int64(86400)
     if time < 0
         time += Int64(86400)
     end
-    date = Int((offset2000A - time) ÷ Int64(86400))
+    date = Int((sec - time) ÷ Int64(86400))
 
     date_comp = Date(AstroDates.J2000_EPOCH, date)
-    time_comp = Time(time, offset2000B)
+    time_comp = Time(time, ep.fraction)
 
     leap = getleap(ep)
     leap = ifelse(abs(leap) == 1.0, leap, 0.0)
