@@ -2,7 +2,6 @@ module AstroDates
 
 using ..TimeScales: TimeScale
 
-import Base: time, show
 import Dates
 import Dates: year, month, day,
     hour, minute, second, millisecond,
@@ -121,7 +120,7 @@ struct Date{C}
     Date{C}(year, month, day) where {C} = new{C::Calendar}(year, month, day)
 end
 
-@inline function Date(offset)
+@inline function Date(offset::Integer)
     calendar = GregorianCalendar()
     if offset < -152384
         if offset > -730122
@@ -177,10 +176,10 @@ month(s::Date) = s.month
 day(s::Date) = s.day
 calendar(s::Date{C}) where {C} = C
 
-show(io::IO, d::Date) = print(io,
-                              year(d), "-",
-                              lpad(month(d), 2, '0'), "-",
-                              lpad(day(d), 2, '0'))
+Base.show(io::IO, d::Date) = print(io,
+                                   year(d), "-",
+                                   lpad(month(d), 2, '0'), "-",
+                                   lpad(day(d), 2, '0'))
 
 Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
 Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
@@ -264,7 +263,7 @@ fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
 
 secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
 
-function show(io::IO, t::Time)
+function Base.show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
     s = lpad(second(Int, t), 2, '0')
@@ -277,32 +276,32 @@ struct DateTime{C}
     time::Time
 end
 
-date(dt::DateTime) = dt.date
-time(dt::DateTime) = dt.time
+Date(dt::DateTime) = dt.date
+Time(dt::DateTime) = dt.time
 
-show(io::IO, dt::DateTime) = print(io, date(dt), "T", time(dt))
+Base.show(io::IO, dt::DateTime) = print(io, Date(dt), "T", Time(dt))
 
 function DateTime(year, month, day, hour=0, minute=0, second=0.0)
     DateTime(Date(year, month, day), Time(hour, minute, second))
 end
 
-year(dt::DateTime) = year(date(dt))
-month(dt::DateTime) = month(date(dt))
-day(dt::DateTime) = day(date(dt))
-yearmonthday(dt::DateTime) = year(date(dt)), month(date(dt)), day(date(dt))
+year(dt::DateTime) = year(Date(dt))
+month(dt::DateTime) = month(Date(dt))
+day(dt::DateTime) = day(Date(dt))
+yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
 function dayofyear(dt::DateTime{C}) where C
     leap = isleap(C, year(dt))
     finddayinyear(month(dt), day(dt), leap)
 end
-hour(dt::DateTime) = hour(time(dt))
-minute(dt::DateTime) = minute(time(dt))
-second(typ, dt::DateTime) = second(typ, time(dt))
-second(dt::DateTime) = second(Float64, time(dt))
-millisecond(dt::DateTime) = millisecond(time(dt))
+hour(dt::DateTime) = hour(Time(dt))
+minute(dt::DateTime) = minute(Time(dt))
+second(typ, dt::DateTime) = second(typ, Time(dt))
+second(dt::DateTime) = second(Float64, Time(dt))
+millisecond(dt::DateTime) = millisecond(Time(dt))
 
-julian(dt::DateTime) = fractionofday(time(dt)) + julian(date(dt))
-j2000(dt::DateTime) = fractionofday(time(dt)) + j2000(date(dt))
-julian_twopart(dt::DateTime) = julian(date(dt)), fractionofday(time(dt))
+julian(dt::DateTime) = fractionofday(Time(dt)) + julian(Date(dt))
+j2000(dt::DateTime) = fractionofday(Time(dt)) + j2000(Date(dt))
+julian_twopart(dt::DateTime) = julian(Date(dt)), fractionofday(Time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
                                         Dates.hour(dt), Dates.minute(dt),

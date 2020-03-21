@@ -159,13 +159,17 @@ end
         @test second(Float64, ep) == 59.371
         @test second(Int, ep) == 59
         @test millisecond(ep) == 371
+        @test yearmonthday(ep) == (2018, 2, 6)
+        @test Date(ep) == Date(2018, 2, 6)
     end
     @testset "Ranges" begin
         rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
+        @test step(rng) == 86400.0seconds
         @test length(rng) == 32
         @test first(rng) == UTCEpoch(2018, 1, 1)
         @test last(rng) == UTCEpoch(2018, 2, 1)
         rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
+        @test step(rng) == 13seconds
         @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
     end
     @testset "Leap Seconds" begin
@@ -209,6 +213,7 @@ end
         @test after_tdb.second == after_exp.second
         @test after_tdb.fraction ≈ after_exp.fraction atol=1e-7
 
+        @test !insideleap(TTEpoch(2000, 1, 1))
         @test !insideleap(before_utc)
         @test insideleap(start_utc)
         @test insideleap(during_utc)

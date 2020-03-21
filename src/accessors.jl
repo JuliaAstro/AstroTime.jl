@@ -1,8 +1,9 @@
 import Dates
 
-import ..AstroDates: DateTime, year, month, day,
+import ..AstroDates: Date, DateTime, Time,
+    year, month, day,
     hour, minute, second, millisecond,
-    time, date, fractionofday, yearmonthday, dayofyear
+    fractionofday, yearmonthday, dayofyear
 
 timescale(ep::Epoch) = ep.scale
 
@@ -118,25 +119,25 @@ Get the number of milliseconds of the epoch `ep`.
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
 
 """
-    time(ep::Epoch)
+    Time(ep::Epoch)
 
-Get the time of the epoch `ep`.
+Get the `Time` of the epoch `ep`.
 """
-time(ep::Epoch) = time(DateTime(ep))
+Time(ep::Epoch) = Time(DateTime(ep))
 
 """
-    date(ep::Epoch)
+    Date(ep::Epoch)
 
-Get the date of the epoch `ep`.
+Get the `Date` of the epoch `ep`.
 """
-date(ep::Epoch) = date(DateTime(ep))
+Date(ep::Epoch) = Date(DateTime(ep))
 
 """
     fractionofday(ep::Epoch)
 
 Get the time of the day of the epoch `ep` as a fraction.
 """
-fractionofday(ep::Epoch) = fractionofday(time(ep))
+fractionofday(ep::Epoch) = fractionofday(Time(ep))
 
 """
     Dates.DateTime(ep::Epoch)

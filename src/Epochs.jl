@@ -11,7 +11,6 @@ import ..AstroDates:
     DateTime,
     Time,
     calendar,
-    date,
     day,
     dayofyear,
     fractionofday,
@@ -24,7 +23,6 @@ import ..AstroDates:
     month,
     second,
     secondinday,
-    time,
     year,
     yearmonthday
 
@@ -42,7 +40,8 @@ export Epoch,
     PAST_INFINITY,
     UNIX_EPOCH,
     DateTime,
-    date,
+    Date,
+    Time,
     day,
     dayofyear,
     fractionofday,
@@ -57,7 +56,6 @@ export Epoch,
     now,
     second,
     secondinday,
-    time,
     timescale,
     year,
     yearmonthday,
@@ -294,7 +292,7 @@ Epoch{S}(str::AbstractString, format::AbstractString) where {S} = Epoch{S}(str, 
 
 Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
 
-Epoch{S}(dt::DateTime) where {S} = Epoch{S}(date(dt), time(dt))
+Epoch{S}(dt::DateTime) where {S} = Epoch{S}(Date(dt), Time(dt))
 Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))
 
 """
