@@ -58,9 +58,48 @@
     @test zero(1years) == 0years
     @test zero(1.0years) == 0.0years
 
+    @test eltype(1.0years) == Float64
+    @test eltype(typeof(1.0years)) == Float64
+
+    @test 1.0seconds ≈ 1.0seconds
+    @test 1.0 * seconds == seconds * 1.0
+    @test 3 * 3.0seconds == 3.0seconds * 3
+    @test 4.0seconds / 2 == 2.0seconds
+    p = 1.0seconds
+    @test -p == -1.0seconds
+    @test 3.0seconds - 2.0seconds == 1.0seconds
+
+    a = [1.0, 2.0, 3.0]
+    @test a * seconds == [1.0seconds, 2.0seconds, 3.0seconds]
+    @test a .* seconds == [1.0seconds, 2.0seconds, 3.0seconds]
+
     @test unit(1years) == years
-    @test collect(1seconds:3seconds) == [1seconds, 2seconds, 3seconds]
-    @test collect(1.0seconds:3.0seconds) == [1.0seconds, 2.0seconds, 3.0seconds]
+    int_rng = 1seconds:3seconds
+    @test step(int_rng) == 1seconds
+    @test collect(int_rng) == [1seconds, 2seconds, 3seconds]
+    float_rng = 1.0seconds:3.0seconds
+    @test step(float_rng) == 1.0seconds
+    @test collect(float_rng) == [1.0seconds, 2.0seconds, 3.0seconds]
+    @test Period{Second,Float64}(1.0seconds) == 1.0seconds
+
+    @test Periods.name(seconds, 1) == "second"
+    @test Periods.name(seconds, 2) == "seconds"
+    @test Periods.name(seconds, 1.0) == "seconds"
+    @test Periods.name(minutes, 1) == "minute"
+    @test Periods.name(minutes, 2) == "minutes"
+    @test Periods.name(minutes, 1.0) == "minutes"
+    @test Periods.name(hours, 1) == "hour"
+    @test Periods.name(hours, 2) == "hours"
+    @test Periods.name(hours, 1.0) == "hours"
+    @test Periods.name(days, 1) == "day"
+    @test Periods.name(days, 2) == "days"
+    @test Periods.name(days, 1.0) == "days"
+    @test Periods.name(years, 1) == "year"
+    @test Periods.name(years, 2) == "years"
+    @test Periods.name(years, 1.0) == "years"
+    @test Periods.name(centuries, 1) == "century"
+    @test Periods.name(centuries, 2) == "centuries"
+    @test Periods.name(centuries, 1.0) == "centuries"
 
     @test string(1seconds) == "1 second"
     @test string(Int32(1) * seconds) == "1 second"

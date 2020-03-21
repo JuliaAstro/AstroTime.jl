@@ -142,7 +142,6 @@ end
 (-)(p::Period) = Period(unit(p), -p.Δt)
 (*)(x, p::Period) = Period(unit(p), p.Δt * x)
 (*)(p::Period, x) = Period(unit(p), p.Δt * x)
-(/)(x, p::Period) = Period(unit(p), x / p.Δ)
 (/)(p::Period, x) = Period(unit(p), p.Δt / x)
 
 isless(p1::Period{U}, p2::Period{U}) where {U} = isless(value(p1), value(p2))
