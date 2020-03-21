@@ -146,3 +146,17 @@ Convert the epoch `ep` to a `Dates.DateTime`.
 """
 Dates.DateTime(ep::Epoch) = Dates.DateTime(DateTime(ep))
 
+"""
+    Dates.Date(ep::Epoch)
+
+Convert the date of epoch `ep` to a `Dates.Date`.
+"""
+Dates.Date(ep::Epoch) = Dates.Date(Date(ep))
+
+"""
+    Dates.Time(ep::Epoch)
+
+Convert the time of epoch `ep` to a `Dates.Time`.
+"""
+Dates.Time(ep::Epoch) = Dates.Time(Time(ep))
+

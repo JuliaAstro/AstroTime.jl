@@ -1,5 +1,7 @@
 using Measurements
 
+import Dates
+
 function spice_utc_tdb(str)
     et = utc2et(str)
     second, fraction = divrem(et, 1.0)
@@ -161,6 +163,11 @@ end
         @test millisecond(ep) == 371
         @test yearmonthday(ep) == (2018, 2, 6)
         @test Date(ep) == Date(2018, 2, 6)
+        @test Time(ep) == Time(20, 45, 59.371)
+        @test DateTime(ep) == DateTime(2018, 2, 6, 20, 45, 59.371)
+        @test Dates.Date(ep) == Dates.Date(2018, 2, 6)
+        @test Dates.Time(ep) == Dates.Time(20, 45, 59, 371)
+        @test Dates.DateTime(ep) == Dates.DateTime(2018, 2, 6, 20, 45, 59, 371)
     end
     @testset "Ranges" begin
         rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)

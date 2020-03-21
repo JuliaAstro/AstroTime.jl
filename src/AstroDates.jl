@@ -246,8 +246,9 @@ end
     Time(hour, minute, second)
 end
 
-Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t), Dates.second(t))
-Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t))
+Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t),
+                           Dates.second(t) + 1e-3Dates.millisecond(t))
+Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t))
 
 const H00 = Time(0, 0, 0.0)
 const H12 = Time(12, 0, 0.0)
