@@ -4,8 +4,7 @@ using ERFA
 using SPICE: furnsh, et2utc, utc2et
 
 furnsh(joinpath("data", "naif0012.tls"))
-AstroTime.load_eop(joinpath("data", "finals.csv"),
-                   joinpath("data", "finals2000A.csv"))
+AstroTime.load_test_eop()
 
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m

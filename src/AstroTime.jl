@@ -191,7 +191,7 @@ end
 function load_test_eop()
     finals = joinpath(@__DIR__, "..", "test", "data", "finals.csv")
     finals2000A = joinpath(@__DIR__, "..", "test", "data", "finals2000A.csv")
-    EarthOrientation.push!(EarthOrientation.EOP_DATA, finals, finals2000A)
+    load_eop(finals, finals2000A)
 end
 
 function update()
