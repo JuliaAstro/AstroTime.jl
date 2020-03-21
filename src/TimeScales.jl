@@ -102,8 +102,8 @@ find_path(from, to) = items(SCALES, from, to)
 
 struct NotATimeScale <: TimeScale end
 
-tryparse(s::T) where T<:AbstractString = tryparse(Val(Symbol(s)))
-tryparse(::T) where T = nothing
+tryparse(s::AbstractString) = tryparse(Val(Symbol(s)))
+tryparse(::Any) = nothing
 
 @inline function Dates.tryparsenext(d::Dates.DatePart{'t'}, str, i, len, locale)
     next = Dates.tryparsenext_word(str, i, len, locale, Dates.max_width(d))

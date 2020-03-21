@@ -72,6 +72,9 @@
     a = [1.0, 2.0, 3.0]
     @test a * seconds == [1.0seconds, 2.0seconds, 3.0seconds]
     @test a .* seconds == [1.0seconds, 2.0seconds, 3.0seconds]
+    @test seconds * a == [1.0seconds, 2.0seconds, 3.0seconds]
+    @test seconds .* a == [1.0seconds, 2.0seconds, 3.0seconds]
+    @test Base.broadcastable(seconds) isa typeof(Ref(seconds))
 
     @test unit(1years) == years
     int_rng = 1seconds:3seconds

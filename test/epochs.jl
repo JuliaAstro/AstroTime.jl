@@ -62,6 +62,7 @@ end
         @test t2 < t1
     end
     @testset "Parsing" begin
+        @test AstroTime.TimeScales.tryparse(1.0) === nothing
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
         @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
         @test UT1Epoch("2000-01-01T00:00:00.000") == UT1Epoch(2000, 1, 1)
@@ -78,6 +79,13 @@ end
         ep = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
         @test AstroTime.format(ep, "yyyy-DDDTHH:MM:SS.sss") == "2018-226T10:02:51.551"
         @test AstroTime.format(ep, "HH:MM ttt") == "10:02 TAI"
+        @test string(TAI) == "TAI"
+        @test string(TT) == "TT"
+        @test string(UTC) == "UTC"
+        @test string(UT1) == "UT1"
+        @test string(TCG) == "TCG"
+        @test string(TDB) == "TDB"
+        @test string(TCB) == "TCB"
     end
     @testset "Arithmetic" begin
         ep = UTCEpoch(2000, 1, 1)
