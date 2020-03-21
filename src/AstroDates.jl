@@ -306,7 +306,7 @@ julian_twopart(dt::DateTime) = julian(Date(dt)), fractionofday(Time(dt))
 
 DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
                                         Dates.hour(dt), Dates.minute(dt),
-                                        Dates.millisecond(dt) / 1000.0 + Dates.second(dt))
+                                        1e-3Dates.millisecond(dt) + Dates.second(dt))
 function Dates.DateTime(dt::DateTime)
     y = year(dt)
     m = month(dt)

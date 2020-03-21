@@ -81,17 +81,28 @@ end
     end
     @testset "Arithmetic" begin
         ep = UTCEpoch(2000, 1, 1)
+        ep1 = UTCEpoch(2000, 1, 2)
         @test (ep + 1.0seconds) - ep   == 1.0seconds
         @test (ep + 1.0minutes) - ep   == seconds(1.0minutes)
         @test (ep + 1.0hours) - ep     == seconds(1.0hours)
         @test (ep + 1.0days) - ep      == seconds(1.0days)
         @test (ep + 1.0years) - ep     == seconds(1.0years)
         @test (ep + 1.0centuries) - ep == seconds(1.0centuries)
+        @test ep < ep1
+        @test isless(ep, ep1)
     end
     @testset "Conversion" begin
         include("conversions.jl")
+        dt = DateTime(2018, 8, 14, 10, 2, 51.551247436378276)
+        ep = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
+        @test TAIEpoch(dt) == ep
+        @test TAIEpoch(Dates.DateTime(dt)) == TAIEpoch(2018, 8, 14, 10, 2, 51.551)
+        @test TAIEpoch(Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
+        @test now() isa UTCEpoch
 
         tt = TTEpoch(2000, 1, 1, 12)
+        @test TTEpoch(tt) == tt
+        @test Epoch{TerrestrialTime,Float64}(tt) == tt
         @test tt - J2000_EPOCH == 0.0seconds
         tai = TAIEpoch(2000, 1, 1, 12)
         @test tai.second == 0
