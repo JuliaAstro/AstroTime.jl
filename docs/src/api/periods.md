@@ -1,4 +1,4 @@
-# API
+# Periods
 
 ```@meta
 DocTestSetup = quote
@@ -7,6 +7,11 @@ end
 ```
 
 ```@autodocs
-Modules = [AstroTime, AstroTime.Epochs, AstroTime.Periods, AstroTime.TimeScales]
+Modules = [AstroTime.Periods]
 Private = false
 ```
+
+```@meta
+DocTestSetup = nothing
+```
+

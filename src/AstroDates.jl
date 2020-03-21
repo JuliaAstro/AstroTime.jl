@@ -209,12 +209,12 @@ const MIN_EPOCH = Date(typemin(Int32))
 const MAX_EPOCH = Date(typemax(Int32))
 const UNIX_EPOCH = Date(1970, 1, 1)
 
-struct Time
+struct Time{T}
     hour::Int
     minute::Int
-    second::Float64
+    second::T
 
-    function Time(hour, minute, second)
+    function Time(hour, minute, second::T) where T
         if hour < 0 || hour > 23
             throw(ArgumentError("`hour` must be an integer between 0 and 23."))
         elseif minute < 0 || minute > 59
@@ -223,7 +223,7 @@ struct Time
             throw(ArgumentError("`second` must be a float between 0 and 61."))
         end
 
-        new(hour, minute, second)
+        new{T}(hour, minute, second)
     end
 end
 

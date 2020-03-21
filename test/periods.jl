@@ -5,12 +5,12 @@
     d = 1.0days
     y = 1.0years
     c = 1.0centuries
-    @test s == Period{seconds}(1.0)
-    @test m == Period{minutes}(1.0)
-    @test h == Period{hours}(1.0)
-    @test d == Period{days}(1.0)
-    @test y == Period{years}(1.0)
-    @test c == Period{centuries}(1.0)
+    @test s == Period(seconds, 1.0)
+    @test m == Period(minutes, 1.0)
+    @test h == Period(hours, 1.0)
+    @test d == Period(days, 1.0)
+    @test y == Period(years, 1.0)
+    @test c == Period(centuries, 1.0)
 
     @test seconds(s) == 1.0seconds
     @test seconds(m) == 60.0seconds
@@ -54,12 +54,37 @@
     @test centuries(y) == (1.0 / 100.0)centuries
     @test centuries(c) == 1.0centuries
 
-    @test zero(Period{years}) == 0.0years
+    @test zero(Period{Year}) == 0.0years
     @test zero(1years) == 0years
     @test zero(1.0years) == 0.0years
 
     @test unit(1years) == years
     @test collect(1seconds:3seconds) == [1seconds, 2seconds, 3seconds]
     @test collect(1.0seconds:3.0seconds) == [1.0seconds, 2.0seconds, 3.0seconds]
+
+    @test string(1seconds) == "1 second"
+    @test string(Int32(1) * seconds) == "1 second"
+    @test string(1.0seconds) == "1.0 seconds"
+    @test string(2seconds) == "2 seconds"
+    @test string(1minutes) == "1 minute"
+    @test string(Int32(1) * minutes) == "1 minute"
+    @test string(1.0minutes) == "1.0 minutes"
+    @test string(2minutes) == "2 minutes"
+    @test string(1hours) == "1 hour"
+    @test string(Int32(1) * hours) == "1 hour"
+    @test string(1.0hours) == "1.0 hours"
+    @test string(2hours) == "2 hours"
+    @test string(1days) == "1 day"
+    @test string(Int32(1) * days) == "1 day"
+    @test string(1.0days) == "1.0 days"
+    @test string(2days) == "2 days"
+    @test string(1years) == "1 year"
+    @test string(Int32(1) * years) == "1 year"
+    @test string(1.0years) == "1.0 years"
+    @test string(2years) == "2 years"
+    @test string(1centuries) == "1 century"
+    @test string(Int32(1) * centuries) == "1 century"
+    @test string(1.0centuries) == "1.0 centuries"
+    @test string(2centuries) == "2 centuries"
 end
 

@@ -1,111 +1,485 @@
+using ..TimeScales: find_path
+using EarthOrientation: getΔUT1, EOP_DATA, get
+using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
-export tai_offset
+export
+    NoOffsetError,
+    NoPathError,
+    getoffset,
+    insideleap
 
-include(joinpath("constants", "tdb.jl"))
+struct NoPathError <: Base.Exception
+    in_scale::String
+    out_scale::String
+end
+
+function Base.showerror(io::IO, err::NoPathError)
+    ins = err.in_scale
+    out = err.out_scale
+    print(io, "No conversion path between '$ins' and '$out' available.")
+end
+
+struct NoOffsetError <: Base.Exception
+    in_scale::String
+    out_scale::String
+    in_type::String
+    out_type::String
+end
+
+function Base.showerror(io::IO, err::NoOffsetError)
+    ins = err.in_scale
+    out = err.out_scale
+    it = err.in_type
+    ot = err.out_type
+    print(io, "No conversion '$ins->$out' available. ",
+          "If one of these is a custom time scale, you may need to define ",
+          "`AstroTime.Epochs.getoffset(::$it, ::$ot, second, fraction, args...)`.")
+end
+
+function getoffset(s1::TimeScale, s2::TimeScale, _, _)
+    err = NoOffsetError(string(s1), string(s2),
+                        string(typeof(s1)), string(typeof(s2)))
+    throw(err)
+end
+
+function j2000(second, fraction)
+    (fraction + second) / SECONDS_PER_DAY * days
+end
+
+function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
+    path = find_path(S(), scale)
+    isempty(path) && throw(NoPathError(string(S()), string(scale)))
+    length(path) == 2 && return getoffset(S(), scale, ep.second, ep.fraction)
+    total_offset = 0.0
+    second = ep.second
+    fraction = ep.fraction
+    for i in 1:length(path) - 1
+        offset::Float64 = getoffset(path[i], path[i+1], second, fraction)
+        total_offset += offset
+        second, fraction = apply_offset(second, fraction, offset)
+    end
+    return total_offset
+end
+
+
+"""
+    getoffset(ep::Epoch, scale::TimeScale)
+
+For a given epoch `ep` return the offset between its time scale and
+another time `scale` in seconds.
+
+# Example
+
+```jldoctest
+julia> tai = TAIEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TAI
+
+julia> getoffset(tai, TT)
+32.184
+```
+"""
+function getoffset(ep::Epoch{S}, scale::TimeScale, args...) where S<:TimeScale
+    return getoffset(S(), scale, ep.second, ep.fraction, args...)
+end
+
+@inline function apply_offset(second::Int64,
+                              fraction::T,
+                              from::S1,
+                              to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
+    path = find_path(from, to)
+    isempty(path) && throw(NoPathError(string(from), string(to)))
+    length(path) == 2 && return _apply_offset(second, fraction, from, to)
+    return _apply_offset((second, fraction), path...)
+end
+
+@inline function _apply_offset(second::Int64,
+                               fraction::T,
+                               from::S1,
+                               to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
+    return apply_offset(second, fraction, getoffset(from, to, second, fraction))
+end
+
+@generated function _apply_offset(sf, path...)
+    expr = :(sf)
+    for i in 1:length(path) - 1
+        s1 = path[i]
+        s2 = path[i+1]
+        expr = :(_apply_offset($expr..., $s1(), $s2()))
+    end
+    return quote
+        Base.@_inline_meta
+        $expr
+    end
+end
+
+######
+# TT #
+######
 
 const OFFSET_TAI_TT = 32.184
+
+"""
+    getoffset(TAI, TT, args...)
+
+Return the fixed offset between [`TAI`](@ref) and [`TT`](@ref) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TAI, TT)
+32.184
+```
+"""
+getoffset(::InternationalAtomicTime, ::TerrestrialTime, args...) = OFFSET_TAI_TT
+
+"""
+    getoffset(TT, TAI, args...)
+
+Return the fixed offset between [`TT`](@ref) and [`TAI`](@ref) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TT, TAI)
+-32.184
+```
+"""
+getoffset(::TerrestrialTime, ::InternationalAtomicTime, args...) = -OFFSET_TAI_TT
+
+#######
+# TCG #
+#######
+
+const JD77_SEC = -7.25803167816e8
 const LG_RATE = 6.969290134e-10
+
+"""
+    getoffset(TCG, TT, second, fraction)
+
+Return the linear offset between [`TCG`](@ref) and [`TT`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TCG, TT, 0, 0.0)
+-0.5058332856685995
+```
+"""
+function getoffset(::GeocentricCoordinateTime, ::TerrestrialTime, second, fraction)
+    dt = second - JD77_SEC + fraction
+    return -LG_RATE * dt
+end
+
+"""
+    getoffset(TT, TCG, second, fraction)
+
+Return the linear offset between [`TT`](@ref) and [`TCG`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TT, TCG, 0, 0.0)
+0.5058332860211293
+```
+"""
+function getoffset(::TerrestrialTime, ::GeocentricCoordinateTime, second, fraction)
+    rate = LG_RATE / (1.0 - LG_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
+
+#######
+# TCB #
+#######
+
 const LB_RATE = 1.550519768e-8
 
-
 """
-    tai_offset(ep)
+    getoffset(TCB, TDB, second, fraction)
 
-Returns the offset from TAI for the epoch `ep`.
+Return the linear offset between [`TCB`](@ref) and [`TDB`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TCB, TDB, 0, 0.0)
+-11.253721593757295
+```
 """
-tai_offset(ep::Epoch) = ep.ts_offset
-
-tai_offset(::InternationalAtomicTime, ep) = 0.0
-
-"""
-    tai_offset(TT, ep)
-
-Returns the difference TT-TAI in seconds at the epoch `ep`.
-"""
-tai_offset(::TerrestrialTime, ep) = OFFSET_TAI_TT
-
-"""
-    tai_offset(TCG, ep)
-
-Returns the difference TCG-TAI in seconds at the epoch `ep`.
-"""
-tai_offset(::GeocentricCoordinateTime, ep) = tai_offset(TT, ep) + LG_RATE * value(ep - EPOCH_77)
-
-"""
-    tai_offset(TCB, ep)
-
-Returns the difference TCB-TAI in seconds at the epoch `ep`.
-"""
-tai_offset(::BarycentricCoordinateTime, ep) = tai_offset(TDB, ep) + LB_RATE * value(ep - EPOCH_77)
-
-
-"""
-    tai_offset(UTC, ep)
-
-Returns the difference UTC-TAI in seconds at the epoch `ep`.
-"""
-@inline function tai_offset(::CoordinatedUniversalTime, ep)
-    offset = findoffset(ep)
-    offset === nothing && return 0.0
-
-    -getoffset(offset, ep)
+function getoffset(::BarycentricCoordinateTime, ::BarycentricDynamicalTime, second, fraction)
+    dt = second - JD77_SEC + fraction
+    return -LB_RATE * dt
 end
 
 """
-    tai_offset(UT1, ep)
+    getoffset(TDB, TCB, second, fraction)
 
-Returns the difference UT1-TAI in seconds at the epoch `ep`.
+Return the linear offset between [`TDB`](@ref) and [`TCB`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TDB, TCB, 0, 0.0)
+11.253721768248475
+```
 """
-@inline function tai_offset(::UniversalTime, ep)
-    jd = value(julian(UTC, ep))
-    tai_offset(UTC, ep) + getΔUT1(jd)
+function getoffset(::BarycentricDynamicalTime, ::BarycentricCoordinateTime, second, fraction)
+    rate = LB_RATE / (1.0 - LB_RATE)
+    dt = second - JD77_SEC + fraction
+    return rate * dt
+end
+
+#######
+# UTC #
+#######
+
+function getleap(jd0)
+    jd, frac = divrem(jd0, 1.0)
+    jd += ifelse(frac >= 0.5, 1, -1) * 0.5
+    drift0 = offset_tai_utc(jd)
+    drift12 = offset_tai_utc(jd + 0.5)
+    drift24 = offset_tai_utc(jd + 1.5)
+
+    return drift24 - (2.0drift12 - drift0)
+end
+
+function getleap(::CoordinatedUniversalTime, date::Date)
+    getleap(j2000(date) + value(J2000_TO_JULIAN))
+end
+
+getleap(::TimeScale, ::Date) = 0.0
+getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
+getleap(::Epoch) = 0.0
+
+function insideleap(jd0)
+    jd1 = jd0 + 1 / SECONDS_PER_DAY
+    o1 = offset_tai_utc(jd0)
+    o2 = offset_tai_utc(jd1)
+    return o1 != o2
 end
 
 """
-    tai_offset(TDB, ep)
+    insideleap(ep::UTCEpoch)
 
-Returns the difference TDB-TAI in seconds at the epoch `ep`.
+Check whether the UTC epoch `ep` is located during the introduction of a leap
+second.
 
-This routine is accurate to ~40 microseconds in the interval 1900-2100.
+# Example
+
+```jldoctest
+julia> insideleap(UTCEpoch(2020, 3, 20))
+false
+
+julia> insideleap(UTCEpoch(2016, 12, 31, 23, 59, 60.5))
+true
+```
+"""
+insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
+
+insideleap(::Epoch) = false
+
+"""
+    getoffset(UTC, TAI, second, fraction)
+
+Return the offset between [`UTC`](@ref) and [`TAI`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+For dates after `1972-01-01` this is the number of leap seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(UTC, TAI, 0, 0.0)
+32.0
+```
+"""
+@inline function getoffset(::CoordinatedUniversalTime, ::InternationalAtomicTime,
+                           second, fraction)
+    jd = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    return -offset_utc_tai(jd)
+end
+
+"""
+    getoffset(TAI, UTC, second, fraction)
+
+Return the offset between [`TAI`](@ref) and [`UTC`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+For dates after `1972-01-01` this is the number of leap seconds.
+
+# Example
+
+```jldoctest
+julia> getoffset(TAI, UTC, 0, 0.0)
+-32.0
+```
+"""
+@inline function getoffset(::InternationalAtomicTime, ::CoordinatedUniversalTime,
+                           second, fraction)
+    jd = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    return -offset_tai_utc(jd)
+end
+
+#######
+# UT1 #
+#######
+
+"""
+    getoffset(UTC, UT1, second, fraction[, eop])
+
+Return the offset between [`UTC`](@ref) and [`UT1`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+Optionally, a custom Earth orientation data struct `eop` can be provided,
+see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
+
+# Example
+
+```jldoctest; setup=:(AstroTime.load_test_eop())
+julia> getoffset(UTC, UT1, 0, 0.0)
+0.3550253556501879
+```
+"""
+@inline function getoffset(::CoordinatedUniversalTime, ::UniversalTime,
+                           second, fraction, eop=get(EOP_DATA))
+    utc = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    return getΔUT1(eop, utc)
+end
+
+"""
+    getoffset(UT1, UTC, second, fraction[, eop])
+
+Return the offset between [`UT1`](@ref) and [`UTC`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+Optionally, a custom Earth orientation data struct `eop` can be provided,
+see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
+
+# Example
+
+```jldoctest; setup=:(AstroTime.load_test_eop())
+julia> getoffset(UT1, UTC, 0, 0.0)
+-0.3550253592514352
+```
+"""
+@inline function getoffset(::UniversalTime, ::CoordinatedUniversalTime,
+                           second, fraction, eop=get(EOP_DATA))
+    ut1 = value(j2000(second, fraction) + J2000_TO_JULIAN)
+    utc = ut1 - getΔUT1(eop, ut1) / SECONDS_PER_DAY
+    return -getΔUT1(eop, utc)
+end
+
+#######
+# TDB #
+#######
+
+const k = 1.657e-3
+const eb = 1.671e-2
+const m₀ = 6.239996
+const m₁ = 1.99096871e-7
+
+"""
+    getoffset(TT, TDB, second, fraction[, eop])
+
+Return the offset between [`TT`](@ref) and [`TDB`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+This routine is accurate to ~40 microseconds over the interval 1900-2100.
 
 !!! note
     An accurate transformation between TDB and TT depends on the
     trajectory of the observer. For two observers fixed on Earth's surface
     the quantity TDB-TT can differ by as much as ~4 microseconds. See
-    [`tai_offset(TDB, ep, elong, u, v)`](@ref).
+    [`here`](@ref getoffset(::TerrestrialTime, ::BarycentricDynamicalTime, second, fraction, elong, u, v)).
+
+# Example
+
+```jldoctest
+julia> getoffset(TT, TDB, 0, 0.0)
+-7.273677619130569e-5
+```
 
 ### References ###
 
 - [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
 - [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
-
 """
-@inline function tai_offset(::BarycentricDynamicalTime, ep)
-    dt = value(j2000(TT, ep))
-    g = deg2rad(357.53 + 0.9856003dt)
-    tai_offset(TT, ep) + 0.001658sin(g) + 0.000014sin(2g)
+@inline function getoffset(::TerrestrialTime, ::BarycentricDynamicalTime,
+                           second, fraction)
+    tt = fraction + second
+    g = m₀ + m₁ * tt
+    return k * sin(g + eb * sin(g))
 end
 
 """
-    tai_offset(TDB, ep, elong, u, v)
+    getoffset(TDB, TT, second, fraction[, eop])
 
-Returns the difference TDB-TAI in seconds at the epoch `ep` for an observer on Earth.
+Return the offset between [`TDB`](@ref) and [`TT`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) in seconds.
+This routine is accurate to ~40 microseconds over the interval 1900-2100.
+
+!!! note
+    An accurate transformation between TDB and TT depends on the
+    trajectory of the observer. For two observers fixed on Earth's surface
+    the quantity TDB-TT can differ by as much as ~4 microseconds. See
+    [`here`](@ref getoffset(::BarycentricDynamicalTime, ::TerrestrialTime, second, fraction, elong, u, v)).
+
+# Example
+
+```jldoctest
+julia> getoffset(TDB, TT, 0, 0.0)
+7.273677616693264e-5
+```
+
+### References ###
+
+- [https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB](https://www.cv.nrao.edu/~rfisher/Ephemerides/times.html#TDB)
+- [Issue #26](https://github.com/JuliaAstro/AstroTime.jl/issues/26)
+"""
+@inline function getoffset(::BarycentricDynamicalTime, ::TerrestrialTime,
+                           second, fraction)
+    tdb = fraction + second
+    tt = tdb
+    offset = 0.0
+    for _ in 1:3
+        g = m₀ + m₁ * tt
+        offset = -k * sin(g + eb * sin(g))
+        tt = tdb + offset
+    end
+    return offset
+end
+
+include(joinpath("constants", "tdb.jl"))
+
+"""
+    getoffset(TDB, TT, second, fraction[, eop])
+
+Return the offset between [`TDB`](@ref) and [`TT`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) for an observer on earth
+in seconds.
 
 ### Arguments ###
 
-- `ep`: Current epoch
+- `second`, `fraction`: Current epoch
 - `elong`: Longitude (east positive, radians)
 - `u`: Distance from Earth's spin axis (km)
 - `v`: Distance north of equatorial plane (km)
+
+# Example
+
+```jldoctest
+julia> getoffset(TDB, TT, 0, 0.0, π, 6371.0, 0.0)
+9.928419814101153e-5
+```
 
 ### References ###
 
 - [ERFA](https://github.com/liberfa/erfa/blob/master/src/dtdb.c)
 """
-function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
-    ut = fractionofday(UT1Epoch(ep))
-    t = value(centuries(j2000(TT, ep))) / 10.0
+function getoffset(::BarycentricDynamicalTime, ::TerrestrialTime, second, fraction, elong, u, v)
+    tt = TTEpoch(second, fraction)
+    ut = fractionofday(UT1Epoch(tt))
+    t = (second + fraction) / (SECONDS_PER_CENTURY * 10.0)
     # Convert UT to local solar time in radians.
     tsol = mod(ut, 1.0) * 2π  + elong
 
@@ -175,28 +549,43 @@ function tai_offset(::BarycentricDynamicalTime, ep, elong, u, v)
         0.03638e-6 * t * t
 
     # TDB-TT in seconds.
-    w = wt + wf + wj
-
-    tai_offset(TT, ep) + w
+    return -(wt + wf + wj)
 end
 
-tai_offset(::InternationalAtomicTime, date::Date, time::Time) = 0.0
+"""
+    getoffset(TT, TDB, second, fraction[, eop])
 
-@inline function tai_offset(::CoordinatedUniversalTime, date::Date, time::Time)
-    minute_in_day = hour(time) * 60 + minute(time)
-    correction = minute_in_day < 0 ? (minute_in_day - 1439) ÷ 1440 : minute_in_day ÷ 1440
-    offset = findoffset(julian(date) + correction)
-    offset === nothing && return 0.0
+Return the offset between [`TT`](@ref) and [`TDB`](@ref) for the
+current epoch (`second` after J2000 and `fraction`) for an observer on earth
+in seconds.
 
-    getoffset(offset, date, time)
-end
+### Arguments ###
 
-@inline function tai_offset(scale, date::Date, time::Time, args...)
-    ref = Epoch{TAI}(date, time)
+- `second`, `fraction`: Current epoch
+- `elong`: Longitude (east positive, radians)
+- `u`: Distance from Earth's spin axis (km)
+- `v`: Distance north of equatorial plane (km)
+
+# Example
+
+```jldoctest
+julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
+-9.92841981897215e-5
+```
+
+### References ###
+
+- [ERFA](https://github.com/liberfa/erfa/blob/master/src/dtdb.c)
+"""
+@inline function getoffset(::TerrestrialTime, ::BarycentricDynamicalTime,
+                           second, fraction, elong, u, v)
+    tt1, tt2 = second, fraction
+    tdb1, tdb2 = tt1, tt2
     offset = 0.0
-    # TODO: Maybe replace this with a simple convergence check
-    for _ in 1:8
-        offset = -tai_offset(scale, Epoch{TAI}(ref, offset), args...)
+    for _ in 1:3
+        offset = -getoffset(TDB, TT, tdb1, tdb2, elong, u, v)
+        tdb1, tdb2 = apply_offset(tt1, tt2, offset)
     end
-    offset
+    return offset
 end
+

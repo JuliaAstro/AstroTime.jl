@@ -1,35 +1,61 @@
+using Measurements
+
+function spice_utc_tdb(str)
+    et = utc2et(str)
+    second, fraction = divrem(et, 1.0)
+    return (second=Int64(second), fraction=fraction)
+end
+
+function twopart_secondfraction(jd1, jd2)
+    jd1 -= value(J2000_TO_JULIAN)
+    jd1 *= SECONDS_PER_DAY
+    jd2 *= SECONDS_PER_DAY
+    s1, f1 = divrem(jd1, 1.0)
+    s2, f2 = divrem(jd2, 1.0)
+    f, residual = AstroTime.Epochs.two_sum(f1, f2)
+    s3, fraction = divrem(f, 1.0)
+    second = Int64(s1 + s2 + s3)
+    fraction += residual
+    return (second=second, fraction=fraction)
+end
+
+function erfa_second_fraction(scale, year, month, day, hour, minute, second)
+    jd1, jd2 = ERFA.dtf2d(scale, year, month, day, hour, minute, second)
+    return twopart_secondfraction(jd1, jd2)
+end
+
 @testset "Epochs" begin
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
-        @test ep.epoch == 0
-        @test ep.offset ≈ 2eps()
+        @test ep.second == 0
+        @test ep.fraction ≈ 2eps()
 
         ep += 10000centuries
-        @test ep.epoch == value(seconds(10000centuries))
-        @test ep.offset ≈ 2eps()
+        @test ep.second == value(seconds(10000centuries))
+        @test ep.fraction ≈ 2eps()
 
         # Issue 44
         elong1 = 0.0
         elong2 = π
         u = 6371.0
-        tai = TAIEpoch(2000, 1, 1)
-        tdb_tai1 = tai_offset(TDB, tai, elong1, u, 0.0)
-        tdb_tai2 = tai_offset(TDB, tai, elong2, u, 0.0)
-        Δtdb = tdb_tai2 - tdb_tai1
-        tdb1 = TDBEpoch(tdb_tai1, tai)
-        tdb2 = TDBEpoch(tdb_tai2, tai)
+        tt = TTEpoch(2000, 1, 1)
+        tdb_tt1 = getoffset(TT, TDB, tt.second, tt.fraction, elong1, u, 0.0)
+        tdb_tt2 = getoffset(TT, TDB, tt.second, tt.fraction, elong2, u, 0.0)
+        Δtdb = tdb_tt2 - tdb_tt1
+        tdb1 = TDBEpoch(tdb_tt1, tt)
+        tdb2 = TDBEpoch(tdb_tt2, tt)
         @test value(tdb2 - tdb1) ≈ Δtdb
         @test tdb1 != tdb2
-        tdb1 = TDBEpoch(tai, elong1, u, 0.0)
-        tdb2 = TDBEpoch(tai, elong2, u, 0.0)
+        tdb1 = TDBEpoch(tt, elong1, u, 0.0)
+        tdb2 = TDBEpoch(tt, elong2, u, 0.0)
         @test value(tdb2 - tdb1) ≈ Δtdb
         @test tdb1 != tdb2
 
         t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
         t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
         t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
-        @test t1 - t0 == -32.0seconds
-        @test t1 < t0
+        @test_throws MethodError t1 - t0
+        @test_throws MethodError t1 < t0
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
     end
@@ -61,12 +87,41 @@
         @test (ep + 1.0centuries) - ep == seconds(1.0centuries)
     end
     @testset "Conversion" begin
+        include("conversions.jl")
+
+        tt = TTEpoch(2000, 1, 1, 12)
+        @test tt - J2000_EPOCH == 0.0seconds
         tai = TAIEpoch(2000, 1, 1, 12)
-        @test tai.epoch == 0
-        @test tai.offset == 0.0
+        @test tai.second == 0
+        @test tai.fraction == 0.0
         @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
         @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
-        @test_throws MethodError UTCEpoch(-32.0, TTEpoch(tai))
+
+        ut1 = UT1Epoch(2000, 1, 1)
+        ut1_utc = getoffset(ut1, UTC)
+        utc = UTCEpoch(ut1)
+        utc_tai = getoffset(utc, TAI)
+        tai = TAIEpoch(utc)
+        tai_tt = getoffset(tai, TT)
+        tt = TTEpoch(tai)
+        tt_tdb = getoffset(tt, TDB)
+        tdb = TDBEpoch(tt)
+        tdb_tcb = getoffset(tdb, TCB)
+        tcb = TCBEpoch(tdb)
+        @test getoffset(ut1, TCB) == ut1_utc + utc_tai + tai_tt + tt_tdb + tdb_tcb
+    end
+    @testset "TDB" begin
+        ep = TTEpoch(2000, 1, 1)
+        @test TDBEpoch(ep) ≈ TDBEpoch(ep, 0.0, 0.0, 0.0) rtol=1e-3
+        jd1, jd2 = value.(julian_twopart(ep))
+        ut = fractionofday(UT1Epoch(ep))
+        elong, u, v = abs.(randn(3)) * 1000
+        exp = ERFA.dtdb(jd1, jd2, ut, elong, u, v)
+        act = getoffset(ep, TDB, elong, u, v)
+        @test act ≈ exp
+        second, fraction = 394372865, 0.1839999999999975
+        offset = getoffset(TT, TDB, second, fraction)
+        @test offset ≈ 0.105187547186749e-3
     end
     @testset "Julian Dates" begin
         jd = 0.0days
@@ -77,42 +132,18 @@
         ep = UTCEpoch(jd)
         @test ep == UTCEpoch(2000, 1, 2, 12)
         @test j2000(ep) == days(jd)
+        @test j2000(ep, seconds) == jd
         jd = 2.451545e6days
         ep = UTCEpoch(jd, origin=:julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test julian(ep) == jd
+        @test julian(ep, seconds) == seconds(jd)
         jd = 51544.5days
         ep = UTCEpoch(jd, origin=:modified_julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
+        @test modified_julian(ep, seconds) == seconds(jd)
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
-    end
-    @testset "Time Scales" begin
-        tai = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        tt = TTEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        utc = UTCEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        ut1 = UT1Epoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        tdb = TDBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        tcb = TCBEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-        tcg = TCGEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
-
-        @test tai.epoch == 587512971
-        @test tai.offset == 0.5512474363782758
-        @test tt.epoch ==  587512939
-        @test tt.offset == 0.3672474363782783
-        @test utc.epoch == 587513008
-        @test utc.offset == 0.5512474363782758
-        @test ut1.epoch == 587513008
-        @test ut1.offset ≈ 0.48504859616502927 rtol=1e-3
-        @test tdb.epoch == 587512939
-        @test tdb.offset ≈ 0.3682890196414874 atol=1e-14
-        @test tcb.epoch == 587512919
-        @test tcb.offset == 0.005062972974656077
-        @test tcg.epoch == 587512938
-        @test tcg.offset == 0.45195931572465753
-
-        tt = TTEpoch(2000, 1, 1, 12)
-        @test tt - J2000_EPOCH == 0.0seconds
     end
     @testset "Accessors" begin
         @test TAIEpoch(JULIAN_EPOCH - Inf * seconds) == PAST_INFINITY
@@ -141,41 +172,77 @@
         @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
 
         # Test transformation to calendar date during pre-leap second era
+        ep61 = UTCEpoch(1961, 3, 5, 23, 4, 12.0)
+        ep61_exp = erfa_second_fraction("UTC", 1961, 3, 5, 23, 4, 12.0)
+        @test ep61.second == ep61_exp.second
+        @test ep61.fraction ≈ ep61_exp.fraction
         @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
 
-        let
-            before = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
-            start = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
-            during = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
-            after = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
+        ep61_tai = TAIEpoch(ep61)
+        jd_utc = ERFA.dtf2d("UTC", 1961, 3, 5, 23, 4, 12.0)
+        jd_tai = ERFA.utctai(jd_utc...)
+        ep61_tai_exp = twopart_secondfraction(jd_tai...)
+        @test ep61_tai.second == ep61_tai_exp.second
+        @test ep61_tai.fraction ≈ ep61_tai_exp.fraction
 
-            @test before.epoch == 394372833
-            @test before.offset == 0.0
-            @test before.ts_offset == -34.0
+        before_utc = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
+        start_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
+        during_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
+        after_utc = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
+        before_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 59.0))
+        start_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.0))
+        during_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.5))
+        after_tdb = TDBEpoch(UTCEpoch(2012, 7, 1, 0, 0, 0.0))
 
-            @test start.epoch == 394372834
-            @test start.offset == 0.0
-            @test start.ts_offset == -35.0
+        before_exp = spice_utc_tdb("2012-06-30T23:59:59.0")
+        start_exp = spice_utc_tdb("2012-06-30T23:59:60.0")
+        during_exp = spice_utc_tdb("2012-06-30T23:59:60.5")
+        after_exp = spice_utc_tdb("2012-07-01T00:00:00.0")
 
-            @test during.epoch == 394372834
-            @test during.offset == 0.5
-            @test during.ts_offset == -35.0
+        # SPICE is a lot less precise
+        @test before_tdb.second == before_exp.second
+        @test before_tdb.fraction ≈ before_exp.fraction atol=1e-7
+        @test start_tdb.second == start_exp.second
+        @test start_tdb.fraction ≈ start_exp.fraction atol=1e-7
+        @test during_tdb.second == during_exp.second
+        @test during_tdb.fraction ≈ during_exp.fraction atol=1e-7
+        @test after_tdb.second == after_exp.second
+        @test after_tdb.fraction ≈ after_exp.fraction atol=1e-7
 
-            @test after.epoch == 394372835
-            @test after.offset == 0.0
-            @test after.ts_offset == -35.0
+        @test !insideleap(before_utc)
+        @test insideleap(start_utc)
+        @test insideleap(during_utc)
+        @test !insideleap(after_utc)
 
-            @test !insideleap(before)
-            @test insideleap(start)
-            @test insideleap(during)
-            @test !insideleap(after)
-
-            # Test transformation to calendar date during leap second
-            @test string(before) == "2012-06-30T23:59:59.000 UTC"
-            @test string(start) == "2012-06-30T23:59:60.000 UTC"
-            @test string(during) == "2012-06-30T23:59:60.500 UTC"
-            @test string(after) == "2012-07-01T00:00:00.000 UTC"
-        end
+        # Test transformation to calendar date during leap second
+        @test string(before_utc) == "2012-06-30T23:59:59.000 UTC"
+        @test string(start_utc) == "2012-06-30T23:59:60.000 UTC"
+        @test string(during_utc) == "2012-06-30T23:59:60.500 UTC"
+        @test string(after_utc) == "2012-07-01T00:00:00.000 UTC"
+    end
+    @testset "Parametrization" begin
+        ep_f64 = UTCEpoch(2000, 1, 1)
+        ep_err = UTCEpoch(ep_f64.second, 1.0 ± 1.1)
+        Δt = (30 ± 0.1) * seconds
+        @test typeof(Δt) == Period{Second,Measurement{Float64}}
+        @test typeof(ep_f64) == Epoch{CoordinatedUniversalTime,Float64}
+        @test typeof(ep_err) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_f64 + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_err + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        jd1_err = (0.0 ± 0.001) * days
+        jd2_err = (0.5 ± 0.001) * days
+        ep_jd1 = UTCEpoch(jd1_err)
+        @test typeof(ep_jd1) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ep_jd2 = UTCEpoch(jd1_err, jd2_err)
+        @test typeof(ep_jd2) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ut1_err = UT1Epoch(ep_f64.second, 1.0 ± 1.1)
+        tcg_err = TCGEpoch(ut1_err)
+        tcb_err = TCBEpoch(ut1_err)
+        @test typeof(ut1_err) == Epoch{UniversalTime,Measurement{Float64}}
+        @test typeof(tcg_err) == Epoch{GeocentricCoordinateTime,Measurement{Float64}}
+        @test typeof(tcb_err) == Epoch{BarycentricCoordinateTime,Measurement{Float64}}
+        @test typeof(UT1Epoch(tcg_err)) == Epoch{UniversalTime,Measurement{Float64}}
+        @test typeof(UT1Epoch(tcb_err)) == Epoch{UniversalTime,Measurement{Float64}}
     end
 end
 

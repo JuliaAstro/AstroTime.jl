@@ -4,29 +4,24 @@ import ..AstroDates: DateTime, year, month, day,
     hour, minute, second, millisecond,
     time, date, fractionofday, yearmonthday, dayofyear
 
-export timescale
+timescale(ep::Epoch) = ep.scale
 
-timescale(ep::Epoch{S}) where {S} = S
+"""
+    DateTime(ep::Epoch)
 
+Convert the epoch `ep` to an `AstroDates.DateTime`.
+"""
 function DateTime(ep::Epoch)
-    if !isfinite(ep.offset)
-        if ep.offset < 0
+    if !isfinite(ep.fraction)
+        if ep.fraction < 0
             return DateTime(AstroDates.MIN_EPOCH, AstroDates.H00)
         else
             return DateTime(AstroDates.MAX_EPOCH, Time(23, 59, 59.999))
         end
     end
 
-    sum = ep.offset + ep.ts_offset
-    o′ = sum - ep.ts_offset
-    d′ = sum - o′
-    Δo = ep.offset - o′
-    Δd = ep.ts_offset - d′
-    residual = Δo + Δd
-
-    carry = floor(Int64, sum)
-    offset2000B = (sum - carry) + residual
-    offset2000A = ep.epoch + carry + Int64(43200)
+    offset2000B = ep.fraction
+    offset2000A = ep.second + Int64(43200)
     if offset2000B < 0
         offset2000A -= 1
         offset2000B += 1
@@ -40,8 +35,9 @@ function DateTime(ep::Epoch)
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, offset2000B)
 
-    if insideleap(ep)
-        leap = getleap(ep)
+    leap = getleap(ep)
+    leap = ifelse(abs(leap) == 1.0, leap, 0.0)
+    if !iszero(leap)
         h = hour(time_comp)
         m = minute(time_comp)
         s = second(Float64, time_comp) + leap
@@ -143,7 +139,7 @@ Get the time of the day of the epoch `ep` as a fraction.
 fractionofday(ep::Epoch) = fractionofday(time(ep))
 
 """
-    Dates.DatetTime(ep::Epoch)
+    Dates.DateTime(ep::Epoch)
 
 Convert the epoch `ep` to a `Dates.DateTime`.
 """
