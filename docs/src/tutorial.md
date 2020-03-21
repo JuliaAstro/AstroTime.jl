@@ -295,7 +295,9 @@ and the resulting error message will provide a hint.
 
 ```julia
 julia> UTCEpoch(gmt)
-ERROR: No conversion 'GMT->UTC' available. If one of these is a custom time scale, you may need to define `AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime, second, fraction, args...)`.
+ERROR: No conversion 'GMT->UTC' available. If one of these is a custom time scale,
+you may need to define `AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime,
+second, fraction, args...)`.
 ```
 
 To enable transformations between `GMT` and `UTC` in both directions you need
