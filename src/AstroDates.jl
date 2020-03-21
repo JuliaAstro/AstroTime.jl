@@ -7,6 +7,8 @@ import Dates: year, month, day,
     hour, minute, second, millisecond,
     yearmonthday, dayofyear
 
+const J2000 = 2.4515445e6
+
 abstract type Calendar end
 
 struct ProlepticJulianCalendar <: Calendar end
@@ -195,7 +197,7 @@ end
 
 j2000(s::Date{C}) where {C} = j2000(C, year(s), month(s), day(s))
 
-julian(s::Date) = j2000(s) + 2.4515445e6
+julian(s::Date) = j2000(s) + J2000
 
 const JULIAN_EPOCH = Date(-4712,  1,  1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)
@@ -297,7 +299,7 @@ end
 hour(dt::DateTime) = hour(Time(dt))
 minute(dt::DateTime) = minute(Time(dt))
 second(typ, dt::DateTime) = second(typ, Time(dt))
-second(dt::DateTime) = second(Float64, Time(dt))
+second(dt::DateTime) = second(Int, Time(dt))
 millisecond(dt::DateTime) = millisecond(Time(dt))
 
 julian(dt::DateTime) = fractionofday(Time(dt)) + julian(Date(dt))
@@ -314,7 +316,7 @@ function Dates.DateTime(dt::DateTime)
     h = hour(dt)
     mi = minute(dt)
     s = second(Int, dt)
-    ms = floor((second(Float64, dt) - s) * 1000)
+    ms = round((second(Float64, dt) - s) * 1000)
     Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 

@@ -1,4 +1,5 @@
-import AstroTime.AstroDates: Date, Time, year, month, day, j2000
+using AstroTime.AstroDates
+import Dates
 
 const REFERENCES = (
     (-4713, 12, 31, -2451546),
@@ -46,4 +47,37 @@ const REFERENCES = (
 
     @test Date(2000, 1) == Date(2000, 1, 1)
     @test Date(-2000, 1) == Date(-2000, 1, 1)
+    @test Date(1000, 1) == Date(1000, 1, 1)
+
+    dt = DateTime(2020, 3, 21, 10, 15, 37.245)
+    d = Date(dt)
+    t = Time(dt)
+
+    @test DateTime(Dates.DateTime(dt)) == dt
+    @test Date(Dates.Date(d)) == d
+    @test Time(Dates.Time(t)) == t
+
+    @test year(dt) == 2020
+    @test year(d) == 2020
+    @test month(dt) == 3
+    @test month(d) == 3
+    @test day(dt) == 21
+    @test day(d) == 21
+    @test hour(dt) == 10
+    @test hour(t) == 10
+    @test minute(dt) == 15
+    @test minute(t) == 15
+    @test second(dt) == 37
+    @test second(t) == 37
+    @test second(Float64, dt) == 37.245
+    @test second(Float64, t) == 37.245
+    @test millisecond(dt) == 245
+    @test millisecond(t) == 245
+
+    @test secondinday(t) == 36937.245
+
+    jd = Dates.datetime2julian(Dates.DateTime(dt))
+    @test julian(dt) ≈ jd
+    @test sum(julian_twopart(dt)) ≈ jd
+    @test j2000(dt) ≈ jd - AstroTime.AstroDates.J2000
 end
