@@ -194,6 +194,12 @@ function load_test_eop()
     load_eop(finals, finals2000A)
 end
 
+"""
+    AstroTime.update()
+
+Download up-to-date IERS tables from the internet to enable transformations to and from
+the [`UT1`](@ref) time scale.
+"""
 function update()
     EarthOrientation.update()
     nothing

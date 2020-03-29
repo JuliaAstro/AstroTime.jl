@@ -48,6 +48,7 @@ export Epoch,
     hour,
     j2000,
     julian,
+    julian_period,
     julian_twopart,
     millisecond,
     minute,
@@ -127,35 +128,77 @@ julia> Epoch{CoordinatedUniversalTime}(2.451545e6days, origin=:julian)
 ```
 """
 function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Period}
-    jd1 = float(value(days(jd1)))
-    jd2 = float(value(days(jd2)))
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
 
+    u = unit(jd1)
+
     if origin == :j2000
         # pass
     elseif origin == :julian
-        jd1 -= value(J2000_TO_JULIAN)
+        jd1 -= u(J2000_TO_JULIAN)
     elseif origin == :modified_julian
-        jd1 -= value(J2000_TO_MJD)
+        jd1 -= u(J2000_TO_MJD)
     else
         throw(ArgumentError("Unknown Julian epoch: $origin"))
     end
 
-    jd1 *= SECONDS_PER_DAY
-    jd2 *= SECONDS_PER_DAY
+    jd1v = jd1 |> seconds |> value
+    jd2v = jd2 |> seconds |> value
 
-    sum, residual = two_sum(jd1, jd2)
+    sum, residual = two_sum(jd1v, jd2v)
     epoch = floor(Int64, sum)
     offset = (sum - epoch) + residual
     return Epoch{S}(epoch, offset)
 end
 
 """
+    julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days, raw=false)
+
+Return the period since Julian Epoch `origin` within the time scale `scale` expressed in
+`unit` for a given epoch `ep`. If `raw` is `true`, the raw value is returned instead of a
+[`Period`](@ref) object.
+
+### Example ###
+
+```jldoctest
+julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 UTC
+
+julia> julian_period(ep; scale=TAI)
+6611.365011574074 days
+
+julia> julian_period(ep; unit=years)
+18.100929728496464 years
+
+julia> julian_period(ep; raw=true)
+6611.364583333333
+```
+"""
+function julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days, raw=false)
+    ep1 = Epoch(ep, scale)
+    jd1 = unit(ep1.second * seconds)
+    jd2 = unit(ep1.fraction * seconds)
+
+    if origin == :j2000
+        # pass
+    elseif origin == :julian
+        jd1 += unit(J2000_TO_JULIAN)
+    elseif origin == :modified_julian
+        jd1 += unit(J2000_TO_MJD)
+    else
+        throw(ArgumentError("Unknown Julian epoch: $origin"))
+    end
+
+    jd = jd2 + jd1
+    return ifelse(raw, value(jd), jd)
+end
+
+"""
     j2000(ep)
 
-Return the J2000 Julian date for epoch `ep`.
+Return the J2000 Julian Date for epoch `ep`.
 
 ### Example ###
 
@@ -164,9 +207,7 @@ julia> j2000(UTCEpoch(2000, 1, 1, 12))
 0.0 days
 ```
 """
-function j2000(ep::Epoch, unit=days)
-    unit((ep.fraction + ep.second) * seconds)
-end
+j2000(ep::Epoch) = julian_period(ep)
 
 """
     julian(ep)
@@ -180,7 +221,7 @@ julia> julian(UTCEpoch(2000, 1, 1, 12))
 2.451545e6 days
 ```
 """
-julian(ep::Epoch, unit=days) = j2000(ep, unit) + unit(J2000_TO_JULIAN)
+julian(ep::Epoch) = julian_period(ep; origin=:julian)
 
 """
     modified_julian(ep)
@@ -194,12 +235,12 @@ julia> modified_julian(UTCEpoch(2000, 1, 1, 12))
 51544.5 days
 ```
 """
-modified_julian(ep::Epoch, unit=days) = j2000(ep, unit) + unit(J2000_TO_MJD)
+modified_julian(ep::Epoch) = julian_period(ep; origin=:modified_julian)
 
 """
     julian_twopart(ep)
 
-Return the two-part Julian date for epoch `ep`, which is a tuple consisting
+Return the two-part Julian Date for epoch `ep`, which is a tuple consisting
 of the Julian day number and the fraction of the day.
 
 ### Example ###
@@ -209,11 +250,13 @@ julia> julian_twopart(UTCEpoch(2000, 1, 2))
 (2.451545e6 days, 0.5 days)
 ```
 """
-function julian_twopart(ep::Epoch, unit=days)
-    jd = value(julian(ep, unit))
-    jd1 = trunc(jd)
-    jd2 = jd - jd1
-    (jd1 * unit, jd2 * unit)
+function julian_twopart(ep::Epoch)
+    sec_in_days = ep.second / SECONDS_PER_DAY
+    frac_in_days = ep.fraction / SECONDS_PER_DAY
+    j2k1, j2k2 = divrem(sec_in_days, 1.0)
+    jd1 = j2k1 * days + J2000_TO_JULIAN
+    jd2 = (frac_in_days + j2k2) * days
+    return jd1, jd2
 end
 
 include("offsets.jl")
@@ -390,6 +433,27 @@ function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
     Epoch{S2}(second, fraction)
 end
 
+"""
+    Epoch(ep::Epoch{S1}, scale::S2) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TTEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TT
+
+julia> Epoch(ep, TAI)
+1999-12-31T23:59:27.816 TAI
+```
+"""
+function Epoch(ep::Epoch{S1}, scale::S2) where {S1<:TimeScale, S2<:TimeScale}
+    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
+    Epoch{S2}(second, fraction)
+end
+
 function Epoch{S2}(ep::Epoch{S1}, args...) where {S1<:TimeScale, S2<:TimeScale}
     offset = getoffset(S1(), S2(), ep.second, ep.fraction, args...)
     second, fraction = apply_offset(ep.second, ep.fraction, offset)
@@ -397,6 +461,7 @@ function Epoch{S2}(ep::Epoch{S1}, args...) where {S1<:TimeScale, S2<:TimeScale}
 end
 
 Epoch{S}(ep::Epoch{S}) where {S<:TimeScale} = ep
+Epoch(ep::Epoch{S}, ::S) where {S<:TimeScale} = ep
 
 function isapprox(a::Epoch{S}, b::Epoch{S}; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where S <: TimeScale
     a.second == b.second && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)

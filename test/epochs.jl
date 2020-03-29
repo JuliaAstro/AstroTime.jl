@@ -116,6 +116,7 @@ end
         @test tai.second == 0
         @test tai.fraction == 0.0
         @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
+        @test Epoch(tai, UTC) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
         @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
 
         ut1 = UT1Epoch(2000, 1, 1)
@@ -148,22 +149,22 @@ end
         jd = 0.0days
         ep = UTCEpoch(jd)
         @test ep == UTCEpoch(2000, 1, 1, 12)
+        @test julian_period(ep) == 0.0days
+        @test julian_period(ep; scale=TAI, unit=seconds) == 32.0seconds
+        @test julian_period(ep; raw=true) == 0.0
         @test j2000(ep) == jd
         jd = 86400.0seconds
         ep = UTCEpoch(jd)
         @test ep == UTCEpoch(2000, 1, 2, 12)
         @test j2000(ep) == days(jd)
-        @test j2000(ep, seconds) == jd
         jd = 2.451545e6days
         ep = UTCEpoch(jd, origin=:julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test julian(ep) == jd
-        @test julian(ep, seconds) == seconds(jd)
         jd = 51544.5days
         ep = UTCEpoch(jd, origin=:modified_julian)
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
-        @test modified_julian(ep, seconds) == seconds(jd)
         @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
     end
     @testset "Accessors" begin

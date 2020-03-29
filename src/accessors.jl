@@ -5,6 +5,21 @@ import ..AstroDates: Date, DateTime, Time,
     hour, minute, second, millisecond,
     fractionofday, yearmonthday, dayofyear
 
+"""
+    timescale(ep)
+
+Return the time scale of epoch `ep`.
+
+# Example
+
+```jldoctest
+julia> ep = TTEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TT
+
+julia> timescale(ep)
+TT
+```
+"""
 timescale(ep::Epoch) = ep.scale
 
 """

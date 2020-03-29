@@ -11,13 +11,19 @@ You construct `Epoch` instances similar to `DateTime` instance, for example by u
 The main difference is that you need to supply the time scale to be used.
 Out of the box, the following time scales are defined:
 
-- `TAI`: [International Atomic Time](https://en.wikipedia.org/wiki/International_Atomic_Time)
-- `UTC`: [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)
-- `UT1`: [Universal Time](https://en.wikipedia.org/wiki/Universal_Time#Versions)
-- `TT`: [Terrestrial Time](https://en.wikipedia.org/wiki/Terrestrial_Time)
-- `TCG`: [Geocentric Coordinate Time](https://en.wikipedia.org/wiki/Geocentric_Coordinate_Time)
-- `TCB`: [Barycentric Coordinate Time](https://en.wikipedia.org/wiki/Barycentric_Coordinate_Time)
-- `TDB`: [Barycentric Dynamical Time](https://en.wikipedia.org/wiki/Barycentric_Dynamical_Time)
+- [`TAI`](@ref): [International Atomic Time](https://en.wikipedia.org/wiki/International_Atomic_Time)
+- [`UTC`](@ref): [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)
+- [`UT1`](@ref): [Universal Time](https://en.wikipedia.org/wiki/Universal_Time#Versions)[^1]
+- [`TT`](@ref): [Terrestrial Time](https://en.wikipedia.org/wiki/Terrestrial_Time)
+- [`TCG`](@ref): [Geocentric Coordinate Time](https://en.wikipedia.org/wiki/Geocentric_Coordinate_Time)
+- [`TCB`](@ref): [Barycentric Coordinate Time](https://en.wikipedia.org/wiki/Barycentric_Coordinate_Time)
+- [`TDB`](@ref): [Barycentric Dynamical Time](https://en.wikipedia.org/wiki/Barycentric_Dynamical_Time)
+
+[^1]:
+    Transformations to and from UT1 depend on the measured quantity ΔUT1 which is
+    published in [IERS](https://www.iers.org) tables on a weekly basis. AstroTime.jl can
+    automatically fetch these tables by running [`AstroTime.update()`](@ref).
+    If you work with [`UT1`](@ref), you need to run this function periodically.
 
 ```julia
 using AstroTime
@@ -238,7 +244,8 @@ julia> TTEpoch(86400.0seconds, origin=:j2000)
 
 Some libraries (such as [ERFA](https://github.com/JuliaAstro/ERFA.jl)) expect a two-part Julian date
 as input.
-You can use `julian_twopart(ep)` in this case.
+You can use [`julian_twopart(ep)`](@ref) in this case.
+If you need more control over the output, have a look at the [`julian_period`](@ref) function.
 
 !!! warning
     You should not convert an `Epoch` to a Julian date to do arithmetic because this will result in a loss

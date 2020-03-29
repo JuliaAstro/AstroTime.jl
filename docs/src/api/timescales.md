@@ -7,6 +7,10 @@ end
 ```
 
 ```@docs
+AstroTime.update
+```
+
+```@docs
 @timescale
 ```
 
