@@ -151,7 +151,7 @@ end
         @test ep == UTCEpoch(2000, 1, 1, 12)
         @test julian_period(ep) == 0.0days
         @test julian_period(ep; scale=TAI, unit=seconds) == 32.0seconds
-        @test julian_period(ep; raw=true) == 0.0
+        @test julian_period(Float64, ep) == 0.0
         @test j2000(ep) == jd
         jd = 86400.0seconds
         ep = UTCEpoch(jd)

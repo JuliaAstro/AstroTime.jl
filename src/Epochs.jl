@@ -154,11 +154,11 @@ function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:P
 end
 
 """
-    julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days, raw=false)
+    julian_period([T,] ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days)
 
 Return the period since Julian Epoch `origin` within the time scale `scale` expressed in
-`unit` for a given epoch `ep`. If `raw` is `true`, the raw value is returned instead of a
-[`Period`](@ref) object.
+`unit` for a given epoch `ep`. The result is a [`Period`](@ref) object by default.
+If the type argument `T` is present, the result is converted to `T` instead.
 
 ### Example ###
 
@@ -172,11 +172,11 @@ julia> julian_period(ep; scale=TAI)
 julia> julian_period(ep; unit=years)
 18.100929728496464 years
 
-julia> julian_period(ep; raw=true)
+julia> julian_period(Float64, ep)
 6611.364583333333
 ```
 """
-function julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days, raw=false)
+function julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days)
     ep1 = Epoch(ep, scale)
     jd1 = unit(ep1.second * seconds)
     jd2 = unit(ep1.fraction * seconds)
@@ -191,8 +191,12 @@ function julian_period(ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days,
         throw(ArgumentError("Unknown Julian epoch: $origin"))
     end
 
-    jd = jd2 + jd1
-    return ifelse(raw, value(jd), jd)
+    return jd2 + jd1
+end
+
+function julian_period(::Type{T}, ep::Epoch; kwargs...) where T
+    jd = julian_period(ep; kwargs...)
+    return T(value(jd))
 end
 
 """
