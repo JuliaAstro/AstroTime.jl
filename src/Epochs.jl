@@ -269,9 +269,11 @@ include("accessors.jl")
 show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))
 
 function Epoch{S}(date::Date, time::Time, args...) where S
+    hr = hour(time)
+    mn = minute(time)
     leap = getleap(S(), date)
     # We care only about discontinuities
-    leap = ifelse(abs(leap) == 1.0, leap, 0.0)
+    leap = ifelse(hr == 23 && mn == 59 && abs(leap) == 1.0, leap, 0.0)
     s, fraction = divrem(second(Float64, time) - leap, 1.0)
     daysec = Int64((j2000(date) - 0.5) * SECONDS_PER_DAY)
     hoursec = Int64(hour(time) * SECONDS_PER_HOUR)
