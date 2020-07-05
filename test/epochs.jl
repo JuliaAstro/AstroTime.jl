@@ -26,6 +26,16 @@ function erfa_second_fraction(scale, year, month, day, hour, minute, second)
     return twopart_secondfraction(jd1, jd2)
 end
 
+function erfa_leap(year, month, day)
+    dj, w = ERFA.cal2jd(year, month, day)
+    dj += w
+    dat0 = ERFA.dat(year, month, day, 0.0)
+    dat12 = ERFA.dat(year, month, day, 0.5)
+    year2, month2, day2, w = ERFA.jd2cal(dj, 1.5)
+    dat24 = ERFA.dat(year2, month2, day2, 0.0)
+    return dat24 - (2dat12 - dat0)
+end
+
 @testset "Epochs" begin
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
@@ -251,6 +261,25 @@ end
         @test string(start_utc) == "2012-06-30T23:59:60.000 UTC"
         @test string(during_utc) == "2012-06-30T23:59:60.500 UTC"
         @test string(after_utc) == "2012-07-01T00:00:00.000 UTC"
+
+        # Issue 50
+        ep50_1 = UTCEpoch(2016, 12, 31, 0, 0, 0.0)
+        ep50_1_exp = erfa_second_fraction("UTC", 2016, 12, 31, 0, 0, 0.0)
+        @test ep50_1.second == ep50_1_exp.second
+        @test ep50_1.fraction ≈ ep50_1_exp.fraction
+
+        ep50_2 = UTCEpoch(2016, 12, 31, 0, 0, 0.1)
+        ep50_2_exp = erfa_second_fraction("UTC", 2016, 12, 31, 0, 0, 0.1)
+        @test ep50_2.second == ep50_2_exp.second
+        @test ep50_2.fraction ≈ ep50_2_exp.fraction atol=1e-5
+
+        ep50_3 = UTCEpoch(2016, 12, 31, 0, 1, 0.0)
+
+        @test AstroTime.Epochs.getleap(UTC, Date(2016, 12, 30)) == erfa_leap(2016, 12, 30)
+        @test AstroTime.Epochs.getleap(UTC, Date(2016, 12, 31)) == erfa_leap(2016, 12, 31)
+        @test string(ep50_1) == "2016-12-31T00:00:00.000 UTC"
+        @test string(ep50_2) == "2016-12-31T00:00:00.100 UTC"
+        @test string(ep50_3) == "2016-12-31T00:01:00.000 UTC"
     end
     @testset "Parametrization" begin
         ep_f64 = UTCEpoch(2000, 1, 1)
