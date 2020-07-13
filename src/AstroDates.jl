@@ -1,7 +1,5 @@
 module AstroDates
 
-using ..TimeScales: TimeScale
-
 import Dates
 import Dates: year, month, day,
     hour, minute, second, millisecond,
