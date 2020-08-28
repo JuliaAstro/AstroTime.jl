@@ -13,7 +13,7 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
 ERFA = "^0.4"
-EarthOrientation = "^0.6"
+EarthOrientation = "^0.6, 0.7"
 ItemGraphs = "^0.4"
 LeapSeconds = "^1.1"
 MacroTools = "^0.5"
