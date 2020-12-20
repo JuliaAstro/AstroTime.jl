@@ -12,7 +12,7 @@ MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-ERFA = "^0.4 - 1"
+ERFA = "0.4 - 1"
 EarthOrientation = "^0.6"
 ItemGraphs = "^0.4"
 LeapSeconds = "^1.1"
