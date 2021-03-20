@@ -272,9 +272,9 @@ function Base.show(io::IO, t::Time)
     print(io, h, ":", m, ":", s, ".", f)
 end
 
-struct DateTime{C}
+struct DateTime{C,T}
     date::Date{C}
-    time::Time
+    time::Time{T}
 end
 
 Date(dt::DateTime) = dt.date

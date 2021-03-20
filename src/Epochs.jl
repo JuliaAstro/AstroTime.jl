@@ -268,7 +268,7 @@ include("accessors.jl")
 
 show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))
 
-function Epoch{S}(date::Date, time::Time, args...) where S
+function Epoch{S}(date::Date, time::Time{T}, args...) where {S,T}
     hr = hour(time)
     mn = minute(time)
     leap = getleap(S(), date)
