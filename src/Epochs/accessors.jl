@@ -1,10 +1,3 @@
-import Dates
-
-import ..AstroDates: Date, DateTime, Time,
-    year, month, day,
-    hour, minute, second, millisecond,
-    fractionofday, yearmonthday, dayofyear
-
 """
     timescale(ep)
 

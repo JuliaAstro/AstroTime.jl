@@ -1,5 +1,3 @@
-import Base: (:)
-
 (:)(start::Epoch{S}, stop::Epoch{S}) where {S} = (:)(start, 1.0days, stop)
 
 function (:)(start::Epoch{S}, step::Period, stop::Epoch{S}) where S

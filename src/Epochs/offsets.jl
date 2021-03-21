@@ -1,13 +1,74 @@
-using ..TimeScales: find_path
-using EarthOrientation: getΔUT1, EOP_DATA, get
-using LeapSeconds: offset_tai_utc, offset_utc_tai
-using MuladdMacro
+"""
+    Epoch{S}(Δtai, ep::TAIEpoch) where S
 
-export
-    NoOffsetError,
-    NoPathError,
-    getoffset,
-    insideleap
+Convert `ep`, a `TAIEpoch`, to an `Epoch` with time scale `S` by overriding
+the offset between `S2` and `TAI` with `Δtai`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TAIEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TAI
+
+julia> TTEpoch(32.184, ep)
+2000-01-01T00:00:32.184 TT
+```
+"""
+function Epoch{S2}(offset, ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
+    second, fraction = apply_offset(ep.second, ep.fraction, offset)
+    Epoch{S2}(second, fraction)
+end
+
+"""
+    Epoch{S2}(ep::Epoch{S1}) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TTEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TT
+
+julia> TAIEpoch(ep)
+1999-12-31T23:59:27.816 TAI
+```
+"""
+function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
+    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
+    Epoch{S2}(second, fraction)
+end
+
+"""
+    Epoch(ep::Epoch{S1}, scale::S2) where {S1, S2}
+
+Convert `ep`, an `Epoch` with time scale `S1`, to an `Epoch` with time
+scale `S2`.
+
+### Examples ###
+
+```jldoctest
+julia> ep = TTEpoch(2000,1,1)
+2000-01-01T00:00:00.000 TT
+
+julia> Epoch(ep, TAI)
+1999-12-31T23:59:27.816 TAI
+```
+"""
+function Epoch(ep::Epoch{S1}, scale::S2) where {S1<:TimeScale, S2<:TimeScale}
+    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
+    Epoch{S2}(second, fraction)
+end
+
+function Epoch{S2}(ep::Epoch{S1}, args...) where {S1<:TimeScale, S2<:TimeScale}
+    offset = getoffset(S1(), S2(), ep.second, ep.fraction, args...)
+    second, fraction = apply_offset(ep.second, ep.fraction, offset)
+    Epoch{S2}(second, fraction)
+end
+
+Epoch{S}(ep::Epoch{S}) where {S<:TimeScale} = ep
+Epoch(ep::Epoch{S}, ::S) where {S<:TimeScale} = ep
 
 struct NoPathError <: Base.Exception
     in_scale::String
@@ -448,8 +509,6 @@ julia> getoffset(TDB, TT, 0, 0.0)
     end
     return offset
 end
-
-include("tdb_constants.jl")
 
 """
     getoffset(TDB, TT, second, fraction[, eop])
