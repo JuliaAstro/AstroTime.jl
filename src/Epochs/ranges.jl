@@ -1,8 +1,6 @@
-import Base: (:)
+(::Base.Colon)(start::Epoch{S}, stop::Epoch{S}) where {S} = (:)(start, 1.0days, stop)
 
-(:)(start::Epoch{S}, stop::Epoch{S}) where {S} = (:)(start, 1.0days, stop)
-
-function (:)(start::Epoch{S}, step::Period, stop::Epoch{S}) where S
+function (::Base.Colon)(start::Epoch{S}, step::Period, stop::Epoch{S}) where S
     step = seconds(step)
     step = start < stop ? step : -step
     StepRangeLen(start, step, floor(Int, value(stop-start)/value(step))+1)

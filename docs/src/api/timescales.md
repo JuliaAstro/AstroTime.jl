@@ -1,11 +1,5 @@
 # Time Scales
 
-```@meta
-DocTestSetup = quote
-    using AstroTime
-end
-```
-
 ```@docs
 AstroTime.update
 ```
@@ -17,9 +11,5 @@ AstroTime.update
 ```@autodocs
 Modules = [AstroTime.TimeScales]
 Private = false
-```
-
-```@meta
-DocTestSetup = nothing
 ```
 

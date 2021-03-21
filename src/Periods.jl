@@ -1,7 +1,5 @@
 module Periods
 
-import Base: -, *, /, +, get, isapprox, show, zero, eltype, (:), isless
-
 export TimeUnit, Second, Minute, Hour, Day, Year, Century,
     seconds, minutes, hours, days, years, centuries,
     Period, -, *, /, +, value, unit,
@@ -78,7 +76,7 @@ Periods should be constructed via the shorthand syntax shown in the examples bel
 
 ### Examples ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> 3.0seconds
 3.0 seconds
 
@@ -107,11 +105,11 @@ end
 
 value(p::Period) = p.Δt
 unit(p::Period) = p.unit
-zero(p::Period) = Period(unit(p), zero(value(p)))
-zero(p::Type{<:Period{U}}) where {U} = Period(U(), 0.0)
-zero(p::Type{<:Period{U,T}}) where {U, T} = Period(U(), zero(T))
-eltype(p::Period) = typeof(value(p))
-eltype(p::Type{<:Period{U,T}}) where {U, T} = T
+Base.zero(p::Period) = Period(unit(p), zero(value(p)))
+Base.zero(p::Type{<:Period{U}}) where {U} = Period(U(), 0.0)
+Base.zero(p::Type{<:Period{U,T}}) where {U, T} = Period(U(), zero(T))
+Base.eltype(p::Period) = typeof(value(p))
+Base.eltype(p::Type{<:Period{U,T}}) where {U, T} = T
 
 name(::Second, val::Integer) = ifelse(val == one(val), "second", "seconds")
 name(::Second, ::Any) = "seconds"
@@ -126,30 +124,30 @@ name(::Year, ::Any) = "years"
 name(::Century, val::Integer) = ifelse(val == one(val), "century", "centuries")
 name(::Century, ::Any) = "centuries"
 
-function show(io::IO, p::Period)
+function Base.show(io::IO, p::Period)
     u = unit(p)
     v = value(p)
     print(io, v, " ", name(u, v))
 end
 
-*(Δt::T, unit::TimeUnit) where {T<:Number} = Period(unit, Δt)
-*(unit::TimeUnit, Δt::T) where {T<:Number} = Period(unit, Δt)
-*(A::TimeUnit, B::AbstractArray) = broadcast(*, A, B)
-*(A::AbstractArray, B::TimeUnit) = broadcast(*, A, B)
+Base.:*(Δt::T, unit::TimeUnit) where {T<:Number} = Period(unit, Δt)
+Base.:*(unit::TimeUnit, Δt::T) where {T<:Number} = Period(unit, Δt)
+Base.:*(A::TimeUnit, B::AbstractArray) = broadcast(*, A, B)
+Base.:*(A::AbstractArray, B::TimeUnit) = broadcast(*, A, B)
 
-(+)(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt + p2.Δt)
-(-)(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt - p2.Δt)
-(-)(p::Period) = Period(unit(p), -p.Δt)
-(*)(x, p::Period) = Period(unit(p), p.Δt * x)
-(*)(p::Period, x) = Period(unit(p), p.Δt * x)
-(/)(p::Period, x) = Period(unit(p), p.Δt / x)
+Base.:+(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt + p2.Δt)
+Base.:-(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt - p2.Δt)
+Base.:-(p::Period) = Period(unit(p), -p.Δt)
+Base.:*(x, p::Period) = Period(unit(p), p.Δt * x)
+Base.:*(p::Period, x) = Period(unit(p), p.Δt * x)
+Base.:/(p::Period, x) = Period(unit(p), p.Δt / x)
 
-isless(p1::Period{U}, p2::Period{U}) where {U} = isless(value(p1), value(p2))
-isapprox(p1::Period{U}, p2::Period{U}) where {U} = value(p1) ≈ value(p2)
+Base.isless(p1::Period{U}, p2::Period{U}) where {U} = isless(value(p1), value(p2))
+Base.isapprox(p1::Period{U}, p2::Period{U}) where {U} = value(p1) ≈ value(p2)
 
-(:)(start::Period{U,T}, stop::Period{U,T}) where {U,T} = (:)(start, one(T) * U(), stop)
+(::Base.Colon)(start::Period{U,T}, stop::Period{U,T}) where {U,T} = (:)(start, one(T) * U(), stop)
 
-function (:)(start::Period{U}, step::Period{U}, stop::Period{U}) where {U}
+function (::Base.Colon)(start::Period{U}, step::Period{U}, stop::Period{U}) where {U}
     step = start < stop ? step : -step
     StepRangeLen(start, step, floor(Int, value(stop-start)/value(step))+1)
 end

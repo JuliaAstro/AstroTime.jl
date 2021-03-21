@@ -11,7 +11,7 @@ export @timescale
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")
-include("Epochs.jl")
+include(joinpath("Epochs", "Epochs.jl"))
 
 @reexport using .TimeScales
 @reexport using .Periods
@@ -130,7 +130,7 @@ Define a new time scale and the corresponding `Epoch` type alias.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> @timescale GMT UTC
 
 julia> GMT isa TimeScale

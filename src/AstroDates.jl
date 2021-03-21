@@ -7,52 +7,58 @@ import Dates: year, month, day,
 
 const J2000 = 2.4515445e6
 
-abstract type Calendar end
+function findyear(calendar, j2000day::Int64)
+    if calendar == :proleptic_julian
+        return -((-4 * j2000day - 2920488) ÷ 1461)
+    elseif calendar == :julian
+        return -((-4 * j2000day - 2921948) ÷ 1461)
+    end
 
-struct ProlepticJulianCalendar <: Calendar end
+    year = (400 * j2000day + 292194288) ÷ 146097
 
-struct JulianCalendar <: Calendar end
+    # The previous estimate is one unit too high in some rare cases
+    # (240 days in the 400 years gregorian cycle, about 0.16%)
+    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
+        year -= 1
+    end
 
-struct GregorianCalendar <: Calendar end
-
-function findyear(::ProlepticJulianCalendar, j2000day)
-    -Int((-Int64(4) * j2000day - Int64(2920488)) ÷ Int64(1461))
+    return year
 end
 
-function last_j2000_dayofyear(::ProlepticJulianCalendar, year)
-    365 * year + (year + 1) ÷ 4 - 730123
-end
+function findyear(calendar, j2000day::Int32)
+    if calendar == :proleptic_julian
+        return -Int((-Int64(4) * j2000day - Int64(2920488)) ÷ Int64(1461))
+    elseif calendar == :julian
+        return -Int((-Int64(4) * j2000day - Int64(2921948)) ÷ Int64(1461))
+    end
 
-isleap(::ProlepticJulianCalendar, year) = (year % 4) == 0
-
-function findyear(::JulianCalendar, j2000day)
-    -Int((-Int64(4) * j2000day - Int64(2921948)) ÷ Int64(1461))
-end
-
-function last_j2000_dayofyear(::JulianCalendar, year)
-    365 * year + year ÷ 4 - 730122
-end
-
-isleap(::JulianCalendar, year) = (year % 4) == 0
-
-function findyear(::GregorianCalendar, j2000day)
     year = Int((Int64(400) * j2000day + Int64(292194288)) ÷ Int64(146097))
 
     # The previous estimate is one unit too high in some rare cases
     # (240 days in the 400 years gregorian cycle, about 0.16%)
-    if j2000day <= last_j2000_dayofyear(GregorianCalendar(), year - 1)
+    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
         year -= 1
     end
 
-    year
+    return year
 end
 
-function last_j2000_dayofyear(::GregorianCalendar, year)
-    365 * year + year ÷ 4 - year ÷ 100 + year ÷ 400 - 730120
+function last_j2000_dayofyear(calendar, year)
+    if calendar == :proleptic_julian
+        return 365 * year + (year + 1) ÷ 4 - 730123
+    elseif calendar == :julian
+        return 365 * year + year ÷ 4 - 730122
+    end
+
+    return 365 * year + year ÷ 4 - year ÷ 100 + year ÷ 400 - 730120
 end
 
-function isleap(::GregorianCalendar, year)
-    year % 4 == 0 && (year % 400 == 0 || year % 100 != 0)
+function isleap(calendar, year)
+    if calendar in (:proleptic_julian, :julian)
+        return year % 4 == 0
+    end
+
+    return year % 4 == 0 && (year % 400 == 0 || year % 100 != 0)
 end
 
 const PREVIOUS_MONTH_END_DAY_LEAP = (
@@ -87,46 +93,45 @@ const PREVIOUS_MONTH_END_DAY = (
 
 function findmonth(dayinyear, isleap)
     offset = isleap ? 313 : 323
-    dayinyear < 32 ? 1 : (10 * dayinyear + offset) ÷ 306
+    return dayinyear < 32 ? 1 : (10 * dayinyear + offset) ÷ 306
 end
 
 function findday(dayinyear, month, isleap)
     (!isleap && dayinyear > 365) && throw(ArgumentError("Day of year cannot be 366 for a non-leap year."))
     previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
-    dayinyear - previous_days[month]
+    return dayinyear - previous_days[month]
 end
 
 function finddayinyear(month, day, isleap)
     previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
-    day + previous_days[month]
+    return day + previous_days[month]
 end
 
 function getcalendar(year, month, day)
-    calendar = GregorianCalendar()
     if year < 1583
         if year < 1
-            calendar = ProlepticJulianCalendar()
+            return :proleptic_julian
         elseif year < 1582 || month < 10 || (month < 11 && day < 5)
-            calendar = JulianCalendar()
+            return :julian
         end
     end
-    calendar
+    return :gregorian
 end
 
-struct Date{C}
+struct Date
+    calendar::Symbol
     year::Int
     month::Int
     day::Int
-    Date{C}(year, month, day) where {C} = new{C::Calendar}(year, month, day)
 end
 
-@inline function Date(offset::Integer)
-    calendar = GregorianCalendar()
+function Date(offset::Integer)
+    calendar = :gregorian
     if offset < -152384
         if offset > -730122
-            calendar = JulianCalendar()
+            calendar = :julian
         else
-            calendar = ProlepticJulianCalendar()
+            calendar = :proleptic_julian
         end
     end
 
@@ -136,12 +141,10 @@ end
     month = findmonth(dayinyear, isleap(calendar, year))
     day = findday(dayinyear, month, isleap(calendar, year))
 
-    Date{calendar}(year, month, day)
+    return Date(calendar, year, month, day)
 end
 
-function Date(epoch::Date, offset::Int)
-    Date(j2000(epoch) + offset)
-end
+Date(epoch::Date, offset::Int) = Date(j2000(epoch) + offset)
 
 function Date(year, month, day)
     if month < 1 || month > 12
@@ -152,29 +155,29 @@ function Date(year, month, day)
     if check.year != year || check.month != month || check.day != day
         throw(ArgumentError("Invalid date."))
     end
-    Date{calendar(check)}(year, month, day)
+    return Date(calendar(check), year, month, day)
 end
 
 function Date(year, dayinyear)
-    calendar = GregorianCalendar()
+    calendar = :gregorian
     if year < 1583
         if year < 1
-            calendar = ProlepticJulianCalendar()
+            calendar = :proleptic_julian
         else
-            calendar = JulianCalendar()
+            calendar = :julian
         end
     end
-    leap = isleap(GregorianCalendar(), year)
+    leap = isleap(calendar, year)
     month = findmonth(dayinyear, leap)
     day = findday(dayinyear, month, leap)
 
-    Date{calendar}(year, month, day)
+    return Date(calendar, year, month, day)
 end
 
 year(s::Date) = s.year
 month(s::Date) = s.month
 day(s::Date) = s.day
-calendar(s::Date{C}) where {C} = C
+calendar(s::Date) = s.calendar
 
 Base.show(io::IO, d::Date) = print(io,
                                    year(d), "-",
@@ -184,18 +187,20 @@ Base.show(io::IO, d::Date) = print(io,
 Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
 Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
 
-function j2000(calendar::Calendar, year, month, day)
-    last_j2000_dayofyear(calendar, year - 1) + finddayinyear(month, day, isleap(calendar, year))
+function j2000(calendar, year, month, day)
+    d1 = last_j2000_dayofyear(calendar, year - 1)
+    d2 = finddayinyear(month, day, isleap(calendar, year))
+    return d1 + d2
 end
 
 function j2000(year, month, day)
     calendar = getcalendar(year, month, day)
-    j2000(calendar, year, month, day)
+    return j2000(calendar, year, month, day)
 end
 
-j2000(s::Date{C}) where {C} = j2000(C, year(s), month(s), day(s))
+j2000(d::Date) = j2000(calendar(d), year(d), month(d), day(d))
 
-julian(s::Date) = j2000(s) + J2000
+julian(d::Date) = j2000(d) + J2000
 
 const JULIAN_EPOCH = Date(-4712,  1,  1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)
@@ -222,11 +227,11 @@ struct Time{T}
             throw(ArgumentError("`second` must be a float between 0 and 61."))
         end
 
-        new{T}(hour, minute, second)
+        return new{T}(hour, minute, second)
     end
 end
 
-@inline function Time(second_in_day_a, second_in_day_b)
+function Time(second_in_day_a, second_in_day_b)
     carry = floor(Int, second_in_day_b)
     wholeseconds = second_in_day_a + carry
     fractional = second_in_day_b - carry
@@ -243,7 +248,7 @@ end
     wholeseconds -= 60 * minute
     second = wholeseconds + fractional
 
-    Time(hour, minute, second)
+    return Time(hour, minute, second)
 end
 
 Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t),
@@ -269,12 +274,12 @@ function Base.show(io::IO, t::Time)
     m = lpad(minute(t), 2, '0')
     s = lpad(second(Int, t), 2, '0')
     f = lpad(millisecond(t), 3, '0')
-    print(io, h, ":", m, ":", s, ".", f)
+    return print(io, h, ":", m, ":", s, ".", f)
 end
 
-struct DateTime{C}
-    date::Date{C}
-    time::Time
+struct DateTime{T}
+    date::Date
+    time::Time{T}
 end
 
 Date(dt::DateTime) = dt.date
@@ -283,22 +288,23 @@ Time(dt::DateTime) = dt.time
 Base.show(io::IO, dt::DateTime) = print(io, Date(dt), "T", Time(dt))
 
 function DateTime(year, month, day, hour=0, minute=0, second=0.0)
-    DateTime(Date(year, month, day), Time(hour, minute, second))
+    return DateTime(Date(year, month, day), Time(hour, minute, second))
 end
 
 year(dt::DateTime) = year(Date(dt))
 month(dt::DateTime) = month(Date(dt))
 day(dt::DateTime) = day(Date(dt))
 yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
-function dayofyear(dt::DateTime{C}) where C
-    leap = isleap(C, year(dt))
-    finddayinyear(month(dt), day(dt), leap)
-end
 hour(dt::DateTime) = hour(Time(dt))
 minute(dt::DateTime) = minute(Time(dt))
 second(typ, dt::DateTime) = second(typ, Time(dt))
 second(dt::DateTime) = second(Int, Time(dt))
 millisecond(dt::DateTime) = millisecond(Time(dt))
+
+function dayofyear(dt::DateTime{C}) where C
+    leap = isleap(C, year(dt))
+    return finddayinyear(month(dt), day(dt), leap)
+end
 
 julian(dt::DateTime) = fractionofday(Time(dt)) + julian(Date(dt))
 j2000(dt::DateTime) = fractionofday(Time(dt)) + j2000(Date(dt))
@@ -315,7 +321,7 @@ function Dates.DateTime(dt::DateTime)
     mi = minute(dt)
     s = second(Int, dt)
     ms = round((second(Float64, dt) - s) * 1000)
-    Dates.DateTime(y, m, d, h, mi, s, ms)
+    return Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 
 end
