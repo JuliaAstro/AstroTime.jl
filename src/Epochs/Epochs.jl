@@ -5,7 +5,6 @@ using EarthOrientation: getΔUT1, EOP_DATA, get
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro
 
-import Base: (:), -, +, <, ==, isapprox, isless, show
 import Dates
 import Dates: format, parse
 
@@ -35,8 +34,8 @@ include("julian.jl")
 include("tdb_constants.jl")
 include("offsets.jl")
 include("accessors.jl")
-include("dates.jl")
 include("operations.jl")
+include("dates.jl")
 include("aliases.jl")
 include("ranges.jl")
 include("epoch_constants.jl")

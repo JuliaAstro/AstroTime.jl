@@ -35,4 +35,4 @@ function Epoch{S}(ep::Epoch{S}, Δt) where {S<:TimeScale}
     Epoch{S}(second, fraction)
 end
 
-show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))
+Base.show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))
