@@ -449,7 +449,7 @@ julia> getoffset(TDB, TT, 0, 0.0)
     return offset
 end
 
-include(joinpath("constants", "tdb.jl"))
+include("tdb_constants.jl")
 
 """
     getoffset(TDB, TT, second, fraction[, eop])

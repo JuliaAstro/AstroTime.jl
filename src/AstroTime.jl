@@ -11,7 +11,7 @@ export @timescale
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")
-include("Epochs.jl")
+include(joinpath("Epochs", "Epochs.jl"))
 
 @reexport using .TimeScales
 @reexport using .Periods

@@ -574,7 +574,7 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
     end
 end
 
-include("range.jl")
+include("ranges.jl")
 
 const JULIAN_EPOCH = TTEpoch(AstroDates.JULIAN_EPOCH, AstroDates.H12)
 const J2000_EPOCH = TTEpoch(AstroDates.J2000_EPOCH, AstroDates.H12)
