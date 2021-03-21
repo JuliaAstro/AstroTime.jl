@@ -76,7 +76,7 @@ Periods should be constructed via the shorthand syntax shown in the examples bel
 
 ### Examples ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> 3.0seconds
 3.0 seconds
 

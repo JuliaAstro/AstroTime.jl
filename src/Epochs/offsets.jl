@@ -6,7 +6,7 @@ the offset between `S2` and `TAI` with `Δtai`.
 
 ### Examples ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> ep = TAIEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TAI
 
@@ -27,7 +27,7 @@ scale `S2`.
 
 ### Examples ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> ep = TTEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TT
 
@@ -48,7 +48,7 @@ scale `S2`.
 
 ### Examples ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> ep = TTEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TT
 
@@ -132,7 +132,7 @@ another time `scale` in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> tai = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -187,7 +187,7 @@ Return the fixed offset between [`TAI`](@ref) and [`TT`](@ref) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TAI, TT)
 32.184
 ```
@@ -201,7 +201,7 @@ Return the fixed offset between [`TT`](@ref) and [`TAI`](@ref) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TAI)
 -32.184
 ```
@@ -223,7 +223,7 @@ current epoch (`second` after J2000 and `fraction`) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TCG, TT, 0, 0.0)
 -0.5058332856685995
 ```
@@ -241,7 +241,7 @@ current epoch (`second` after J2000 and `fraction`) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TCG, 0, 0.0)
 0.5058332860211293
 ```
@@ -266,7 +266,7 @@ current epoch (`second` after J2000 and `fraction`) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TCB, TDB, 0, 0.0)
 -11.253721593757295
 ```
@@ -284,7 +284,7 @@ current epoch (`second` after J2000 and `fraction`) in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TDB, TCB, 0, 0.0)
 11.253721768248475
 ```
@@ -332,7 +332,7 @@ second.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> insideleap(UTCEpoch(2020, 3, 20))
 false
 
@@ -353,7 +353,7 @@ For dates after `1972-01-01` this is the number of leap seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(UTC, TAI, 0, 0.0)
 32.0
 ```
@@ -373,7 +373,7 @@ For dates after `1972-01-01` this is the number of leap seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TAI, UTC, 0, 0.0)
 -32.0
 ```
@@ -398,7 +398,7 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 
 # Example
 
-```jldoctest; setup=:(AstroTime.load_test_eop())
+```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
 julia> getoffset(UTC, UT1, 0, 0.0)
 0.3550253556501879
 ```
@@ -419,7 +419,7 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 
 # Example
 
-```jldoctest; setup=:(AstroTime.load_test_eop())
+```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
 julia> getoffset(UT1, UTC, 0, 0.0)
 -0.3550253592514352
 ```
@@ -455,7 +455,7 @@ This routine is accurate to ~40 microseconds over the interval 1900-2100.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TDB, 0, 0.0)
 -7.273677619130569e-5
 ```
@@ -487,7 +487,7 @@ This routine is accurate to ~40 microseconds over the interval 1900-2100.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TDB, TT, 0, 0.0)
 7.273677616693264e-5
 ```
@@ -526,7 +526,7 @@ in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TDB, TT, 0, 0.0, π, 6371.0, 0.0)
 9.928419814101153e-5
 ```
@@ -627,7 +627,7 @@ in seconds.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
 -9.92841981897215e-5
 ```

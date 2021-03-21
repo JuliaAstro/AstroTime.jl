@@ -28,7 +28,7 @@ code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTH
 
 ### Example ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> Epoch("2018-02-06T20:45:00.0 UTC")
 2018-02-06T20:45:00.000 UTC
 
@@ -53,7 +53,7 @@ be used which is parsed as "day of year" (see the example below).  The default f
 
 ### Example ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> Epoch{CoordinatedUniversalTime}("2018-02-06T20:45:00.0")
 2018-02-06T20:45:00.000 UTC
 
@@ -89,7 +89,7 @@ Construct an `Epoch` with time scale `S` from date and time components.
 
 ### Example ###
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> Epoch{CoordinatedUniversalTime}(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 UTC
 

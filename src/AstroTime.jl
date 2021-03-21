@@ -130,7 +130,7 @@ Define a new time scale and the corresponding `Epoch` type alias.
 
 # Example
 
-```jldoctest
+```jldoctest; setup = :(using AstroTime)
 julia> @timescale GMT UTC
 
 julia> GMT isa TimeScale
