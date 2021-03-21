@@ -64,8 +64,9 @@ julia> Epoch{CoordinatedUniversalTime}("2018-037T00:00", "yyyy-DDDTHH:MM")
 2018-02-06T00:00:00.000 UTC
 ```
 """
-Epoch{S}(str::AbstractString,
-         format::Dates.DateFormat=Dates.default_format(Epoch{S})) where {S} = parse(Epoch{S}, str, format)
+function Epoch{S}(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch{S})) where S
+    return Dates.parse(Epoch{S}, str, format)
+end
 
 Epoch{S}(str::AbstractString, format::AbstractString) where {S} = Epoch{S}(str, Dates.DateFormat(format))
 
