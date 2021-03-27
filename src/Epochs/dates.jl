@@ -103,28 +103,33 @@ function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,
 end
 
 function Epoch{S}(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
-                  hour::Int64, minute::Int64, second::Int64, milliseconds::Int64) where S
+                  hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
+                  fractionofsecond::Float64) where S
     if dayofyear != 0
         date = Date(year, dayofyear)
     else
         date = Date(year, month, day)
     end
-    Epoch{S}(date, Time(hour, minute, second + 1e-3milliseconds))
+
+    if !iszero(fractionofsecond)
+        time = Time(hour, minute, second + fractionofsecond)
+    else
+        time = Time(hour, minute, second + 1e-3milliseconds)
+    end
+
+    return Epoch{S}(date, time)
 end
 
 function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
                hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
-               scale::S) where S<:TimeScale
+               fractionofsecond::Float64, scale::S) where S<:TimeScale
     if scale === TimeScales.NotATimeScale()
         throw(ArgumentError("Could not parse the provided string as an `Epoch`." *
                             " No time scale was provided."))
     end
 
-    if dayofyear != 0
-        date = Date(year, dayofyear)
-    else
-        date = Date(year, month, day)
-    end
-    Epoch{S}(date, Time(hour, minute, second + 1e-3milliseconds))
+    return Epoch{S}(year, month, day, dayofyear,
+                    hour, minute, second, milliseconds,
+                    fractionofsecond)
 end
 

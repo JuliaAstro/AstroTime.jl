@@ -22,9 +22,11 @@ import .Epochs: format
 
 function __init__()
     Dates.CONVERSION_SPECIFIERS['t'] = TimeScale
+    Dates.CONVERSION_SPECIFIERS['f'] = Epochs.FractionOfSecondToken
     Dates.CONVERSION_SPECIFIERS['D'] = Epochs.DayOfYearToken
     Dates.CONVERSION_DEFAULTS[TimeScale] = TimeScales.NotATimeScale()
     Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
+    Dates.CONVERSION_DEFAULTS[Epochs.FractionOfSecondToken] = 0.0
 
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,
@@ -35,6 +37,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
         TimeScale,
     )
 
@@ -47,6 +50,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[UTCEpoch] = (
@@ -58,6 +62,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[UT1Epoch] = (
@@ -69,6 +74,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TTEpoch] = (
@@ -80,6 +86,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TCGEpoch] = (
@@ -91,6 +98,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TCBEpoch] = (
@@ -102,6 +110,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TDBEpoch] = (
@@ -113,6 +122,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 end
 

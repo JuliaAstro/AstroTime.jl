@@ -145,6 +145,13 @@ Get the time of the day of the epoch `ep` as a fraction.
 fractionofday(ep::Epoch) = fractionofday(Time(ep))
 
 """
+    fractionofsecond(ep::Epoch)
+
+Get the fraction of the current second of the epoch `ep`.
+"""
+fractionofsecond(ep::Epoch) = ep.fraction
+
+"""
     Dates.DateTime(ep::Epoch)
 
 Convert the epoch `ep` to a `Dates.DateTime`.
