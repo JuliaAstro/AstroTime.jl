@@ -55,7 +55,7 @@ const REFERENCES = (
 
     @test DateTime(Dates.DateTime(dt)) == dt
     @test Date(Dates.Date(d)) == d
-    @test Time(Dates.Time(t)) == t
+    @test Time(Dates.Time(t)) ≈ t atol=1e-14
 
     @test year(dt) == 2020
     @test year(d) == 2020
@@ -80,4 +80,9 @@ const REFERENCES = (
     @test julian(dt) ≈ jd
     @test sum(julian_twopart(dt)) ≈ jd
     @test j2000(dt) ≈ jd - AstroTime.AstroDates.J2000
+
+    pt = Time(12, 12, 12, 0.123456789)
+    @test millisecond(pt) == 123
+    @test microsecond(pt) == 456
+    @test nanosecond(pt) == 789
 end

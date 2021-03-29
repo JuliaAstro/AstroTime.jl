@@ -1,9 +1,9 @@
 module AstroDates
 
 import Dates
-import Dates: year, month, day,
-    hour, minute, second, millisecond,
-    yearmonthday, dayofyear
+
+using Dates: year, month, day, hour, minute, second, millisecond, microsecond, nanosecond
+using Dates: dayofyear
 
 const J2000 = 2.4515445e6
 
@@ -174,9 +174,9 @@ function Date(year, dayinyear)
     return Date(calendar, year, month, day)
 end
 
-year(s::Date) = s.year
-month(s::Date) = s.month
-day(s::Date) = s.day
+Dates.year(s::Date) = s.year
+Dates.month(s::Date) = s.month
+Dates.day(s::Date) = s.day
 calendar(s::Date) = s.calendar
 
 Base.show(io::IO, d::Date) = print(io,
@@ -216,58 +216,74 @@ const UNIX_EPOCH = Date(1970, 1, 1)
 struct Time{T}
     hour::Int
     minute::Int
-    second::T
+    second::Int
+    fraction::T
 
-    function Time(hour, minute, second::T) where T
+    function Time(hour, minute, second, fraction::T) where T
         if hour < 0 || hour > 23
             throw(ArgumentError("`hour` must be an integer between 0 and 23."))
         elseif minute < 0 || minute > 59
             throw(ArgumentError("`minute` must be an integer between 0 and 59."))
-        elseif second < 0 || second >= 61.0
-            throw(ArgumentError("`second` must be a float between 0 and 61."))
+        elseif second < 0 || second >= 61
+            throw(ArgumentError("`second` must be an integer between 0 and 61."))
+        elseif fraction < 0 || fraction > 1
+            throw(ArgumentError("`fraction` must be a floating point number between 0 and 1."))
         end
 
-        return new{T}(hour, minute, second)
+        return new{T}(hour, minute, second, fraction)
     end
 end
 
-function Time(second_in_day_a, second_in_day_b)
-    carry = floor(Int, second_in_day_b)
-    wholeseconds = second_in_day_a + carry
-    fractional = second_in_day_b - carry
+function Time(hour, minute, second::T) where T
+    sec, frac = divrem(rationalize(second), 1)
+    return Time(hour, minute, sec, T(frac))
+end
 
+function Time(secondinday, fraction)
     # range check
-    if wholeseconds < 0 || wholeseconds > 86400
+    if secondinday < 0 || secondinday > 86400
         throw(ArgumentError("Seconds are out of range"))
     end
 
     # extract the time components
-    hour = wholeseconds ÷ 3600
-    wholeseconds -= 3600 * hour
-    minute = wholeseconds ÷ 60
-    wholeseconds -= 60 * minute
-    second = wholeseconds + fractional
+    hour = secondinday ÷ 3600
+    secondinday -= 3600 * hour
+    minute = secondinday ÷ 60
+    secondinday -= 60 * minute
 
-    return Time(hour, minute, second)
+    return Time(hour, minute, secondinday, fraction)
 end
 
-Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t),
-                           Dates.second(t) + 1e-3Dates.millisecond(t))
-Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t))
+function Base.isapprox(a, b; kwargs...)
+    return a.hour == b.hour &&
+        a.minute == b.minute &&
+        a.second == b.second &&
+        isapprox(a.fraction, b.fraction; kwargs...)
+end
 
-const H00 = Time(0, 0, 0.0)
-const H12 = Time(12, 0, 0.0)
-
-hour(t::Time) = t.hour
-minute(t::Time) = t.minute
-second(::Type{Float64}, t::Time) = t.second
-second(::Type{Int}, t::Time) = floor(Int, t.second)
-second(t::Time) = second(Int, t)
-millisecond(t::Time) = round(Int, (second(Float64, t) - second(Int, t)) * 1000)
+Dates.hour(t::Time) = t.hour
+Dates.minute(t::Time) = t.minute
+Dates.second(::Type{Float64}, t::Time) = t.fraction + t.second
+Dates.second(::Type{Int}, t::Time) = t.second
+Dates.second(t::Time) = second(Int, t)
+Dates.millisecond(t::Time) = trunc(Int, 1e3 * t.fraction)
+Dates.microsecond(t::Time) = trunc(Int, 1e3 * (1e3 * t.fraction - millisecond(t)))
+Dates.nanosecond(t::Time) = trunc(Int, 1e3 * (1e3 * (1e3 * t.fraction - millisecond(t)) - microsecond(t)))
 
 fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
 
-secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
+secondinday(t::Time) = t.fraction + t.second + 60 * t.minute + 3600 * t.hour
+
+Time(t::Dates.Time) = Time(Dates.hour(t),
+                           Dates.minute(t),
+                           Dates.second(t),
+                           1e-9 * Dates.nanosecond(t) +
+                           1e-6 * Dates.microsecond(t) +
+                           1e-3 * Dates.millisecond(t))
+Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t), microsecond(t), nanosecond(t))
+
+const H00 = Time(0, 0, 0, 0.0)
+const H12 = Time(12, 0, 0, 0.0)
 
 function Base.show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
@@ -291,17 +307,19 @@ function DateTime(year, month, day, hour=0, minute=0, second=0.0)
     return DateTime(Date(year, month, day), Time(hour, minute, second))
 end
 
-year(dt::DateTime) = year(Date(dt))
-month(dt::DateTime) = month(Date(dt))
-day(dt::DateTime) = day(Date(dt))
-yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
-hour(dt::DateTime) = hour(Time(dt))
-minute(dt::DateTime) = minute(Time(dt))
-second(typ, dt::DateTime) = second(typ, Time(dt))
-second(dt::DateTime) = second(Int, Time(dt))
-millisecond(dt::DateTime) = millisecond(Time(dt))
+Dates.year(dt::DateTime) = year(Date(dt))
+Dates.month(dt::DateTime) = month(Date(dt))
+Dates.day(dt::DateTime) = day(Date(dt))
+Dates.yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
+Dates.hour(dt::DateTime) = hour(Time(dt))
+Dates.minute(dt::DateTime) = minute(Time(dt))
+Dates.second(typ, dt::DateTime) = second(typ, Time(dt))
+Dates.second(dt::DateTime) = second(Int, Time(dt))
+Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
+Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
+Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
 
-function dayofyear(dt::DateTime{C}) where C
+function Dates.dayofyear(dt::DateTime{C}) where C
     leap = isleap(C, year(dt))
     return finddayinyear(month(dt), day(dt), leap)
 end
@@ -320,7 +338,7 @@ function Dates.DateTime(dt::DateTime)
     h = hour(dt)
     mi = minute(dt)
     s = second(Int, dt)
-    ms = round((second(Float64, dt) - s) * 1000)
+    ms = millisecond(dt)
     return Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 

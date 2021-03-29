@@ -7,10 +7,12 @@ using MuladdMacro
 
 import Dates
 import Dates: format
+import Dates: year, day, month, hour, minute, second
+import Dates: millisecond, microsecond, nanosecond
+import Dates: yearmonthday, dayofyear
 
 import ..AstroDates: Date, DateTime, Time
-import ..AstroDates: year, day, month, hour, minute, second, millisecond
-import ..AstroDates: calendar, yearmonthday, dayofyear, fractionofday, secondinday
+import ..AstroDates: calendar, fractionofday, secondinday
 import ..AstroDates: j2000, julian, julian_twopart
 
 using ..TimeScales: find_path
@@ -21,6 +23,7 @@ export UNIX_EPOCH
 export Date, DateTime, Time, Epoch
 export NoOffsetError, NoPathError
 export day, dayofyear, fractionofday, millisecond, minute, hour, month, now, second
+export microsecond, nanosecond
 export secondinday, timescale, year, yearmonthday
 export getoffset, insideleap
 export j2000, julian, julian_period, julian_twopart, modified_julian
