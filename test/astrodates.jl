@@ -29,33 +29,33 @@ const REFERENCES = (
 
 @testset "DateTime" begin
     @testset for ref in REFERENCES
-        s = Date(ref[end])
+        s = AstroTime.Date(ref[end])
         @test year(s) == ref[1]
         @test month(s) == ref[2]
         @test day(s) == ref[3]
         @test j2000(s) == ref[end]
-        @test j2000(Date(ref[1:3]...)) == ref[end]
+        @test j2000(AstroTime.Date(ref[1:3]...)) == ref[end]
     end
 
-    @test_throws ArgumentError Date(2018, 2, 29)
-    @test_throws ArgumentError Date(2018, 0, 1)
-    @test_throws ArgumentError Date(2018, 13, 1)
-    @test_throws ArgumentError Time(24, 59, 59.0)
-    @test_throws ArgumentError Time(23, 60, 59.0)
-    @test_throws ArgumentError Time(23, 59, 61.0)
-    @test_throws ArgumentError Time(86401, 0)
+    @test_throws ArgumentError AstroTime.Date(2018, 2, 29)
+    @test_throws ArgumentError AstroTime.Date(2018, 0, 1)
+    @test_throws ArgumentError AstroTime.Date(2018, 13, 1)
+    @test_throws ArgumentError AstroTime.Time(24, 59, 59.0)
+    @test_throws ArgumentError AstroTime.Time(23, 60, 59.0)
+    @test_throws ArgumentError AstroTime.Time(23, 59, 61.0)
+    @test_throws ArgumentError AstroTime.Time(86401, 0)
 
-    @test Date(2000, 1) == Date(2000, 1, 1)
-    @test Date(-2000, 1) == Date(-2000, 1, 1)
-    @test Date(1000, 1) == Date(1000, 1, 1)
+    @test AstroTime.Date(2000, 1) == AstroTime.Date(2000, 1, 1)
+    @test AstroTime.Date(-2000, 1) == AstroTime.Date(-2000, 1, 1)
+    @test AstroTime.Date(1000, 1) == AstroTime.Date(1000, 1, 1)
 
-    dt = DateTime(2020, 3, 21, 10, 15, 37.245)
-    d = Date(dt)
-    t = Time(dt)
+    dt = AstroTime.DateTime(2020, 3, 21, 10, 15, 37.245)
+    d = AstroTime.Date(dt)
+    t = AstroTime.Time(dt)
 
-    @test DateTime(Dates.DateTime(dt)) == dt
-    @test Date(Dates.Date(d)) == d
-    @test Time(Dates.Time(t)) ≈ t atol=1e-14
+    @test AstroTime.DateTime(Dates.DateTime(dt)) == dt
+    @test AstroTime.Date(Dates.Date(d)) == d
+    @test AstroTime.Time(Dates.Time(t)) ≈ t atol=1e-14
 
     @test year(dt) == 2020
     @test year(d) == 2020
@@ -81,7 +81,7 @@ const REFERENCES = (
     @test sum(julian_twopart(dt)) ≈ jd
     @test j2000(dt) ≈ jd - AstroTime.AstroDates.J2000
 
-    pt = Time(12, 12, 12, 0.123456789)
+    pt = AstroTime.Time(12, 12, 12, 0.123456789)
     @test millisecond(pt) == 123
     @test microsecond(pt) == 456
     @test nanosecond(pt) == 789

@@ -111,11 +111,11 @@ end
     end
     @testset "Conversion" begin
         include("conversions.jl")
-        dt = DateTime(2018, 8, 14, 10, 2, 51.551247436378276)
+        dt = AstroTime.DateTime(2018, 8, 14, 10, 2, 51.551247436378276)
         ep = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
         @test TAIEpoch(dt) == ep
         @test TAIEpoch(Dates.DateTime(dt)) == TAIEpoch(2018, 8, 14, 10, 2, 51.551)
-        @test TAIEpoch(Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
+        @test TAIEpoch(AstroTime.Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
         @test now() isa UTCEpoch
 
         tt = TTEpoch(2000, 1, 1, 12)
@@ -192,9 +192,9 @@ end
         @test second(Int, ep) == 59
         @test millisecond(ep) == 371
         @test yearmonthday(ep) == (2018, 2, 6)
-        @test Date(ep) == Date(2018, 2, 6)
-        @test Time(ep) == Time(20, 45, 59.371)
-        @test DateTime(ep) == DateTime(2018, 2, 6, 20, 45, 59.371)
+        @test AstroTime.Date(ep) == AstroTime.Date(2018, 2, 6)
+        @test AstroTime.Time(ep) == AstroTime.Time(20, 45, 59.371)
+        @test AstroTime.DateTime(ep) == AstroTime.DateTime(2018, 2, 6, 20, 45, 59.371)
         @test Dates.Date(ep) == Dates.Date(2018, 2, 6)
         @test Dates.Time(ep) == Dates.Time(20, 45, 59, 371)
         @test Dates.DateTime(ep) == Dates.DateTime(2018, 2, 6, 20, 45, 59, 371)

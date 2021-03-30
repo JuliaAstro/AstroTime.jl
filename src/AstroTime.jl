@@ -13,6 +13,8 @@ include("Periods.jl")
 include("AstroDates.jl")
 include(joinpath("Epochs", "Epochs.jl"))
 
+import .AstroDates: Date, DateTime, Time
+
 @reexport using .TimeScales
 @reexport using .Periods
 @reexport using .AstroDates
