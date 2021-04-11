@@ -403,10 +403,10 @@ julia> getoffset(UTC, UT1, 0, 0.0)
 0.3550253556501879
 ```
 """
-@inline function getoffset(::CoordinatedUniversalTime, ::UniversalTime,
+@inline function getoffset(::InternationalAtomicTime, ::UniversalTime,
                            second, fraction, eop=get(EOP_DATA))
     utc = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    return getΔUT1(eop, utc)
+    return getΔUT1_TAI(eop, utc)
 end
 
 """
@@ -424,11 +424,11 @@ julia> getoffset(UT1, UTC, 0, 0.0)
 -0.3550253592514352
 ```
 """
-@inline function getoffset(::UniversalTime, ::CoordinatedUniversalTime,
+@inline function getoffset(::UniversalTime, ::InternationalAtomicTime,
                            second, fraction, eop=get(EOP_DATA))
     ut1 = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    utc = ut1 - getΔUT1(eop, ut1) / SECONDS_PER_DAY
-    return -getΔUT1(eop, utc)
+    utc = ut1 - getΔUT1_TAI(eop, ut1) / SECONDS_PER_DAY
+    return -getΔUT1_TAI(eop, utc)
 end
 
 #######

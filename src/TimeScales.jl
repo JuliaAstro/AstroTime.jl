@@ -93,7 +93,7 @@ end
 
 link_scales!(TAI, TT)
 link_scales!(TAI, UTC)
-link_scales!(UTC, UT1)
+link_scales!(TAI, UT1)
 link_scales!(TT, TCG)
 link_scales!(TT, TDB)
 link_scales!(TCB, TDB)
@@ -115,3 +115,4 @@ tryparse(::Any) = nothing
 end
 
 end
+
