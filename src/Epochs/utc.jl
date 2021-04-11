@@ -1,4 +1,8 @@
 const LEAP_J2000 = round.(Int, (LeapSeconds.LS_EPOCHS .- value(J2000_TO_MJD)) * 86400)
+const LEAP_TAI = LEAP_J2000 .+ round.(Int, LeapSeconds.LEAP_SECONDS) .- 1
+const LEAP_TAI_SET = Set(LEAP_TAI)
+
+# TODO: Add date range checks!
 
 function from_utc(str::AbstractString;
         dateformat::Dates.DateFormat=Dates.default_format(AstroDates.DateTime),
@@ -23,7 +27,23 @@ function from_utc(dt::Dates.DateTime, scale::S=TAI) where S
     return Epoch{S}(TAIEpoch(offset, ep))
 end
 
-function to_utc end
+function to_utc(::Type{DateTime}, ep)
+    offset = LeapSeconds.LEAP_SECONDS[searchsortedlast(LEAP_TAI, ep.second)]
+    dt = DateTime(TAIEpoch(-offset, ep))
+    d = Date(dt)
+    t = Time(dt)
+    if ep.second in LEAP_TAI_SET
+        t = Time(hour(t), minute(t), second(t) + 1, fractionofsecond(t))
+    end
+    return DateTime(d, t)
+end
+
+function to_utc(::Type{String}, ep, dateformat=Dates.default_format(DateTime))
+    dt = to_utc(DateTime, ep)
+    return Dates.format(dt, dateformat)
+end
+
+to_utc(ep, args...) = to_utc(String, ep, args...)
 
 """
     now(::Type{Epoch})

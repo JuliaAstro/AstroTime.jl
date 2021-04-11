@@ -9,7 +9,7 @@ import Dates
 import Dates: format
 import Dates: year, day, month, hour, minute, second
 import Dates: millisecond, microsecond, nanosecond
-import Dates: yearmonthday, dayofyear
+import Dates: yearmonthday, dayofyear, now
 
 import LeapSeconds
 

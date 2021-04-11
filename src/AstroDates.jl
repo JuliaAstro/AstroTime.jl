@@ -365,6 +365,7 @@ Dates.second(dt::DateTime) = second(Int, Time(dt))
 Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
 Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
 Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
+fractionofsecond(dt::DateTime) = fractionofsecond(Time(dt))
 calendar(dt::DateTime) = calendar(dt.date)
 
 function Dates.dayofyear(dt::DateTime)

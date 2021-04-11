@@ -61,6 +61,11 @@ end
         @test during_act.fraction ≈ during_exp.fraction
         @test after_act.second == after_exp.second
         @test after_act.fraction ≈ after_exp.fraction
+
+        @test to_utc(before_act) == before
+        @test to_utc(start_act) == start
+        @test to_utc(during_act) == during
+        @test to_utc(after_act) == after
     end
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
@@ -141,7 +146,8 @@ end
         @test TAIEpoch(dt) == ep
         @test TAIEpoch(Dates.DateTime(dt)) == TAIEpoch(2018, 8, 14, 10, 2, 51.551)
         @test TAIEpoch(AstroTime.Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
-        @test now() isa UTCEpoch
+        @test now(Epoch) isa TAIEpoch
+        @test now(TDBEpoch) isa TDBEpoch
 
         tt = TTEpoch(2000, 1, 1, 12)
         @test TTEpoch(tt) == tt
