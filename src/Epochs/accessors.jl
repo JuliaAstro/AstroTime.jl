@@ -149,7 +149,7 @@ fractionofday(ep::Epoch) = fractionofday(Time(ep))
 
 Get the fraction of the current second of the epoch `ep`.
 """
-fractionofsecond(ep::Epoch) = ep.fraction
+AstroDates.fractionofsecond(ep::Epoch) = ep.fraction
 
 """
     Dates.DateTime(ep::Epoch)

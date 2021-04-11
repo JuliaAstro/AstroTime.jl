@@ -9,7 +9,7 @@ function Epoch{S}(date::Date, time::Time{T}, args...) where {S,T}
     return Epoch{S}(sec, time.fraction)
 end
 
-Dates.default_format(::Type{Epoch}) = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.sss ttt")
+Dates.default_format(::Type{Epoch}) = EPOCH_ISO_FORMAT[]
 
 """
     Epoch(str[, format])
@@ -37,7 +37,7 @@ Epoch(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch))
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
 
-Dates.default_format(::Type{Epoch{S}}) where {S} = Dates.ISODateTimeFormat
+Dates.default_format(::Type{Epoch{S}}) where {S} = Dates.default_format(AstroDates.DateTime)
 
 """
     Epoch{S}(str[, format]) where S
@@ -102,19 +102,9 @@ end
 function Epoch{S}(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
                   hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
                   fractionofsecond::Float64) where S
-    if dayofyear != 0
-        date = Date(year, dayofyear)
-    else
-        date = Date(year, month, day)
-    end
-
-    if !iszero(fractionofsecond)
-        time = Time(hour, minute, second, fractionofsecond)
-    else
-        time = Time(hour, minute, second, 1e-3milliseconds)
-    end
-
-    return Epoch{S}(date, time)
+    dt = AstroDates.DateTime(year, month, day, dayofyear, hour, minute, second,
+                             milliseconds, fractionofsecond)
+    return Epoch{S}(dt)
 end
 
 function Epoch(year::Int64, month::Int64, day::Int64, dayofyear::Int64,

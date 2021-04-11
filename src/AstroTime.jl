@@ -8,6 +8,38 @@ import MacroTools
 
 export @timescale
 
+const ASTRO_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff"),
+                                              Tuple{Dates.DatePart{'y'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'m'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'d'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'H'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'M'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'S'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'f'}}}}()
+
+const EPOCH_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff ttt"),
+                                              Tuple{Dates.DatePart{'y'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'m'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'d'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'H'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'M'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'S'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'f'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'t'}}}}()
+
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")
@@ -29,6 +61,33 @@ function __init__()
     Dates.CONVERSION_DEFAULTS[TimeScale] = TimeScales.NotATimeScale()
     Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
     Dates.CONVERSION_DEFAULTS[Epochs.FractionOfSecondToken] = 0.0
+
+    ASTRO_ISO_FORMAT[] = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.fff")
+    EPOCH_ISO_FORMAT[] = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.fff ttt")
+
+    Dates.CONVERSION_TRANSLATIONS[AstroDates.DateTime] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[AstroDates.DateTime{Float64}] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
+    )
 
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,
@@ -188,7 +247,7 @@ macro timescale(scale::Symbol, parent=nothing, oneway=false)
             Dates.Second,
             Dates.Millisecond,
         )
-        Dates.default_format(::Type{$epoch_type}) = Dates.ISODateTimeFormat
+        Dates.default_format(::Type{$epoch_type}) = Dates.default_format(AstroDates.DateTime)
 
         $reg_expr
 

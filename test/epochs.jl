@@ -37,6 +37,31 @@ function erfa_leap(year, month, day)
 end
 
 @testset "Epochs" begin
+    @testset "UTC" begin
+        before = "2012-06-30T23:59:59.000"
+        start = "2012-06-30T23:59:60.000"
+        during = "2012-06-30T23:59:60.300"
+        after = "2012-07-01T00:00:00.000"
+
+        before_exp = (second=394372833, fraction=0.0)
+        start_exp = (second=394372834, fraction=0.0)
+        during_exp = (second=394372834, fraction=0.3)
+        after_exp = (second=394372835, fraction=0.0)
+
+        before_act = from_utc(before)
+        start_act = from_utc(start)
+        during_act = from_utc(during)
+        after_act = from_utc(after)
+
+        @test before_act.second == before_exp.second
+        @test before_act.fraction ≈ before_exp.fraction
+        @test start_act.second == start_exp.second
+        @test start_act.fraction ≈ start_exp.fraction
+        @test during_act.second == during_exp.second
+        @test during_act.fraction ≈ during_exp.fraction
+        @test after_act.second == after_exp.second
+        @test after_act.fraction ≈ after_exp.fraction
+    end
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
         @test ep.second == 0

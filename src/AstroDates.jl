@@ -2,6 +2,8 @@ module AstroDates
 
 import Dates
 
+import ..ASTRO_ISO_FORMAT
+
 using Dates: year, month, day, hour, minute, second, millisecond, microsecond, nanosecond
 using Dates: dayofyear
 
@@ -254,7 +256,7 @@ function Time(secondinday, fraction)
     return Time(hour, minute, secondinday, fraction)
 end
 
-function Base.isapprox(a, b; kwargs...)
+function Base.isapprox(a::Time, b::Time; kwargs...)
     return a.hour == b.hour &&
         a.minute == b.minute &&
         a.second == b.second &&
@@ -270,7 +272,8 @@ Dates.millisecond(t::Time) = trunc(Int, 1e3 * t.fraction)
 Dates.microsecond(t::Time) = trunc(Int, 1e3 * (1e3 * t.fraction - millisecond(t)))
 Dates.nanosecond(t::Time) = trunc(Int, 1e3 * (1e3 * (1e3 * t.fraction - millisecond(t)) - microsecond(t)))
 
-fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
+fractionofday(t::Time) = (t.fraction + t.second) / 86400 + t.minute / 1440 + t.hour / 24
+fractionofsecond(t::Time) = t.fraction
 
 secondinday(t::Time) = t.fraction + t.second + 60 * t.minute + 3600 * t.hour
 
@@ -293,9 +296,19 @@ function Base.show(io::IO, t::Time)
     return print(io, h, ":", m, ":", s, ".", f)
 end
 
-struct DateTime{T}
+struct DateTime{T} <: Dates.AbstractDateTime
     date::Date
     time::Time{T}
+end
+
+Dates.default_format(::Type{DateTime}) = ASTRO_ISO_FORMAT[]
+
+function Base.:(==)(a::DateTime, b::DateTime)
+    return a.date == b.date && a.time == b.time
+end
+
+function Base.isapprox(a::DateTime, b::DateTime; kwargs...)
+    return a.date == b.date && isapprox(a.time, b.time; kwargs...)
 end
 
 Date(dt::DateTime) = dt.date
@@ -303,8 +316,42 @@ Time(dt::DateTime) = dt.time
 
 Base.show(io::IO, dt::DateTime) = print(io, Date(dt), "T", Time(dt))
 
-function DateTime(year, month, day, hour=0, minute=0, second=0.0)
+function DateTime(str::AbstractString, df::Dates.DateFormat=Dates.default_format(DateTime))
+    return Dates.parse(DateTime{Float64}, str, df)
+end
+
+function DateTime(year::Int, month::Int, day::Int, hour::Int=0, minute::Int=0, second::Int=0, fraction=0.0)
+    return DateTime(Date(year, month, day), Time(hour, minute, second, fraction))
+end
+
+function DateTime(year::Int, month::Int, day::Int, hour::Int, minute::Int, second)
     return DateTime(Date(year, month, day), Time(hour, minute, second))
+end
+
+function DateTime(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
+                  hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
+                  fractionofsecond::T) where T
+    return DateTime{T}(year, month, day, dayofyear,
+                      hour, minute, second, milliseconds,
+                      fractionofsecond)
+end
+
+function DateTime{T}(year::Int64, month::Int64, day::Int64, dayofyear::Int64,
+                  hour::Int64, minute::Int64, second::Int64, milliseconds::Int64,
+                  fractionofsecond::T) where T
+    if dayofyear != 0
+        date = Date(year, dayofyear)
+    else
+        date = Date(year, month, day)
+    end
+
+    if !iszero(fractionofsecond)
+        time = Time(hour, minute, second, fractionofsecond)
+    else
+        time = Time(hour, minute, second, 1e-3milliseconds)
+    end
+
+    return DateTime{T}(date, time)
 end
 
 Dates.year(dt::DateTime) = year(Date(dt))
@@ -318,9 +365,10 @@ Dates.second(dt::DateTime) = second(Int, Time(dt))
 Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
 Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
 Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
+calendar(dt::DateTime) = calendar(dt.date)
 
-function Dates.dayofyear(dt::DateTime{C}) where C
-    leap = isleap(C, year(dt))
+function Dates.dayofyear(dt::DateTime)
+    leap = isleap(calendar(dt), year(dt))
     return finddayinyear(month(dt), day(dt), leap)
 end
 

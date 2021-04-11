@@ -1,8 +1,5 @@
-function Dates.validargs(::Type{Epoch}, y::Int64, m::Int64, d::Int64,
-                         h::Int64, mi::Int64, s::Int64, ms::Int64, ts::S) where S<:TimeScale
-    err = Dates.validargs(Dates.DateTime, y, m, d, h, mi, s, ms)
-    err !== nothing || return err
-    return Dates.argerror()
+function Dates.format(io, d::Dates.DatePart{'t'}, ep)
+    print(io, timescale(ep))
 end
 
 abstract type DayOfYearToken end
@@ -15,6 +12,10 @@ abstract type DayOfYearToken end
     return val, idx
 end
 
+function Dates.format(io, d::Dates.DatePart{'D'}, ep)
+    print(io, dayofyear(ep))
+end
+
 abstract type FractionOfSecondToken end
 
 @inline function Dates.tryparsenext(d::Dates.DatePart{'f'}, str, i, len, locale)
@@ -25,11 +26,10 @@ abstract type FractionOfSecondToken end
     return val, idx
 end
 
-function Dates.format(io, d::Dates.DatePart{'D'}, ep)
-    print(io, dayofyear(ep))
-end
-
-function Dates.format(io, d::Dates.DatePart{'t'}, ep)
-    print(io, timescale(ep))
+function Dates.format(io, d::Dates.DatePart{'f'}, ep)
+    str = last(split(string(fractionofsecond(ep)), "."))
+    n = length(str)
+    len = d.width < n ? d.width : n
+    print(io, rpad(str[1:len], d.width, '0'))
 end
 
