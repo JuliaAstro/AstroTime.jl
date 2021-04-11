@@ -73,13 +73,6 @@ Epoch{S}(dt::DateTime) where {S} = Epoch{S}(Date(dt), Time(dt))
 Epoch{S}(dt::Dates.DateTime) where {S} = Epoch{S}(DateTime(dt))
 
 """
-    now()
-
-Get the current date and time as a `UTCEpoch`.
-"""
-now() = UTCEpoch(Dates.now())
-
-"""
     Epoch{S}(year, month, day, hour=0, minute=0, second=0.0) where S
 
 Construct an `Epoch` with time scale `S` from date and time components.
