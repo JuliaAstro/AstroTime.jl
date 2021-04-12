@@ -152,7 +152,7 @@ julia> julian_twopart(UTCEpoch(2000, 1, 2))
 function julian_twopart(ep::Epoch)
     sec_in_days = ep.second / SECONDS_PER_DAY
     frac_in_days = ep.fraction / SECONDS_PER_DAY
-    j2k1, j2k2 = divrem(sec_in_days, 1.0)
+    j2k1, j2k2 = divrem(sec_in_days, 1)
     jd1 = j2k1 * days + J2000_TO_JULIAN
     jd2 = (frac_in_days + j2k2) * days
     return jd1, jd2

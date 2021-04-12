@@ -69,7 +69,7 @@ import ERFA
         @test value(tdb2 - tdb1) ≈ Δtdb
         @test tdb1 != tdb2
 
-        t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
+        t0 = TTEpoch(2000, 1, 1, 12, 0, 32.0)
         t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
         t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
         @test_throws MethodError t1 - t0
@@ -80,15 +80,14 @@ import ERFA
     @testset "Parsing" begin
         @test AstroTime.TimeScales.tryparse(1.0) === nothing
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
-        @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
         @test UT1Epoch("2000-01-01T00:00:00.000") == UT1Epoch(2000, 1, 1)
         @test TTEpoch("2000-01-01T00:00:00.000") == TTEpoch(2000, 1, 1)
         @test TCGEpoch("2000-01-01T00:00:00.000") == TCGEpoch(2000, 1, 1)
         @test TCBEpoch("2000-01-01T00:00:00.000") == TCBEpoch(2000, 1, 1)
         @test TDBEpoch("2000-01-01T00:00:00.000") == TDBEpoch(2000, 1, 1)
-        @test Epoch("2000-01-01T00:00:00.000 UTC") == UTCEpoch(2000, 1, 1)
-        @test UTCEpoch("2000-001", "yyyy-DDD") == UTCEpoch(2000, 1, 1)
-        @test Epoch("2000-001 UTC", "yyyy-DDD ttt") == UTCEpoch(2000, 1, 1)
+        @test Epoch("2000-01-01T00:00:00.000 TAI") == TAIEpoch(2000, 1, 1)
+        @test TAIEpoch("2000-001", "yyyy-DDD") == TAIEpoch(2000, 1, 1)
+        @test Epoch("2000-001 TAI", "yyyy-DDD ttt") == TAIEpoch(2000, 1, 1)
         @test_throws ArgumentError Epoch("2000-01-01T00:00:00.000")
     end
     @testset "Output" begin
@@ -97,15 +96,14 @@ import ERFA
         @test AstroTime.format(ep, "HH:MM ttt") == "10:02 TAI"
         @test string(TAI) == "TAI"
         @test string(TT) == "TT"
-        @test string(UTC) == "UTC"
         @test string(UT1) == "UT1"
         @test string(TCG) == "TCG"
         @test string(TDB) == "TDB"
         @test string(TCB) == "TCB"
     end
     @testset "Arithmetic" begin
-        ep = UTCEpoch(2000, 1, 1)
-        ep1 = UTCEpoch(2000, 1, 2)
+        ep = TAIEpoch(2000, 1, 1)
+        ep1 = TAIEpoch(2000, 1, 2)
         @test (ep + 1.0seconds) - ep   == 1.0seconds
         @test (ep + 1.0minutes) - ep   == seconds(1.0minutes)
         @test (ep + 1.0hours) - ep     == seconds(1.0hours)
@@ -132,22 +130,20 @@ import ERFA
         tai = TAIEpoch(2000, 1, 1, 12)
         @test tai.second == 0
         @test tai.fraction == 0.0
-        @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
-        @test Epoch(tai, UTC) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
-        @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
+        @test TTEpoch(tai) ≈ TTEpoch(2000, 1, 1, 12, 0, 32.184)
+        @test Epoch(tai, TT) ≈ TTEpoch(2000, 1, 1, 12, 0, 32.184)
+        @test TTEpoch(32.184, tai) == TTEpoch(tai)
 
         ut1 = UT1Epoch(2000, 1, 1)
-        ut1_utc = getoffset(ut1, UTC)
-        utc = UTCEpoch(ut1)
-        utc_tai = getoffset(utc, TAI)
-        tai = TAIEpoch(utc)
+        ut1_tai = getoffset(ut1, TAI)
+        tai = TAIEpoch(ut1)
         tai_tt = getoffset(tai, TT)
         tt = TTEpoch(tai)
         tt_tdb = getoffset(tt, TDB)
         tdb = TDBEpoch(tt)
         tdb_tcb = getoffset(tdb, TCB)
         tcb = TCBEpoch(tdb)
-        @test getoffset(ut1, TCB) == ut1_utc + utc_tai + tai_tt + tt_tdb + tdb_tcb
+        @test getoffset(ut1, TCB) == ut1_tai + tai_tt + tt_tdb + tdb_tcb
     end
     @testset "TDB" begin
         ep = TTEpoch(2000, 1, 1)
@@ -164,32 +160,32 @@ import ERFA
     end
     @testset "Julian Dates" begin
         jd = 0.0days
-        ep = UTCEpoch(jd)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test julian_period(ep) == 0.0days
-        @test julian_period(ep; scale=TAI, unit=seconds) == 32.0seconds
+        @test julian_period(ep; scale=TT, unit=seconds) == 32.184seconds
         @test julian_period(Float64, ep) == 0.0
         @test j2000(ep) == jd
         jd = 86400.0seconds
-        ep = UTCEpoch(jd)
-        @test ep == UTCEpoch(2000, 1, 2, 12)
+        ep = TAIEpoch(jd)
+        @test ep == TAIEpoch(2000, 1, 2, 12)
         @test j2000(ep) == days(jd)
         jd = 2.451545e6days
-        ep = UTCEpoch(jd, origin=:julian)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd, origin=:julian)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test julian(ep) == jd
         jd = 51544.5days
-        ep = UTCEpoch(jd, origin=:modified_julian)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd, origin=:modified_julian)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
-        @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
+        @test_throws ArgumentError TAIEpoch(jd, origin=:julia)
     end
     @testset "Accessors" begin
         @test TAIEpoch(JULIAN_EPOCH - Inf * seconds) == PAST_INFINITY
         @test TAIEpoch(JULIAN_EPOCH + Inf * seconds) == FUTURE_INFINITY
         @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
         @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
-        ep = UTCEpoch(2018, 2, 6, 20, 45, 59.371)
+        ep = TAIEpoch(2018, 2, 6, 20, 45, 59.371)
         @test year(ep) == 2018
         @test month(ep) == 2
         @test day(ep) == 6
@@ -207,30 +203,30 @@ import ERFA
         @test Dates.DateTime(ep) == Dates.DateTime(2018, 2, 6, 20, 45, 59, 371)
     end
     @testset "Ranges" begin
-        rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
+        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 2, 1)
         @test step(rng) == 86400.0seconds
         @test length(rng) == 32
-        @test first(rng) == UTCEpoch(2018, 1, 1)
-        @test last(rng) == UTCEpoch(2018, 2, 1)
-        rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
+        @test first(rng) == TAIEpoch(2018, 1, 1)
+        @test last(rng) == TAIEpoch(2018, 2, 1)
+        rng = TAIEpoch(2018, 1, 1):13seconds:TAIEpoch(2018, 1, 1, 0, 1)
         @test step(rng) == 13seconds
-        @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
+        @test last(rng) == TAIEpoch(2018, 1, 1, 0, 0, 52.0)
     end
     @testset "Parametrization" begin
-        ep_f64 = UTCEpoch(2000, 1, 1)
-        ep_err = UTCEpoch(ep_f64.second, 1.0 ± 1.1)
+        ep_f64 = TAIEpoch(2000, 1, 1)
+        ep_err = TAIEpoch(ep_f64.second, 1.0 ± 1.1)
         Δt = (30 ± 0.1) * seconds
         @test typeof(Δt) == Period{Second,Measurement{Float64}}
-        @test typeof(ep_f64) == Epoch{CoordinatedUniversalTime,Float64}
-        @test typeof(ep_err) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        @test typeof(ep_f64 + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        @test typeof(ep_err + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_f64) == Epoch{InternationalAtomicTime,Float64}
+        @test typeof(ep_err) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        @test typeof(ep_f64 + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        @test typeof(ep_err + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         jd1_err = (0.0 ± 0.001) * days
         jd2_err = (0.5 ± 0.001) * days
-        ep_jd1 = UTCEpoch(jd1_err)
-        @test typeof(ep_jd1) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        ep_jd2 = UTCEpoch(jd1_err, jd2_err)
-        @test typeof(ep_jd2) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ep_jd1 = TAIEpoch(jd1_err)
+        @test typeof(ep_jd1) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        ep_jd2 = TAIEpoch(jd1_err, jd2_err)
+        @test typeof(ep_jd2) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         ut1_err = UT1Epoch(ep_f64.second, 1.0 ± 1.1)
         tcg_err = TCGEpoch(ut1_err)
         tcb_err = TCBEpoch(ut1_err)

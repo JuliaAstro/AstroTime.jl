@@ -6,16 +6,17 @@ AstroTime.load_test_eop()
 const speed_of_light = 299792458.0 # m/s
 const astronomical_unit = 149597870700.0 # m
 
-@timescale GMT UTC
-AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime, _, _) = 0.0
-AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::GMTScale, _, _) = 0.0
+# TODO: Change me
+@timescale GMT TAI
+AstroTime.Epochs.getoffset(::GMTScale, ::InternationalAtomicTime, _, _) = 0.0
+AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::GMTScale, _, _) = 0.0
 
-@timescale SCET UTC
-function AstroTime.Epochs.getoffset(::SCETScale, ::CoordinatedUniversalTime,
+@timescale SCET TAI
+function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
                                     _, _, distance)
     return distance / speed_of_light
 end
-function AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::SCETScale,
+function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
                                     _, _, distance)
     return -distance / speed_of_light
 end
@@ -38,29 +39,30 @@ end
     include("astrodates.jl")
     include("epochs.jl")
     @testset "Custom Time Scales" begin
-        utc = UTCEpoch(2000, 1, 1, 0, 0, 0.1)
+        # TODO: Change me
+        tai = TAIEpoch(2000, 1, 1, 0, 0, 0.1)
         gmt = GMTEpoch(2000, 1, 1, 0, 0, 0.1)
-        @test utc == UTCEpoch(gmt)
-        @test gmt == GMTEpoch(utc)
+        @test tai == TAIEpoch(gmt)
+        @test gmt == GMTEpoch(tai)
 
         @test string(GMT) == "GMT"
         @test typeof(GMT) == GMTScale
         @test string(gmt) == "2000-01-01T00:00:00.100 GMT"
-        @test find_path(GMT, UTC) == [GMT, UTC]
+        @test find_path(GMT, TAI) == [GMT, TAI]
 
         @test string(SCET) == "SCET"
         @test typeof(SCET) == SCETScale
-        @test find_path(SCET, UTC) == [SCET, UTC]
+        @test find_path(SCET, TAI) == [SCET, TAI]
         scet = SCETEpoch(2000, 1, 1, 0, 0, 0.1)
-        utc_exp = UTCEpoch(2000, 1, 1, 0, 8, 19.10478383615643)
-        @test UTCEpoch(scet, astronomical_unit) ≈ utc_exp
-        @test SCETEpoch(utc_exp, astronomical_unit) ≈ scet
+        tai_exp = TAIEpoch(2000, 1, 1, 0, 8, 19.10478383615643)
+        @test TAIEpoch(scet, astronomical_unit) ≈ tai_exp
+        @test SCETEpoch(tai_exp, astronomical_unit) ≈ scet
 
         @test string(Dummy) == "Dummy"
         @test typeof(Dummy) == DummyScale
-        @test find_path(Dummy, UTC) == [Dummy, TDB, TT, TAI, UTC]
+        @test find_path(Dummy, TAI) == [Dummy, TDB, TT, TAI]
         dummy = DummyEpoch(2000, 1, 1)
-        @test_throws NoOffsetError UTCEpoch(dummy)
+        @test_throws NoOffsetError TAIEpoch(dummy)
         @test_throws NoOffsetError TDBEpoch(dummy)
 
         lonely = LonelyEpoch(2000, 1, 1)

@@ -39,18 +39,7 @@ function DateTime(ep::Epoch)
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, ep.fraction)
 
-    leap = getleap(ep)
-    hr = hour(time_comp)
-    mn = minute(time_comp)
-    leap = ifelse(hr == 23 && mn == 59 && abs(leap) == 1.0, leap, 0.0)
-    if !iszero(leap)
-        h = hour(time_comp)
-        m = minute(time_comp)
-        s = second(Float64, time_comp) + leap
-        time_comp = Time(h, m, s)
-    end
-
-    DateTime(date_comp, time_comp)
+    return DateTime(date_comp, time_comp)
 end
 
 """

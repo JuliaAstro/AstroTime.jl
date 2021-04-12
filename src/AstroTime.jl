@@ -114,18 +114,6 @@ function __init__()
         Epochs.FractionOfSecondToken,
     )
 
-    Dates.CONVERSION_TRANSLATIONS[UTCEpoch] = (
-        Dates.Year,
-        Dates.Month,
-        Dates.Day,
-        Epochs.DayOfYearToken,
-        Dates.Hour,
-        Dates.Minute,
-        Dates.Second,
-        Dates.Millisecond,
-        Epochs.FractionOfSecondToken,
-    )
-
     Dates.CONVERSION_TRANSLATIONS[UT1Epoch] = (
         Dates.Year,
         Dates.Month,

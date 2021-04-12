@@ -3,7 +3,7 @@
     a1 = hi - b
     b1 = hi - a1
     lo = (a - a1) + (b - b1)
-    hi, lo
+    return hi, lo
 end
 
 struct Epoch{S<:TimeScale, T} <: Dates.AbstractDateTime
@@ -21,18 +21,18 @@ Epoch{S,T}(ep::Epoch{S,T}) where {S,T} = ep
     sum, residual = two_sum(fraction, offset)
     if !isfinite(sum)
         fraction′ = sum
-        second′ = sum < 0 ? typemin(Int64) : typemax(Int64)
+        second′ = ifelse(sum < 0, typemin(Int64), typemax(Int64))
     else
-        int_secs = floor(Int64, sum)
-        fraction′ = sum - int_secs + residual
-        second′ = second + int_secs
+        s, f = divrem(sum, 1, RoundDown)
+        second′ = second + round(Int64, s)
+        fraction′ = f + residual
     end
     return second′, fraction′
 end
 
 function Epoch{S}(ep::Epoch{S}, Δt) where {S<:TimeScale}
     second, fraction = apply_offset(ep.second, ep.fraction, Δt)
-    Epoch{S}(second, fraction)
+    return Epoch{S}(second, fraction)
 end
 
 Base.show(io::IO, ep::Epoch) = print(io, DateTime(ep), " ", timescale(ep))

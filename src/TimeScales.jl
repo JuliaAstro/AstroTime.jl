@@ -14,7 +14,6 @@ export
 All timescales are subtypes of the abstract type `TimeScale`.
 The following timescales are defined:
 
-* [`UTC`](@ref) — Coordinated Universal Time
 * [`UT1`](@ref) — Universal Time
 * [`TAI`](@ref) — International Atomic Time
 * [`TT`](@ref) — Terrestrial Time
@@ -25,7 +24,6 @@ The following timescales are defined:
 abstract type TimeScale end
 
 const NAMES = (
-    :CoordinatedUniversalTime,
     :UniversalTime,
     :InternationalAtomicTime,
     :TerrestrialTime,
@@ -35,7 +33,6 @@ const NAMES = (
 )
 
 const ACRONYMS = (
-    :UTC,
     :UT1,
     :TAI,
     :TT,
@@ -92,7 +89,6 @@ function link_scales!(s1, s2; oneway=false)
 end
 
 link_scales!(TAI, TT)
-link_scales!(TAI, UTC)
 link_scales!(TAI, UT1)
 link_scales!(TT, TCG)
 link_scales!(TT, TDB)
