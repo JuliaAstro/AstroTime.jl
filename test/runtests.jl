@@ -1,9 +1,6 @@
 using AstroTime
 using Test
-using ERFA
-using SPICE: furnsh, et2utc, utc2et
 
-furnsh(joinpath("data", "naif0012.tls"))
 AstroTime.load_test_eop()
 
 const speed_of_light = 299792458.0 # m/s
