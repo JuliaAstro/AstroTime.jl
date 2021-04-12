@@ -2,8 +2,6 @@ const LEAP_J2000 = round.(Int, (LeapSeconds.LS_EPOCHS .- value(J2000_TO_MJD)) * 
 const LEAP_TAI = LEAP_J2000 .+ round.(Int, LeapSeconds.LEAP_SECONDS) .- 1
 const LEAP_TAI_SET = Set(LEAP_TAI)
 
-# TODO: Add date range checks!
-
 function from_utc(str::AbstractString;
         dateformat::Dates.DateFormat=Dates.default_format(AstroDates.DateTime),
         scale::TimeScale=TAI)
@@ -11,30 +9,52 @@ function from_utc(str::AbstractString;
     return from_utc(dt, scale)
 end
 
-function from_utc(dt::DateTime, scale::S=TAI) where S
-    ep = TAIEpoch(dt)
-    offset = LeapSeconds.LEAP_SECONDS[searchsortedlast(LEAP_J2000, ep.second)]
-    offset = ifelse(second(dt) >= 60, offset - 1, offset)
-
-    return Epoch{S}(TAIEpoch(offset, ep))
+function from_utc(year::Integer, month::Integer, day::Integer,
+    hour::Integer=0, minute::Integer=0, second::Integer=0, fraction=0.0;
+    scale::TimeScale=TAI)
+    dt = DateTime(year, month, day, hour, minute, second, fraction)
+    return from_utc(dt, scale)
 end
 
-function from_utc(dt::Dates.DateTime, scale::S=TAI) where S
-    ep = TAIEpoch(DateTime(dt))
-    offset = LeapSeconds.LEAP_SECONDS[searchsortedlast(LEAP_J2000, ep.second)]
-    offset = ifelse(second(dt) >= 60, offset - 1, offset)
+function from_utc(year::Integer, month::Integer, day::Integer,
+    hour::Integer, minute::Integer, second;
+    scale::TimeScale=TAI)
+    dt = DateTime(year, month, day, hour, minute, second)
+    return from_utc(dt, scale)
+end
+
+from_utc(dt::Dates.DateTime, scale::S=TAI) where {S} = from_utc(DateTime(dt), scale)
+
+function from_utc(dt::DateTime, scale::S=TAI) where S
+    ep = TAIEpoch(dt)
+    idx = searchsortedlast(LEAP_J2000, ep.second)
+    if idx == 0
+        jd1, jd2 = value.(julian_twopart(ep))
+        offset = -offset_utc_tai(jd1, jd2)
+    else
+        offset = LeapSeconds.LEAP_SECONDS[idx]
+        offset = ifelse(second(dt) >= 60, offset - 1, offset)
+    end
 
     return Epoch{S}(TAIEpoch(offset, ep))
 end
 
 function to_utc(::Type{DateTime}, ep)
-    offset = LeapSeconds.LEAP_SECONDS[searchsortedlast(LEAP_TAI, ep.second)]
-    dt = DateTime(TAIEpoch(-offset, ep))
+    tai = TAIEpoch(ep)
+    idx = searchsortedlast(LEAP_TAI, tai.second)
+    if idx == 0
+        jd1, jd2 = value.(julian_twopart(tai))
+        offset = offset_tai_utc(jd1, jd2)
+    else
+        offset = LeapSeconds.LEAP_SECONDS[idx]
+    end
+    dt = DateTime(TAIEpoch(-offset, tai))
     d = Date(dt)
     t = Time(dt)
-    if ep.second in LEAP_TAI_SET
+    if tai.second in LEAP_TAI_SET
         t = Time(hour(t), minute(t), second(t) + 1, fractionofsecond(t))
     end
+
     return DateTime(d, t)
 end
 

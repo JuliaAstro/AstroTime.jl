@@ -242,8 +242,7 @@ end
 function Base.isapprox(a::Time, b::Time; kwargs...)
     return a.hour == b.hour &&
         a.minute == b.minute &&
-        a.second == b.second &&
-        isapprox(a.fraction, b.fraction; kwargs...)
+        isapprox(a.fraction + a.second, b.fraction + b.second; kwargs...)
 end
 
 Dates.hour(t::Time) = t.hour

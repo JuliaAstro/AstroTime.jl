@@ -1,5 +1,5 @@
-function Base.isapprox(a::Epoch{S}, b::Epoch{S}; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where S <: TimeScale
-    a.second == b.second && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)
+function Base.isapprox(a::Epoch{S}, b::Epoch{S}; kwargs...) where S <: TimeScale
+    return isapprox(a.fraction + a.second, b.fraction + b.second; kwargs...)
 end
 
 function Base.:(==)(a::Epoch, b::Epoch)

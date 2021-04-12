@@ -1,6 +1,6 @@
 module Epochs
 
-using LeapSeconds: offset_tai_utc
+using LeapSeconds: offset_tai_utc, offset_utc_tai
 using EarthOrientation: getΔUT1_TAI, EOP_DATA, get
 using LeapSeconds: offset_tai_utc, offset_utc_tai
 using MuladdMacro

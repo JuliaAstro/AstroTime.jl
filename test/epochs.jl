@@ -66,6 +66,15 @@ end
         @test to_utc(start_act) == start
         @test to_utc(during_act) == during
         @test to_utc(after_act) == after
+
+        sixties = AstroTime.DateTime(1961, 3, 5, 23, 4, 12.0)
+        sixties_exp = (second=-1225198547, fraction=0.5057117799999999)
+        sixties_act = from_utc(sixties)
+        sixties_utc = to_utc(AstroTime.DateTime, sixties_act)
+
+        @test sixties_act.second == sixties_exp.second
+        @test sixties_act.fraction ≈ sixties_exp.fraction
+        @test sixties_utc ≈ sixties
     end
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
