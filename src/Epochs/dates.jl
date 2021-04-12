@@ -1,4 +1,4 @@
-function Epoch{S}(date::Date, time::Time{T}, args...) where {S,T}
+function Epoch{S}(date::Date, time::Time, args...) where S
     daysec = round(Int64, (j2000(date) - 0.5) * SECONDS_PER_DAY)
     horsec = round(Int64, hour(time) * SECONDS_PER_HOUR)
     minsec = round(Int64, minute(time) * SECONDS_PER_MINUTE)
