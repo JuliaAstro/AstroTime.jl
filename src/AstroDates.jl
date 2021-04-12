@@ -9,36 +9,19 @@ using Dates: dayofyear
 
 const J2000 = 2.4515445e6
 
-function findyear(calendar, j2000day::Int64)
+function findyear(calendar, j2000day)
+    j2kday = Int64(j2000day)
     if calendar == :proleptic_julian
-        return -((-4 * j2000day - 2920488) ÷ 1461)
+        return -((-4 * j2kday - 2920488) ÷ 1461)
     elseif calendar == :julian
-        return -((-4 * j2000day - 2921948) ÷ 1461)
+        return -((-4 * j2kday - 2921948) ÷ 1461)
     end
 
-    year = (400 * j2000day + 292194288) ÷ 146097
+    year = (400 * j2kday + 292194288) ÷ 146097
 
     # The previous estimate is one unit too high in some rare cases
     # (240 days in the 400 years gregorian cycle, about 0.16%)
-    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
-        year -= 1
-    end
-
-    return year
-end
-
-function findyear(calendar, j2000day::Int32)
-    if calendar == :proleptic_julian
-        return -Int((-Int64(4) * j2000day - Int64(2920488)) ÷ Int64(1461))
-    elseif calendar == :julian
-        return -Int((-Int64(4) * j2000day - Int64(2921948)) ÷ Int64(1461))
-    end
-
-    year = Int((Int64(400) * j2000day + Int64(292194288)) ÷ Int64(146097))
-
-    # The previous estimate is one unit too high in some rare cases
-    # (240 days in the 400 years gregorian cycle, about 0.16%)
-    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
+    if j2kday <= last_j2000_dayofyear(:gregorian, year - 1)
         year -= 1
     end
 
