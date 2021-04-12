@@ -29,12 +29,12 @@ function DateTime(ep::Epoch)
         end
     end
 
-    sec = ep.second + Int64(43200)
-    time = sec % Int64(86400)
+    sec = ep.second + 43200
+    time = sec % 86400
     if time < 0
-        time += Int64(86400)
+        time += 86400
     end
-    date = Int((sec - time) ÷ Int64(86400))
+    date = (sec - time) ÷ 86400
 
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, ep.fraction)

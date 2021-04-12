@@ -1,11 +1,9 @@
 function Epoch{S}(date::Date, time::Time{T}, args...) where {S,T}
-    hr = hour(time)
-    mn = minute(time)
-    s = second(Int, time)
-    daysec = Int64((j2000(date) - 0.5) * SECONDS_PER_DAY)
-    hoursec = Int64(hour(time) * SECONDS_PER_HOUR)
-    minutesec = Int64(minute(time) * SECONDS_PER_MINUTE)
-    sec = Int64(s) + minutesec + hoursec + daysec
+    daysec = round(Int64, (j2000(date) - 0.5) * SECONDS_PER_DAY)
+    horsec = round(Int64, hour(time) * SECONDS_PER_HOUR)
+    minsec = round(Int64, minute(time) * SECONDS_PER_MINUTE)
+    sec = daysec + horsec + minsec + second(time)
+
     return Epoch{S}(sec, time.fraction)
 end
 

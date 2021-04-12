@@ -10,7 +10,7 @@ using Dates: dayofyear
 const J2000 = 2.4515445e6
 
 function findyear(calendar, j2000day)
-    j2kday = Int64(j2000day)
+    j2kday = ifelse(j2000day isa Int32, widen(j2000day), j2000day)
     if calendar == :proleptic_julian
         return -((-4 * j2kday - 2920488) ÷ 1461)
     elseif calendar == :julian
@@ -129,7 +129,7 @@ function Date(offset::Integer)
     return Date(calendar, year, month, day)
 end
 
-Date(epoch::Date, offset::Int) = Date(j2000(epoch) + offset)
+Date(epoch::Date, offset::Int64) = Date(j2000(epoch) + offset)
 
 function Date(year, month, day)
     if month < 1 || month > 12

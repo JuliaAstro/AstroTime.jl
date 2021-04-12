@@ -79,11 +79,11 @@ end
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
         @test ep.second == 0
-        @test ep.fraction ≈ 2eps()
+        @test ep.fraction == 2eps()
 
         ep += 10000centuries
         @test ep.second == value(seconds(10000centuries))
-        @test ep.fraction ≈ 2eps()
+        @test ep.fraction == 2eps()
 
         # Issue 44
         elong1 = 0.0
