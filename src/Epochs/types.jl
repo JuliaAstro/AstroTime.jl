@@ -23,9 +23,9 @@ Epoch{S,T}(ep::Epoch{S,T}) where {S,T} = ep
         fraction′ = sum
         second′ = ifelse(sum < 0, typemin(Int64), typemax(Int64))
     else
-        s, f = divrem(sum, 1, RoundDown)
-        second′ = second + round(Int64, s)
-        fraction′ = f + residual
+        int_secs = floor(Int64, sum)
+        second′ = second + int_secs
+        fraction′ = sum - int_secs + residual
     end
     return second′, fraction′
 end
