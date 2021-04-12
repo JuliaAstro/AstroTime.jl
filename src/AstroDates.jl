@@ -94,18 +94,18 @@ const PREVIOUS_MONTH_END_DAY = (
 )
 
 function findmonth(dayinyear, isleap)
-    offset = isleap ? 313 : 323
-    return dayinyear < 32 ? 1 : (10 * dayinyear + offset) ÷ 306
+    offset = ifelse(isleap, 313, 323)
+    return ifelse(dayinyear < 32, 1, (10 * dayinyear + offset) ÷ 306)
 end
 
 function findday(dayinyear, month, isleap)
     (!isleap && dayinyear > 365) && throw(ArgumentError("Day of year cannot be 366 for a non-leap year."))
-    previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
+    previous_days = ifelse(isleap, PREVIOUS_MONTH_END_DAY_LEAP, PREVIOUS_MONTH_END_DAY)
     return dayinyear - previous_days[month]
 end
 
 function finddayinyear(month, day, isleap)
-    previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
+    previous_days = ifelse(isleap, PREVIOUS_MONTH_END_DAY_LEAP, PREVIOUS_MONTH_END_DAY)
     return day + previous_days[month]
 end
 
@@ -320,11 +320,12 @@ function DateTime(str::AbstractString, df::Dates.DateFormat=Dates.default_format
     return Dates.parse(DateTime{Float64}, str, df)
 end
 
-function DateTime(year::Int, month::Int, day::Int, hour::Int=0, minute::Int=0, second::Int=0, fraction=0.0)
+function DateTime(year::Integer, month::Integer, day::Integer,
+                  hour::Integer=0, minute::Integer=0, second::Integer=0, fraction=0.0)
     return DateTime(Date(year, month, day), Time(hour, minute, second, fraction))
 end
 
-function DateTime(year::Int, month::Int, day::Int, hour::Int, minute::Int, second)
+function DateTime(year::Integer, month::Integer, day::Integer, hour::Integer, minute::Integer, second)
     return DateTime(Date(year, month, day), Time(hour, minute, second))
 end
 
