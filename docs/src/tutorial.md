@@ -12,7 +12,6 @@ The main difference is that you need to supply the time scale to be used.
 Out of the box, the following time scales are defined:
 
 - [`TAI`](@ref): [International Atomic Time](https://en.wikipedia.org/wiki/International_Atomic_Time)
-- [`UTC`](@ref): [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time)
 - [`UT1`](@ref): [Universal Time](https://en.wikipedia.org/wiki/Universal_Time#Versions)[^1]
 - [`TT`](@ref): [Terrestrial Time](https://en.wikipedia.org/wiki/Terrestrial_Time)
 - [`TCG`](@ref): [Geocentric Coordinate Time](https://en.wikipedia.org/wiki/Geocentric_Coordinate_Time)
