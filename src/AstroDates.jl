@@ -219,13 +219,14 @@ end
 
 function subsecond(fraction, n, r)
     n % 3 == 0 || throw(ArgumentError("`n` must be divisible by 3."))
-	rounded = round(fraction, r; digits=n)
-	return round(Int, rounded * 10^n, r) % 1000
+    factor = ifelse(Int === Int32, widen(10), 10)^n
+    rounded = round(fraction, r; digits=n)
+    return round(Int64, rounded * factor, r) % 1000
 end
 
 function subsecond(fraction, n)
-	r = ifelse(subsecond(fraction, n+3, RoundNearest) == 0, RoundNearest, RoundToZero)
-	return subsecond(fraction, n, r)
+    r = ifelse(subsecond(fraction, n+3, RoundNearest) == 0, RoundNearest, RoundToZero)
+    return subsecond(fraction, n, r)
 end
 
 subsecond(t::Time, n) = subsecond(t.fraction, n)
