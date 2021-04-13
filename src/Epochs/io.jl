@@ -27,9 +27,7 @@ abstract type FractionOfSecondToken end
 end
 
 function Dates.format(io, d::Dates.DatePart{'f'}, ep)
-    str = last(split(string(fractionofsecond(ep)), "."))
-    n = length(str)
-    len = d.width < n ? d.width : n
-    print(io, rpad(str[1:len], d.width, '0'))
+    sec = round(Int, fractionofsecond(ep) * 10^d.width)
+    print(io, lpad(sec, d.width, '0'))
 end
 

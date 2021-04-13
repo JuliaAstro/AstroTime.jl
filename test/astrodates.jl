@@ -55,7 +55,7 @@ const REFERENCES = (
 
     @test AstroTime.DateTime(Dates.DateTime(dt)) == dt
     @test AstroTime.Date(Dates.Date(d)) == d
-    @test AstroTime.Time(Dates.Time(t)) ≈ t atol=1e-14
+    @test AstroTime.Time(Dates.Time(t)) ≈ t
 
     @test year(dt) == 2020
     @test year(d) == 2020
@@ -71,8 +71,8 @@ const REFERENCES = (
     @test second(t) == 37
     @test second(Float64, dt) == 37.245
     @test second(Float64, t) == 37.245
-    @test millisecond(dt) == 245
-    @test millisecond(t) == 245
+    @test millisecond(dt, RoundNearest) == 245
+    @test millisecond(t, RoundNearest) == 245
 
     @test secondinday(t) == 36937.245
 

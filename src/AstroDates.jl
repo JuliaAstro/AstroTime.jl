@@ -212,25 +212,23 @@ struct Time{T}
         elseif second < 0 || second >= 61
             throw(ArgumentError("`second` must be an integer between 0 and 61."))
         elseif fraction < 0 || fraction > 1
-            throw(ArgumentError("`fraction` must be a floating point number between 0 and 1."))
+            throw(ArgumentError("`fraction` must be a number between 0 and 1."))
         end
 
         return new{T}(hour, minute, second, fraction)
     end
 end
 
-function Time(hour, minute, second::T) where T
-    sec, frac = divrem(rationalize(second), 1)
-    return Time(hour, minute, sec, T(frac))
+function Time(hour, minute, second)
+    sec, frac = divrem(second, 1)
+    return Time(hour, minute, sec, frac)
 end
 
 function Time(secondinday, fraction)
-    # range check
     if secondinday < 0 || secondinday > 86400
         throw(ArgumentError("Seconds are out of range"))
     end
 
-    # extract the time components
     hour = secondinday ÷ 3600
     secondinday -= 3600 * hour
     minute = secondinday ÷ 60
@@ -250,9 +248,9 @@ Dates.minute(t::Time) = t.minute
 Dates.second(::Type{Float64}, t::Time) = t.fraction + t.second
 Dates.second(::Type{Int}, t::Time) = t.second
 Dates.second(t::Time) = second(Int, t)
-Dates.millisecond(t::Time) = trunc(Int, 1e3 * t.fraction)
-Dates.microsecond(t::Time) = trunc(Int, 1e3 * (1e3 * t.fraction - millisecond(t)))
-Dates.nanosecond(t::Time) = trunc(Int, 1e3 * (1e3 * (1e3 * t.fraction - millisecond(t)) - microsecond(t)))
+Dates.millisecond(t::Time, mode=RoundToZero) = round(Int, 1e3 * t.fraction, mode)
+Dates.microsecond(t::Time) = trunc(Int, 1e3 * (1e3 * t.fraction - millisecond(t, RoundToZero)))
+Dates.nanosecond(t::Time) = trunc(Int, 1e3 * (1e3 * (1e3 * t.fraction - millisecond(t, RoundToZero)) - microsecond(t)))
 
 fractionofday(t::Time) = (t.fraction + t.second) / 86400 + t.minute / 1440 + t.hour / 24
 fractionofsecond(t::Time) = t.fraction
@@ -265,7 +263,7 @@ Time(t::Dates.Time) = Time(Dates.hour(t),
                            1e-9 * Dates.nanosecond(t) +
                            1e-6 * Dates.microsecond(t) +
                            1e-3 * Dates.millisecond(t))
-Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t), microsecond(t), nanosecond(t))
+Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t, RoundToZero), microsecond(t), nanosecond(t))
 
 const H00 = Time(0, 0, 0, 0.0)
 const H12 = Time(12, 0, 0, 0.0)
@@ -274,7 +272,7 @@ function Base.show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
     s = lpad(second(Int, t), 2, '0')
-    f = lpad(millisecond(t), 3, '0')
+    f = lpad(millisecond(t, RoundNearest), 3, '0')
     return print(io, h, ":", m, ":", s, ".", f)
 end
 
@@ -345,7 +343,7 @@ Dates.hour(dt::DateTime) = hour(Time(dt))
 Dates.minute(dt::DateTime) = minute(Time(dt))
 Dates.second(typ, dt::DateTime) = second(typ, Time(dt))
 Dates.second(dt::DateTime) = second(Int, Time(dt))
-Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
+Dates.millisecond(dt::DateTime, mode=RoundToZero) = millisecond(Time(dt), mode)
 Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
 Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
 fractionofsecond(dt::DateTime) = fractionofsecond(Time(dt))
@@ -370,7 +368,7 @@ function Dates.DateTime(dt::DateTime)
     h = hour(dt)
     mi = minute(dt)
     s = second(Int, dt)
-    ms = millisecond(dt)
+    ms = millisecond(dt, RoundNearest)
     return Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 
