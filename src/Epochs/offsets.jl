@@ -302,7 +302,7 @@ end
 """
     getoffset(TAI, UT1, second, fraction[, eop])
 
-Return the offset between TAITC`](@ref) and [`UT1`](@ref) for the
+Return the offset between [`TAI`](@ref) and [`UT1`](@ref) for the
 current epoch (`second` after J2000 and `fraction`) in seconds.
 Optionally, a custom Earth orientation data struct `eop` can be provided,
 see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
@@ -558,4 +558,3 @@ julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
     end
     return offset
 end
-
