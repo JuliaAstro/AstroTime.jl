@@ -113,6 +113,29 @@ Get the number of milliseconds of the epoch `ep`.
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
 
 """
+    microsecond(ep::Epoch)
+
+Get the number of microseconds of the epoch `ep`.
+"""
+microsecond(ep::Epoch) = microsecond(DateTime(ep))
+
+"""
+    nanosecond(ep::Epoch)
+
+Get the number of nanoseconds of the epoch `ep`.
+"""
+nanosecond(ep::Epoch) = nanosecond(DateTime(ep))
+
+"""
+    subsecond(ep::Epoch, n)
+
+Get the number of fractional seconds with the unit ``s * \\frac{1}{10^n}``,
+e.g. `subsecond(ep, 3)` for milliseconds, of the epoch `ep`. `n` must be
+divisible by 3.
+"""
+AstroDates.subsecond(ep::Epoch, n) = subsecond(DateTime(ep), n)
+
+"""
     Time(ep::Epoch)
 
 Get the `Time` of the epoch `ep`.

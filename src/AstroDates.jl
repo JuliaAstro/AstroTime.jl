@@ -217,20 +217,27 @@ function Base.isapprox(a::Time, b::Time; kwargs...)
            isapprox(a.fraction + a.second, b.fraction + b.second; kwargs...)
 end
 
+function subsecond(fraction, n, r)
+    n % 3 == 0 || throw(ArgumentError("`n` must be divisible by 3."))
+	rounded = round(fraction, r; digits=n)
+	return round(Int, rounded * 10^n, r) % 1000
+end
+
+function subsecond(fraction, n)
+	r = ifelse(subsecond(fraction, n+3, RoundNearest) == 0, RoundNearest, RoundToZero)
+	return subsecond(fraction, n, r)
+end
+
+subsecond(t::Time, n) = subsecond(t.fraction, n)
+
 Dates.hour(t::Time) = t.hour
 Dates.minute(t::Time) = t.minute
 Dates.second(::Type{Float64}, t::Time) = t.fraction + t.second
 Dates.second(::Type{Int}, t::Time) = t.second
 Dates.second(t::Time) = second(Int, t)
-Dates.millisecond(t::Time, mode=RoundToZero) = round(Int, 1e3 * t.fraction, mode)
-function Dates.microsecond(t::Time)
-    return trunc(Int, 1e3 * (1e3 * t.fraction - millisecond(t, RoundToZero)))
-end
-function Dates.nanosecond(t::Time)
-    return trunc(
-        Int, 1e3 * (1e3 * (1e3 * t.fraction - millisecond(t, RoundToZero)) - microsecond(t))
-    )
-end
+Dates.millisecond(t::Time) = subsecond(t.fraction, 3)
+Dates.microsecond(t::Time) = subsecond(t.fraction, 6)
+Dates.nanosecond(t::Time) = subsecond(t.fraction, 9)
 
 fractionofday(t::Time) = (t.fraction + t.second) / 86400 + t.minute / 1440 + t.hour / 24
 fractionofsecond(t::Time) = t.fraction
@@ -252,7 +259,7 @@ function Dates.Time(t::Time)
         hour(t),
         minute(t),
         second(t),
-        millisecond(t, RoundToZero),
+        millisecond(t),
         microsecond(t),
         nanosecond(t),
     )
@@ -264,8 +271,8 @@ const H12 = Time(12, 0, 0, 0.0)
 function Base.show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
-    s = lpad(second(Int, t), 2, '0')
-    f = lpad(millisecond(t, RoundNearest), 3, '0')
+    s = lpad(second(t), 2, '0')
+    f = lpad(millisecond(t), 3, '0')
     return print(io, h, ":", m, ":", s, ".", f)
 end
 
@@ -361,10 +368,11 @@ Dates.hour(dt::DateTime) = hour(Time(dt))
 Dates.minute(dt::DateTime) = minute(Time(dt))
 Dates.second(typ, dt::DateTime) = second(typ, Time(dt))
 Dates.second(dt::DateTime) = second(Int, Time(dt))
-Dates.millisecond(dt::DateTime, mode=RoundToZero) = millisecond(Time(dt), mode)
+Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
 Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
 Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
 fractionofsecond(dt::DateTime) = fractionofsecond(Time(dt))
+subsecond(dt::DateTime, n) = subsecond(Time(dt), n)
 calendar(dt::DateTime) = calendar(dt.date)
 
 function Dates.dayofyear(dt::DateTime)
@@ -393,7 +401,7 @@ function Dates.DateTime(dt::DateTime)
     h = hour(dt)
     mi = minute(dt)
     s = second(Int, dt)
-    ms = millisecond(dt, RoundNearest)
+    ms = millisecond(dt)
     return Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 

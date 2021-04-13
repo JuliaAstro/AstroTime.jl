@@ -29,6 +29,10 @@ import ERFA
         @test after_act.second == after_exp.second
         @test after_act.fraction ≈ after_exp.fraction
 
+        during_dt = from_utc(2012, 6, 30, 23, 59, 60.3)
+        @test during_dt.second == during_exp.second
+        @test during_dt.fraction ≈ during_exp.fraction
+
         @test to_utc(before_act) == before
         @test to_utc(start_act) == start
         @test to_utc(during_act) == during
@@ -185,22 +189,31 @@ import ERFA
         @test TAIEpoch(JULIAN_EPOCH + Inf * seconds) == FUTURE_INFINITY
         @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
         @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
-        ep = TAIEpoch(2018, 2, 6, 20, 45, 59.371)
-        @test year(ep) == 2018
-        @test month(ep) == 2
-        @test day(ep) == 6
-        @test hour(ep) == 20
-        @test minute(ep) == 45
-        @test second(Float64, ep) == 59.371
+        y = 2018
+        m = 2
+        d = 6
+        hr = 20
+        mn = 45
+        sec = 59.371248965
+        ep = TAIEpoch(y, m, d, hr, mn, sec)
+        @test year(ep) == y
+        @test month(ep) == m
+        @test day(ep) == d
+        @test hour(ep) == hr
+        @test minute(ep) == mn
+        @test second(Float64, ep) == sec
         @test second(Int, ep) == 59
         @test millisecond(ep) == 371
-        @test yearmonthday(ep) == (2018, 2, 6)
-        @test AstroTime.Date(ep) == AstroTime.Date(2018, 2, 6)
-        @test AstroTime.Time(ep) == AstroTime.Time(20, 45, 59.371)
-        @test AstroTime.DateTime(ep) == AstroTime.DateTime(2018, 2, 6, 20, 45, 59.371)
-        @test Dates.Date(ep) == Dates.Date(2018, 2, 6)
-        @test Dates.Time(ep) == Dates.Time(20, 45, 59, 371)
-        @test Dates.DateTime(ep) == Dates.DateTime(2018, 2, 6, 20, 45, 59, 371)
+        @test microsecond(ep) == 248
+        @test nanosecond(ep) == 965
+        @test subsecond(ep, 9) == nanosecond(ep)
+        @test yearmonthday(ep) == (y, m, d)
+        @test AstroTime.Date(ep) == AstroTime.Date(y, m, d)
+        @test AstroTime.Time(ep) == AstroTime.Time(hr, mn, sec)
+        @test AstroTime.DateTime(ep) == AstroTime.DateTime(y, m, d, hr, mn, sec)
+        @test Dates.Date(ep) == Dates.Date(y, m, d)
+        @test Dates.Time(ep) == Dates.Time(hr, mn, 59, 371, 248, 965)
+        @test Dates.DateTime(ep) == Dates.DateTime(y, m, d, hr, mn, 59, 371)
     end
     @testset "Ranges" begin
         rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 2, 1)

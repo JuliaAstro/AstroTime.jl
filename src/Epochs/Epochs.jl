@@ -16,7 +16,7 @@ import LeapSeconds
 import ..EPOCH_ISO_FORMAT
 
 import ..AstroDates: Date, DateTime, Time
-import ..AstroDates: calendar, fractionofday, fractionofsecond, secondinday
+import ..AstroDates: calendar, fractionofday, fractionofsecond, secondinday, subsecond
 import ..AstroDates: j2000, julian, julian_twopart
 
 using ..TimeScales: find_path
@@ -27,7 +27,7 @@ export UNIX_EPOCH
 export Epoch
 export NoOffsetError, NoPathError
 export year, month, day, hour, minute, second
-export millisecond, microsecond, nanosecond
+export millisecond, microsecond, nanosecond, subsecond
 export yearmonthday, dayofyear, fractionofday, fractionofsecond, secondinday
 export timescale, now
 export getoffset, insideleap
