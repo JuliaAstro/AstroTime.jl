@@ -30,8 +30,11 @@ import ERFA
         @test after_act.fraction ≈ after_exp.fraction
 
         during_dt = from_utc(2012, 6, 30, 23, 59, 60.3)
+        during_dt1 = from_utc(2012, 6, 30, 23, 59, 60, 0.3)
         @test during_dt.second == during_exp.second
         @test during_dt.fraction ≈ during_exp.fraction
+        @test during_dt1.second == during_exp.second
+        @test during_dt1.fraction ≈ during_exp.fraction
 
         @test to_utc(before_act) == before
         @test to_utc(start_act) == start
@@ -208,6 +211,7 @@ import ERFA
         @test nanosecond(ep) == 965
         @test subsecond(ep, 9) == nanosecond(ep)
         @test yearmonthday(ep) == (y, m, d)
+        @test fractionofsecond(ep) ≈ 0.371248965
         @test AstroTime.Date(ep) == AstroTime.Date(y, m, d)
         @test AstroTime.Time(ep) == AstroTime.Time(hr, mn, sec)
         @test AstroTime.DateTime(ep) == AstroTime.DateTime(y, m, d, hr, mn, sec)

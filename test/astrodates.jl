@@ -43,6 +43,8 @@ const REFERENCES = (
     @test_throws ArgumentError AstroTime.Time(24, 59, 59.0)
     @test_throws ArgumentError AstroTime.Time(23, 60, 59.0)
     @test_throws ArgumentError AstroTime.Time(23, 59, 61.0)
+    @test_throws ArgumentError AstroTime.Time(23, 59, 59, 2.0)
+    @test_throws ArgumentError AstroTime.Time(23, 59, 59, -0.2)
     @test_throws ArgumentError AstroTime.Time(86401, 0)
 
     @test AstroTime.Date(2000, 1) == AstroTime.Date(2000, 1, 1)
@@ -50,8 +52,11 @@ const REFERENCES = (
     @test AstroTime.Date(1000, 1) == AstroTime.Date(1000, 1, 1)
 
     dt = AstroTime.DateTime(2020, 3, 21, 10, 15, 37.245)
+    dt1 = AstroTime.DateTime(2020, 3, 21, 10, 15, 37, 0.245)
     d = AstroTime.Date(dt)
     t = AstroTime.Time(dt)
+
+    @test dt ≈ dt1
 
     @test AstroTime.DateTime(Dates.DateTime(dt)) == dt
     @test AstroTime.Date(Dates.Date(d)) == d
