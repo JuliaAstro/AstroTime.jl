@@ -300,9 +300,9 @@ end
 #######
 
 """
-    getoffset(UTC, UT1, second, fraction[, eop])
+    getoffset(TAI, UT1, second, fraction[, eop])
 
-Return the offset between [`UTC`](@ref) and [`UT1`](@ref) for the
+Return the offset between TAITC`](@ref) and [`UT1`](@ref) for the
 current epoch (`second` after J2000 and `fraction`) in seconds.
 Optionally, a custom Earth orientation data struct `eop` can be provided,
 see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
@@ -310,8 +310,8 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 # Example
 
 ```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
-julia> getoffset(UTC, UT1, 0, 0.0)
-0.3550253556501879
+julia> getoffset(TAI, UT1, 0, 0.0)
+-31.644974644349812
 ```
 """
 @inline function getoffset(::InternationalAtomicTime, ::UniversalTime,
@@ -321,9 +321,9 @@ julia> getoffset(UTC, UT1, 0, 0.0)
 end
 
 """
-    getoffset(UT1, UTC, second, fraction[, eop])
+    getoffset(UT1, TAI, second, fraction[, eop])
 
-Return the offset between [`UT1`](@ref) and [`UTC`](@ref) for the
+Return the offset between [`UT1`](@ref) and [`TAI`](@ref) for the
 current epoch (`second` after J2000 and `fraction`) in seconds.
 Optionally, a custom Earth orientation data struct `eop` can be provided,
 see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
@@ -331,8 +331,8 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 # Example
 
 ```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
-julia> getoffset(UT1, UTC, 0, 0.0)
--0.3550253592514352
+julia> getoffset(UT1, TAI, 0, 0.0)
+31.644974965344606
 ```
 """
 @inline function getoffset(::UniversalTime, ::InternationalAtomicTime,
@@ -439,7 +439,7 @@ in seconds.
 
 ```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TDB, TT, 0, 0.0, π, 6371.0, 0.0)
-9.928419814101153e-5
+9.928419814106208e-5
 ```
 
 ### References ###
@@ -540,7 +540,7 @@ in seconds.
 
 ```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
--9.92841981897215e-5
+-9.928419818977206e-5
 ```
 
 ### References ###

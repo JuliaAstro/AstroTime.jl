@@ -190,18 +190,18 @@ Define a new time scale and the corresponding `Epoch` type alias.
 # Example
 
 ```jldoctest; setup = :(using AstroTime)
-julia> @timescale GMT UTC
+julia> @timescale GMT TAI
 
 julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMTScale,T} where T
+Epoch{GMTScale, T} where T
 
-julia> find_path(TAI, GMT)
-3-element Array{TimeScale,1}:
+julia> find_path(TT, GMT)
+3-element Vector{TimeScale}:
+ TT
  TAI
- UTC
  GMT
 ```
 """

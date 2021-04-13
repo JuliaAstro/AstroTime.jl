@@ -19,16 +19,16 @@ code `D` is supported which is parsed as "day of year" (see the example below) a
 code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTHH:MM:SS.sss ttt`.
 
 **Note:** Please be aware that this constructor requires that the time scale is part of `str`, e.g.
-`2018-02-06T00:00 UTC`. Otherwise use an explicit constructor, e.g. `Epoch{UTC}`.
+`2018-02-06T00:00 TAI`. Otherwise use an explicit constructor, e.g. `Epoch{TAI}`.
 
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> Epoch("2018-02-06T20:45:00.0 UTC")
-2018-02-06T20:45:00.000 UTC
+julia> Epoch("2018-02-06T20:45:00.0 TAI")
+2018-02-06T20:45:00.000 TAI
 
-julia> Epoch("2018-037T00:00 UTC", "yyyy-DDDTHH:MM ttt")
-2018-02-06T00:00:00.000 UTC
+julia> Epoch("2018-037T00:00 TAI", "yyyy-DDDTHH:MM ttt")
+2018-02-06T00:00:00.000 TAI
 ```
 """
 Epoch(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch)) = parse(Epoch, str, format)
@@ -49,14 +49,14 @@ be used which is parsed as "day of year" (see the example below).  The default f
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> Epoch{CoordinatedUniversalTime}("2018-02-06T20:45:00.0")
-2018-02-06T20:45:00.000 UTC
+julia> Epoch{InternationalAtomicTime}("2018-02-06T20:45:00.0")
+2018-02-06T20:45:00.000 TAI
 
-julia> Epoch{CoordinatedUniversalTime}("February 6, 2018", "U d, y")
-2018-02-06T00:00:00.000 UTC
+julia> Epoch{InternationalAtomicTime}("February 6, 2018", "U d, y")
+2018-02-06T00:00:00.000 TAI
 
-julia> Epoch{CoordinatedUniversalTime}("2018-037T00:00", "yyyy-DDDTHH:MM")
-2018-02-06T00:00:00.000 UTC
+julia> Epoch{InternationalAtomicTime}("2018-037T00:00", "yyyy-DDDTHH:MM")
+2018-02-06T00:00:00.000 TAI
 ```
 """
 function Epoch{S}(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch{S})) where S
@@ -78,11 +78,11 @@ Construct an `Epoch` with time scale `S` from date and time components.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> Epoch{CoordinatedUniversalTime}(2018, 2, 6, 20, 45, 0.0)
-2018-02-06T20:45:00.000 UTC
+julia> Epoch{InternationalAtomicTime}(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 TAI
 
-julia> Epoch{CoordinatedUniversalTime}(2018, 2, 6)
-2018-02-06T00:00:00.000 UTC
+julia> Epoch{InternationalAtomicTime}(2018, 2, 6)
+2018-02-06T00:00:00.000 TAI
 ```
 """
 function Epoch{S}(year::Int, month::Int, day::Int, hour::Int=0,

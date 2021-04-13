@@ -15,11 +15,11 @@ variant of Julian date that is used. Possible values are:
 ### Examples ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> Epoch{CoordinatedUniversalTime}(0.0days, 0.5days)
-2000-01-02T00:00:00.000 UTC
+julia> Epoch{InternationalAtomicTime}(0.0days, 0.5days)
+2000-01-02T00:00:00.000 TAI
 
-julia> Epoch{CoordinatedUniversalTime}(2.451545e6days, origin=:julian)
-2000-01-01T12:00:00.000 UTC
+julia> Epoch{InternationalAtomicTime}(2.451545e6days, origin=:julian)
+2000-01-01T12:00:00.000 TAI
 ```
 """
 function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Period}
@@ -58,11 +58,11 @@ If the type argument `T` is present, the result is converted to `T` instead.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-2018-02-06T20:45:00.000 UTC
+julia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 TAI
 
-julia> julian_period(ep; scale=TAI)
-6611.365011574074 days
+julia> julian_period(ep; scale=TT)
+6611.364955833334 days
 
 julia> julian_period(ep; unit=years)
 18.100929728496464 years
@@ -102,7 +102,7 @@ Return the J2000 Julian Date for epoch `ep`.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> j2000(UTCEpoch(2000, 1, 1, 12))
+julia> j2000(TAIEpoch(2000, 1, 1, 12))
 0.0 days
 ```
 """
@@ -116,7 +116,7 @@ Return the Julian Date for epoch `ep`.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> julian(UTCEpoch(2000, 1, 1, 12))
+julia> julian(TAIEpoch(2000, 1, 1, 12))
 2.451545e6 days
 ```
 """
@@ -130,7 +130,7 @@ Return the Modified Julian Date for epoch `ep`.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> modified_julian(UTCEpoch(2000, 1, 1, 12))
+julia> modified_julian(TAIEpoch(2000, 1, 1, 12))
 51544.5 days
 ```
 """
@@ -145,7 +145,7 @@ of the Julian day number and the fraction of the day.
 ### Example ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> julian_twopart(UTCEpoch(2000, 1, 2))
+julia> julian_twopart(TAIEpoch(2000, 1, 2))
 (2.451545e6 days, 0.5 days)
 ```
 """
