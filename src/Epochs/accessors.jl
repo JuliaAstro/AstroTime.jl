@@ -29,28 +29,17 @@ function DateTime(ep::Epoch)
         end
     end
 
-    sec = ep.second + Int64(43200)
-    time = sec % Int64(86400)
+    sec = ep.second + 43200
+    time = sec % 86400
     if time < 0
-        time += Int64(86400)
+        time += 86400
     end
-    date = Int((sec - time) ÷ Int64(86400))
+    date = (sec - time) ÷ 86400
 
     date_comp = Date(AstroDates.J2000_EPOCH, date)
     time_comp = Time(time, ep.fraction)
 
-    leap = getleap(ep)
-    hr = hour(time_comp)
-    mn = minute(time_comp)
-    leap = ifelse(hr == 23 && mn == 59 && abs(leap) == 1.0, leap, 0.0)
-    if !iszero(leap)
-        h = hour(time_comp)
-        m = minute(time_comp)
-        s = second(Float64, time_comp) + leap
-        time_comp = Time(h, m, s)
-    end
-
-    DateTime(date_comp, time_comp)
+    return DateTime(date_comp, time_comp)
 end
 
 """
@@ -124,6 +113,29 @@ Get the number of milliseconds of the epoch `ep`.
 millisecond(ep::Epoch) = millisecond(DateTime(ep))
 
 """
+    microsecond(ep::Epoch)
+
+Get the number of microseconds of the epoch `ep`.
+"""
+microsecond(ep::Epoch) = microsecond(DateTime(ep))
+
+"""
+    nanosecond(ep::Epoch)
+
+Get the number of nanoseconds of the epoch `ep`.
+"""
+nanosecond(ep::Epoch) = nanosecond(DateTime(ep))
+
+"""
+    subsecond(ep::Epoch, n)
+
+Get the number of fractional seconds with the unit ``s * \\frac{1}{10^n}``,
+e.g. `subsecond(ep, 3)` for milliseconds, of the epoch `ep`. `n` must be
+divisible by 3.
+"""
+AstroDates.subsecond(ep::Epoch, n) = subsecond(DateTime(ep), n)
+
+"""
     Time(ep::Epoch)
 
 Get the `Time` of the epoch `ep`.
@@ -143,6 +155,13 @@ Date(ep::Epoch) = Date(DateTime(ep))
 Get the time of the day of the epoch `ep` as a fraction.
 """
 fractionofday(ep::Epoch) = fractionofday(Time(ep))
+
+"""
+    fractionofsecond(ep::Epoch)
+
+Get the fraction of the current second of the epoch `ep`.
+"""
+AstroDates.fractionofsecond(ep::Epoch) = ep.fraction
 
 """
     Dates.DateTime(ep::Epoch)

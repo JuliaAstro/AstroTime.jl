@@ -1,50 +1,63 @@
 using Measurements
 
 import Dates
-
-function spice_utc_tdb(str)
-    et = utc2et(str)
-    second, fraction = divrem(et, 1.0)
-    return (second=Int64(second), fraction=fraction)
-end
-
-function twopart_secondfraction(jd1, jd2)
-    jd1 -= value(J2000_TO_JULIAN)
-    jd1 *= SECONDS_PER_DAY
-    jd2 *= SECONDS_PER_DAY
-    s1, f1 = divrem(jd1, 1.0)
-    s2, f2 = divrem(jd2, 1.0)
-    f, residual = AstroTime.Epochs.two_sum(f1, f2)
-    s3, fraction = divrem(f, 1.0)
-    second = Int64(s1 + s2 + s3)
-    fraction += residual
-    return (second=second, fraction=fraction)
-end
-
-function erfa_second_fraction(scale, year, month, day, hour, minute, second)
-    jd1, jd2 = ERFA.dtf2d(scale, year, month, day, hour, minute, second)
-    return twopart_secondfraction(jd1, jd2)
-end
-
-function erfa_leap(year, month, day)
-    dj, w = ERFA.cal2jd(year, month, day)
-    dj += w
-    dat0 = ERFA.dat(year, month, day, 0.0)
-    dat12 = ERFA.dat(year, month, day, 0.5)
-    year2, month2, day2, w = ERFA.jd2cal(dj, 1.5)
-    dat24 = ERFA.dat(year2, month2, day2, 0.0)
-    return dat24 - (2dat12 - dat0)
-end
+import ERFA
 
 @testset "Epochs" begin
+    @testset "UTC" begin
+        before = "2012-06-30T23:59:59.000"
+        start = "2012-06-30T23:59:60.000"
+        during = "2012-06-30T23:59:60.300"
+        after = "2012-07-01T00:00:00.000"
+
+        before_exp = (second=394372833, fraction=0.0)
+        start_exp = (second=394372834, fraction=0.0)
+        during_exp = (second=394372834, fraction=0.3)
+        after_exp = (second=394372835, fraction=0.0)
+
+        before_act = from_utc(before)
+        start_act = from_utc(start)
+        during_act = from_utc(during)
+        after_act = from_utc(after)
+
+        @test before_act.second == before_exp.second
+        @test before_act.fraction ≈ before_exp.fraction
+        @test start_act.second == start_exp.second
+        @test start_act.fraction ≈ start_exp.fraction
+        @test during_act.second == during_exp.second
+        @test during_act.fraction ≈ during_exp.fraction
+        @test after_act.second == after_exp.second
+        @test after_act.fraction ≈ after_exp.fraction
+
+        during_dt = from_utc(2012, 6, 30, 23, 59, 60.3)
+        during_dt1 = from_utc(2012, 6, 30, 23, 59, 60, 0.3)
+        @test during_dt.second == during_exp.second
+        @test during_dt.fraction ≈ during_exp.fraction
+        @test during_dt1.second == during_exp.second
+        @test during_dt1.fraction ≈ during_exp.fraction
+
+        @test to_utc(before_act) == before
+        @test to_utc(start_act) == start
+        @test to_utc(during_act) == during
+        @test to_utc(after_act) == after
+
+        sixties = AstroTime.DateTime(1961, 3, 5, 23, 4, 12.0)
+        sixties_exp = (second=-1225198547, fraction=0.5057117799999999)
+        sixties_act = from_utc(sixties)
+        sixties_utc = to_utc(AstroTime.DateTime, sixties_act)
+
+        @test sixties_act.second == sixties_exp.second
+        @test sixties_act.fraction ≈ sixties_exp.fraction
+        @test sixties_utc ≈ sixties
+    end
     @testset "Precision" begin
         ep = TAIEpoch(TAIEpoch(2000, 1, 1, 12), 2eps())
         @test ep.second == 0
-        @test ep.fraction ≈ 2eps()
+        @test ep.fraction == 2eps()
 
         ep += 10000centuries
         @test ep.second == value(seconds(10000centuries))
-        @test ep.fraction ≈ 2eps()
+        @test ep.fraction == 2eps()
 
         # Issue 44
         elong1 = 0.0
@@ -63,7 +76,7 @@ end
         @test value(tdb2 - tdb1) ≈ Δtdb
         @test tdb1 != tdb2
 
-        t0 = UTCEpoch(2000, 1, 1, 12, 0, 32.0)
+        t0 = TTEpoch(2000, 1, 1, 12, 0, 32.0)
         t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
         t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
         @test_throws MethodError t1 - t0
@@ -74,15 +87,14 @@ end
     @testset "Parsing" begin
         @test AstroTime.TimeScales.tryparse(1.0) === nothing
         @test TAIEpoch("2000-01-01T00:00:00.000") == TAIEpoch(2000, 1, 1)
-        @test UTCEpoch("2000-01-01T00:00:00.000") == UTCEpoch(2000, 1, 1)
         @test UT1Epoch("2000-01-01T00:00:00.000") == UT1Epoch(2000, 1, 1)
         @test TTEpoch("2000-01-01T00:00:00.000") == TTEpoch(2000, 1, 1)
         @test TCGEpoch("2000-01-01T00:00:00.000") == TCGEpoch(2000, 1, 1)
         @test TCBEpoch("2000-01-01T00:00:00.000") == TCBEpoch(2000, 1, 1)
         @test TDBEpoch("2000-01-01T00:00:00.000") == TDBEpoch(2000, 1, 1)
-        @test Epoch("2000-01-01T00:00:00.000 UTC") == UTCEpoch(2000, 1, 1)
-        @test UTCEpoch("2000-001", "yyyy-DDD") == UTCEpoch(2000, 1, 1)
-        @test Epoch("2000-001 UTC", "yyyy-DDD ttt") == UTCEpoch(2000, 1, 1)
+        @test Epoch("2000-01-01T00:00:00.000 TAI") == TAIEpoch(2000, 1, 1)
+        @test TAIEpoch("2000-001", "yyyy-DDD") == TAIEpoch(2000, 1, 1)
+        @test Epoch("2000-001 TAI", "yyyy-DDD ttt") == TAIEpoch(2000, 1, 1)
         @test_throws ArgumentError Epoch("2000-01-01T00:00:00.000")
     end
     @testset "Output" begin
@@ -91,15 +103,14 @@ end
         @test AstroTime.format(ep, "HH:MM ttt") == "10:02 TAI"
         @test string(TAI) == "TAI"
         @test string(TT) == "TT"
-        @test string(UTC) == "UTC"
         @test string(UT1) == "UT1"
         @test string(TCG) == "TCG"
         @test string(TDB) == "TDB"
         @test string(TCB) == "TCB"
     end
     @testset "Arithmetic" begin
-        ep = UTCEpoch(2000, 1, 1)
-        ep1 = UTCEpoch(2000, 1, 2)
+        ep = TAIEpoch(2000, 1, 1)
+        ep1 = TAIEpoch(2000, 1, 2)
         @test (ep + 1.0seconds) - ep   == 1.0seconds
         @test (ep + 1.0minutes) - ep   == seconds(1.0minutes)
         @test (ep + 1.0hours) - ep     == seconds(1.0hours)
@@ -111,12 +122,13 @@ end
     end
     @testset "Conversion" begin
         include("conversions.jl")
-        dt = DateTime(2018, 8, 14, 10, 2, 51.551247436378276)
+        dt = AstroTime.DateTime(2018, 8, 14, 10, 2, 51.551247436378276)
         ep = TAIEpoch(2018, 8, 14, 10, 2, 51.551247436378276)
         @test TAIEpoch(dt) == ep
         @test TAIEpoch(Dates.DateTime(dt)) == TAIEpoch(2018, 8, 14, 10, 2, 51.551)
-        @test TAIEpoch(Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
-        @test now() isa UTCEpoch
+        @test TAIEpoch(AstroTime.Date(2018, 8, 14)) == TAIEpoch(2018, 8, 14, 0, 0, 0.0)
+        @test now(Epoch) isa TAIEpoch
+        @test now(TDBEpoch) isa TDBEpoch
 
         tt = TTEpoch(2000, 1, 1, 12)
         @test TTEpoch(tt) == tt
@@ -125,22 +137,20 @@ end
         tai = TAIEpoch(2000, 1, 1, 12)
         @test tai.second == 0
         @test tai.fraction == 0.0
-        @test UTCEpoch(tai) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
-        @test Epoch(tai, UTC) == UTCEpoch(2000, 1, 1, 11, 59, 28.0)
-        @test UTCEpoch(-32.0, tai) == UTCEpoch(tai)
+        @test TTEpoch(tai) ≈ TTEpoch(2000, 1, 1, 12, 0, 32.184)
+        @test Epoch(tai, TT) ≈ TTEpoch(2000, 1, 1, 12, 0, 32.184)
+        @test TTEpoch(32.184, tai) == TTEpoch(tai)
 
         ut1 = UT1Epoch(2000, 1, 1)
-        ut1_utc = getoffset(ut1, UTC)
-        utc = UTCEpoch(ut1)
-        utc_tai = getoffset(utc, TAI)
-        tai = TAIEpoch(utc)
+        ut1_tai = getoffset(ut1, TAI)
+        tai = TAIEpoch(ut1)
         tai_tt = getoffset(tai, TT)
         tt = TTEpoch(tai)
         tt_tdb = getoffset(tt, TDB)
         tdb = TDBEpoch(tt)
         tdb_tcb = getoffset(tdb, TCB)
         tcb = TCBEpoch(tdb)
-        @test getoffset(ut1, TCB) == ut1_utc + utc_tai + tai_tt + tt_tdb + tdb_tcb
+        @test getoffset(ut1, TCB) == ut1_tai + tai_tt + tt_tdb + tdb_tcb
     end
     @testset "TDB" begin
         ep = TTEpoch(2000, 1, 1)
@@ -157,145 +167,83 @@ end
     end
     @testset "Julian Dates" begin
         jd = 0.0days
-        ep = UTCEpoch(jd)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test julian_period(ep) == 0.0days
-        @test julian_period(ep; scale=TAI, unit=seconds) == 32.0seconds
+        @test julian_period(ep; scale=TT, unit=seconds) == 32.184seconds
         @test julian_period(Float64, ep) == 0.0
         @test j2000(ep) == jd
         jd = 86400.0seconds
-        ep = UTCEpoch(jd)
-        @test ep == UTCEpoch(2000, 1, 2, 12)
+        ep = TAIEpoch(jd)
+        @test ep == TAIEpoch(2000, 1, 2, 12)
         @test j2000(ep) == days(jd)
         jd = 2.451545e6days
-        ep = UTCEpoch(jd, origin=:julian)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd, origin=:julian)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test julian(ep) == jd
         jd = 51544.5days
-        ep = UTCEpoch(jd, origin=:modified_julian)
-        @test ep == UTCEpoch(2000, 1, 1, 12)
+        ep = TAIEpoch(jd, origin=:modified_julian)
+        @test ep == TAIEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
-        @test_throws ArgumentError UTCEpoch(jd, origin=:julia)
+        @test_throws ArgumentError TAIEpoch(jd, origin=:julia)
     end
     @testset "Accessors" begin
         @test TAIEpoch(JULIAN_EPOCH - Inf * seconds) == PAST_INFINITY
         @test TAIEpoch(JULIAN_EPOCH + Inf * seconds) == FUTURE_INFINITY
         @test string(PAST_INFINITY) == "-5877490-03-03T00:00:00.000 TAI"
         @test string(FUTURE_INFINITY) == "5881610-07-11T23:59:59.999 TAI"
-        ep = UTCEpoch(2018, 2, 6, 20, 45, 59.371)
-        @test year(ep) == 2018
-        @test month(ep) == 2
-        @test day(ep) == 6
-        @test hour(ep) == 20
-        @test minute(ep) == 45
-        @test second(Float64, ep) == 59.371
+        y = 2018
+        m = 2
+        d = 6
+        hr = 20
+        mn = 45
+        sec = 59.371248965
+        ep = TAIEpoch(y, m, d, hr, mn, sec)
+        @test year(ep) == y
+        @test month(ep) == m
+        @test day(ep) == d
+        @test hour(ep) == hr
+        @test minute(ep) == mn
+        @test second(Float64, ep) == sec
         @test second(Int, ep) == 59
         @test millisecond(ep) == 371
-        @test yearmonthday(ep) == (2018, 2, 6)
-        @test Date(ep) == Date(2018, 2, 6)
-        @test Time(ep) == Time(20, 45, 59.371)
-        @test DateTime(ep) == DateTime(2018, 2, 6, 20, 45, 59.371)
-        @test Dates.Date(ep) == Dates.Date(2018, 2, 6)
-        @test Dates.Time(ep) == Dates.Time(20, 45, 59, 371)
-        @test Dates.DateTime(ep) == Dates.DateTime(2018, 2, 6, 20, 45, 59, 371)
+        @test microsecond(ep) == 248
+        @test nanosecond(ep) == 965
+        @test subsecond(ep, 9) == nanosecond(ep)
+        @test yearmonthday(ep) == (y, m, d)
+        @test fractionofsecond(ep) ≈ 0.371248965
+        @test AstroTime.Date(ep) == AstroTime.Date(y, m, d)
+        @test AstroTime.Time(ep) == AstroTime.Time(hr, mn, sec)
+        @test AstroTime.DateTime(ep) == AstroTime.DateTime(y, m, d, hr, mn, sec)
+        @test Dates.Date(ep) == Dates.Date(y, m, d)
+        @test Dates.Time(ep) == Dates.Time(hr, mn, 59, 371, 248, 965)
+        @test Dates.DateTime(ep) == Dates.DateTime(y, m, d, hr, mn, 59, 371)
     end
     @testset "Ranges" begin
-        rng = UTCEpoch(2018, 1, 1):UTCEpoch(2018, 2, 1)
+        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 2, 1)
         @test step(rng) == 86400.0seconds
         @test length(rng) == 32
-        @test first(rng) == UTCEpoch(2018, 1, 1)
-        @test last(rng) == UTCEpoch(2018, 2, 1)
-        rng = UTCEpoch(2018, 1, 1):13seconds:UTCEpoch(2018, 1, 1, 0, 1)
+        @test first(rng) == TAIEpoch(2018, 1, 1)
+        @test last(rng) == TAIEpoch(2018, 2, 1)
+        rng = TAIEpoch(2018, 1, 1):13seconds:TAIEpoch(2018, 1, 1, 0, 1)
         @test step(rng) == 13seconds
-        @test last(rng) == UTCEpoch(2018, 1, 1, 0, 0, 52.0)
-    end
-    @testset "Leap Seconds" begin
-        @test string(UTCEpoch(2018, 8, 8, 0, 0, 0.0)) == "2018-08-08T00:00:00.000 UTC"
-
-        # Test transformation to calendar date during pre-leap second era
-        ep61 = UTCEpoch(1961, 3, 5, 23, 4, 12.0)
-        ep61_exp = erfa_second_fraction("UTC", 1961, 3, 5, 23, 4, 12.0)
-        @test ep61.second == ep61_exp.second
-        @test ep61.fraction ≈ ep61_exp.fraction
-        @test string(UTCEpoch(1961, 3, 5, 23, 4, 12.0)) == "1961-03-05T23:04:12.000 UTC"
-
-        ep61_tai = TAIEpoch(ep61)
-        jd_utc = ERFA.dtf2d("UTC", 1961, 3, 5, 23, 4, 12.0)
-        jd_tai = ERFA.utctai(jd_utc...)
-        ep61_tai_exp = twopart_secondfraction(jd_tai...)
-        @test ep61_tai.second == ep61_tai_exp.second
-        @test ep61_tai.fraction ≈ ep61_tai_exp.fraction
-
-        before_utc = UTCEpoch(2012, 6, 30, 23, 59, 59.0)
-        start_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.0)
-        during_utc = UTCEpoch(2012, 6, 30, 23, 59, 60.5)
-        after_utc = UTCEpoch(2012, 7, 1, 0, 0, 0.0)
-        before_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 59.0))
-        start_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.0))
-        during_tdb = TDBEpoch(UTCEpoch(2012, 6, 30, 23, 59, 60.5))
-        after_tdb = TDBEpoch(UTCEpoch(2012, 7, 1, 0, 0, 0.0))
-
-        before_exp = spice_utc_tdb("2012-06-30T23:59:59.0")
-        start_exp = spice_utc_tdb("2012-06-30T23:59:60.0")
-        during_exp = spice_utc_tdb("2012-06-30T23:59:60.5")
-        after_exp = spice_utc_tdb("2012-07-01T00:00:00.0")
-
-        # SPICE is a lot less precise
-        @test before_tdb.second == before_exp.second
-        @test before_tdb.fraction ≈ before_exp.fraction atol=1e-7
-        @test start_tdb.second == start_exp.second
-        @test start_tdb.fraction ≈ start_exp.fraction atol=1e-7
-        @test during_tdb.second == during_exp.second
-        @test during_tdb.fraction ≈ during_exp.fraction atol=1e-7
-        @test after_tdb.second == after_exp.second
-        @test after_tdb.fraction ≈ after_exp.fraction atol=1e-7
-
-        @test !insideleap(TTEpoch(2000, 1, 1))
-        @test !insideleap(before_utc)
-        @test insideleap(start_utc)
-        @test insideleap(during_utc)
-        @test !insideleap(after_utc)
-
-        # Test transformation to calendar date during leap second
-        @test string(before_utc) == "2012-06-30T23:59:59.000 UTC"
-        @test string(start_utc) == "2012-06-30T23:59:60.000 UTC"
-        @test string(during_utc) == "2012-06-30T23:59:60.500 UTC"
-        @test string(after_utc) == "2012-07-01T00:00:00.000 UTC"
-
-        # Issue 50
-        ep50_1 = UTCEpoch(2016, 12, 31, 0, 0, 0.0)
-        ep50_1_exp = erfa_second_fraction("UTC", 2016, 12, 31, 0, 0, 0.0)
-        @test ep50_1.second == ep50_1_exp.second
-        @test ep50_1.fraction ≈ ep50_1_exp.fraction
-
-        ep50_2 = UTCEpoch(2016, 12, 31, 0, 0, 0.1)
-        ep50_2_exp = erfa_second_fraction("UTC", 2016, 12, 31, 0, 0, 0.1)
-        @test ep50_2.second == ep50_2_exp.second
-        @test ep50_2.fraction ≈ ep50_2_exp.fraction atol=1e-5
-
-        ep50_3 = UTCEpoch(2016, 12, 31, 0, 1, 0.0)
-
-        @test AstroTime.Epochs.getleap(UTC, Date(2016, 12, 30)) == erfa_leap(2016, 12, 30)
-        @test AstroTime.Epochs.getleap(UTC, Date(2016, 12, 31)) == erfa_leap(2016, 12, 31)
-        @test string(ep50_1) == "2016-12-31T00:00:00.000 UTC"
-        @test string(ep50_2) == "2016-12-31T00:00:00.100 UTC"
-        @test string(ep50_3) == "2016-12-31T00:01:00.000 UTC"
+        @test last(rng) == TAIEpoch(2018, 1, 1, 0, 0, 52.0)
     end
     @testset "Parametrization" begin
-        ep_f64 = UTCEpoch(2000, 1, 1)
-        ep_err = UTCEpoch(ep_f64.second, 1.0 ± 1.1)
+        ep_f64 = TAIEpoch(2000, 1, 1)
+        ep_err = TAIEpoch(ep_f64.second, 1.0 ± 1.1)
         Δt = (30 ± 0.1) * seconds
         @test typeof(Δt) == Period{Second,Measurement{Float64}}
-        @test typeof(ep_f64) == Epoch{CoordinatedUniversalTime,Float64}
-        @test typeof(ep_err) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        @test typeof(ep_f64 + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        @test typeof(ep_err + Δt) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        @test typeof(ep_f64) == Epoch{InternationalAtomicTime,Float64}
+        @test typeof(ep_err) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        @test typeof(ep_f64 + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        @test typeof(ep_err + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         jd1_err = (0.0 ± 0.001) * days
         jd2_err = (0.5 ± 0.001) * days
-        ep_jd1 = UTCEpoch(jd1_err)
-        @test typeof(ep_jd1) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
-        ep_jd2 = UTCEpoch(jd1_err, jd2_err)
-        @test typeof(ep_jd2) == Epoch{CoordinatedUniversalTime,Measurement{Float64}}
+        ep_jd1 = TAIEpoch(jd1_err)
+        @test typeof(ep_jd1) == Epoch{InternationalAtomicTime,Measurement{Float64}}
+        ep_jd2 = TAIEpoch(jd1_err, jd2_err)
+        @test typeof(ep_jd2) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         ut1_err = UT1Epoch(ep_f64.second, 1.0 ± 1.1)
         tcg_err = TCGEpoch(ut1_err)
         tcb_err = TCBEpoch(ut1_err)

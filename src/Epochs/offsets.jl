@@ -296,102 +296,13 @@ function getoffset(::BarycentricDynamicalTime, ::BarycentricCoordinateTime, seco
 end
 
 #######
-# UTC #
-#######
-
-function getleap(jd0)
-    jd, frac = divrem(jd0, 1.0)
-    jd += ifelse(frac >= 0.5, 1, -1) * 0.5
-    drift0 = offset_tai_utc(jd)
-    drift12 = offset_tai_utc(jd + 0.5)
-    drift24 = offset_tai_utc(jd + 1.5)
-
-    return drift24 - (2.0drift12 - drift0)
-end
-
-function getleap(::CoordinatedUniversalTime, date::Date)
-    getleap(j2000(date) + value(J2000_TO_JULIAN))
-end
-
-getleap(::TimeScale, ::Date) = 0.0
-getleap(ep::Epoch{CoordinatedUniversalTime}) = getleap(ep |> julian |> value)
-getleap(::Epoch) = 0.0
-
-function insideleap(jd0)
-    jd1 = jd0 + 1 / SECONDS_PER_DAY
-    o1 = offset_tai_utc(jd0)
-    o2 = offset_tai_utc(jd1)
-    return o1 != o2
-end
-
-"""
-    insideleap(ep::UTCEpoch)
-
-Check whether the UTC epoch `ep` is located during the introduction of a leap
-second.
-
-# Example
-
-```jldoctest; setup = :(using AstroTime)
-julia> insideleap(UTCEpoch(2020, 3, 20))
-false
-
-julia> insideleap(UTCEpoch(2016, 12, 31, 23, 59, 60.5))
-true
-```
-"""
-insideleap(ep::Epoch{CoordinatedUniversalTime}) = insideleap(ep |> julian |> value)
-
-insideleap(::Epoch) = false
-
-"""
-    getoffset(UTC, TAI, second, fraction)
-
-Return the offset between [`UTC`](@ref) and [`TAI`](@ref) for the
-current epoch (`second` after J2000 and `fraction`) in seconds.
-For dates after `1972-01-01` this is the number of leap seconds.
-
-# Example
-
-```jldoctest; setup = :(using AstroTime)
-julia> getoffset(UTC, TAI, 0, 0.0)
-32.0
-```
-"""
-@inline function getoffset(::CoordinatedUniversalTime, ::InternationalAtomicTime,
-                           second, fraction)
-    jd = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    return -offset_utc_tai(jd)
-end
-
-"""
-    getoffset(TAI, UTC, second, fraction)
-
-Return the offset between [`TAI`](@ref) and [`UTC`](@ref) for the
-current epoch (`second` after J2000 and `fraction`) in seconds.
-For dates after `1972-01-01` this is the number of leap seconds.
-
-# Example
-
-```jldoctest; setup = :(using AstroTime)
-julia> getoffset(TAI, UTC, 0, 0.0)
--32.0
-```
-"""
-@inline function getoffset(::InternationalAtomicTime, ::CoordinatedUniversalTime,
-                           second, fraction)
-    jd = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    return -offset_tai_utc(jd)
-end
-
-#######
 # UT1 #
 #######
 
 """
-    getoffset(UTC, UT1, second, fraction[, eop])
+    getoffset(TAI, UT1, second, fraction[, eop])
 
-Return the offset between [`UTC`](@ref) and [`UT1`](@ref) for the
+Return the offset between [`TAI`](@ref) and [`UT1`](@ref) for the
 current epoch (`second` after J2000 and `fraction`) in seconds.
 Optionally, a custom Earth orientation data struct `eop` can be provided,
 see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
@@ -399,20 +310,20 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 # Example
 
 ```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
-julia> getoffset(UTC, UT1, 0, 0.0)
-0.3550253556501879
+julia> getoffset(TAI, UT1, 0, 0.0)
+-31.644974644349812
 ```
 """
-@inline function getoffset(::CoordinatedUniversalTime, ::UniversalTime,
+@inline function getoffset(::InternationalAtomicTime, ::UniversalTime,
                            second, fraction, eop=get(EOP_DATA))
     utc = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    return getΔUT1(eop, utc)
+    return getΔUT1_TAI(eop, utc)
 end
 
 """
-    getoffset(UT1, UTC, second, fraction[, eop])
+    getoffset(UT1, TAI, second, fraction[, eop])
 
-Return the offset between [`UT1`](@ref) and [`UTC`](@ref) for the
+Return the offset between [`UT1`](@ref) and [`TAI`](@ref) for the
 current epoch (`second` after J2000 and `fraction`) in seconds.
 Optionally, a custom Earth orientation data struct `eop` can be provided,
 see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
@@ -420,15 +331,15 @@ see [EarthOrientation.jl](https://github.com/JuliaAstro/EarthOrientation.jl).
 # Example
 
 ```jldoctest; setup = :(using AstroTime; AstroTime.load_test_eop())
-julia> getoffset(UT1, UTC, 0, 0.0)
--0.3550253592514352
+julia> getoffset(UT1, TAI, 0, 0.0)
+31.644974965344606
 ```
 """
-@inline function getoffset(::UniversalTime, ::CoordinatedUniversalTime,
+@inline function getoffset(::UniversalTime, ::InternationalAtomicTime,
                            second, fraction, eop=get(EOP_DATA))
     ut1 = value(j2000(second, fraction) + J2000_TO_JULIAN)
-    utc = ut1 - getΔUT1(eop, ut1) / SECONDS_PER_DAY
-    return -getΔUT1(eop, utc)
+    utc = ut1 - getΔUT1_TAI(eop, ut1) / SECONDS_PER_DAY
+    return -getΔUT1_TAI(eop, utc)
 end
 
 #######
@@ -528,7 +439,7 @@ in seconds.
 
 ```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TDB, TT, 0, 0.0, π, 6371.0, 0.0)
-9.928419814101153e-5
+9.928419814106208e-5
 ```
 
 ### References ###
@@ -629,7 +540,7 @@ in seconds.
 
 ```jldoctest; setup = :(using AstroTime)
 julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
--9.92841981897215e-5
+-9.928419818977206e-5
 ```
 
 ### References ###
@@ -647,4 +558,3 @@ julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
     end
     return offset
 end
-

@@ -8,10 +8,44 @@ import MacroTools
 
 export @timescale
 
+const ASTRO_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff"),
+                                              Tuple{Dates.DatePart{'y'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'m'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'d'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'H'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'M'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'S'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'f'}}}}()
+
+const EPOCH_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff ttt"),
+                                              Tuple{Dates.DatePart{'y'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'m'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'d'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'H'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'M'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'S'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'f'},
+                                                    Dates.Delim{Char, 1},
+                                                    Dates.DatePart{'t'}}}}()
+
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")
 include(joinpath("Epochs", "Epochs.jl"))
+
+import .AstroDates: Date, DateTime, Time
 
 @reexport using .TimeScales
 @reexport using .Periods
@@ -22,9 +56,38 @@ import .Epochs: format
 
 function __init__()
     Dates.CONVERSION_SPECIFIERS['t'] = TimeScale
+    Dates.CONVERSION_SPECIFIERS['f'] = Epochs.FractionOfSecondToken
     Dates.CONVERSION_SPECIFIERS['D'] = Epochs.DayOfYearToken
     Dates.CONVERSION_DEFAULTS[TimeScale] = TimeScales.NotATimeScale()
     Dates.CONVERSION_DEFAULTS[Epochs.DayOfYearToken] = Int64(0)
+    Dates.CONVERSION_DEFAULTS[Epochs.FractionOfSecondToken] = 0.0
+
+    ASTRO_ISO_FORMAT[] = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.fff")
+    EPOCH_ISO_FORMAT[] = Dates.DateFormat("yyyy-mm-ddTHH:MM:SS.fff ttt")
+
+    Dates.CONVERSION_TRANSLATIONS[AstroDates.DateTime] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
+    )
+
+    Dates.CONVERSION_TRANSLATIONS[AstroDates.DateTime{Float64}] = (
+        Dates.Year,
+        Dates.Month,
+        Dates.Day,
+        Epochs.DayOfYearToken,
+        Dates.Hour,
+        Dates.Minute,
+        Dates.Second,
+        Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
+    )
 
     Dates.CONVERSION_TRANSLATIONS[Epoch] = (
         Dates.Year,
@@ -35,6 +98,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
         TimeScale,
     )
 
@@ -47,17 +111,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
-    )
-
-    Dates.CONVERSION_TRANSLATIONS[UTCEpoch] = (
-        Dates.Year,
-        Dates.Month,
-        Dates.Day,
-        Epochs.DayOfYearToken,
-        Dates.Hour,
-        Dates.Minute,
-        Dates.Second,
-        Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[UT1Epoch] = (
@@ -69,6 +123,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TTEpoch] = (
@@ -80,6 +135,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TCGEpoch] = (
@@ -91,6 +147,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TCBEpoch] = (
@@ -102,6 +159,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 
     Dates.CONVERSION_TRANSLATIONS[TDBEpoch] = (
@@ -113,6 +171,7 @@ function __init__()
         Dates.Minute,
         Dates.Second,
         Dates.Millisecond,
+        Epochs.FractionOfSecondToken,
     )
 end
 
@@ -131,18 +190,18 @@ Define a new time scale and the corresponding `Epoch` type alias.
 # Example
 
 ```jldoctest; setup = :(using AstroTime)
-julia> @timescale GMT UTC
+julia> @timescale GMT TAI
 
 julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMTScale,T} where T
+Epoch{GMTScale, T} where T
 
-julia> find_path(TAI, GMT)
-3-element Array{TimeScale,1}:
+julia> find_path(TT, GMT)
+3-element Vector{TimeScale}:
+ TT
  TAI
- UTC
  GMT
 ```
 """
@@ -176,7 +235,7 @@ macro timescale(scale::Symbol, parent=nothing, oneway=false)
             Dates.Second,
             Dates.Millisecond,
         )
-        Dates.default_format(::Type{$epoch_type}) = Dates.ISODateTimeFormat
+        Dates.default_format(::Type{$epoch_type}) = Dates.default_format(AstroDates.DateTime)
 
         $reg_expr
 

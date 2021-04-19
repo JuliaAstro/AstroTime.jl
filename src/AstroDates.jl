@@ -1,42 +1,27 @@
 module AstroDates
 
-import Dates
-import Dates: year, month, day,
-    hour, minute, second, millisecond,
-    yearmonthday, dayofyear
+using ..AstroTime: ASTRO_ISO_FORMAT
+
+using Dates: Dates
+using Dates: year, month, day, hour, minute, second
+using Dates: millisecond, microsecond, nanosecond
+using Dates: dayofyear
 
 const J2000 = 2.4515445e6
 
-function findyear(calendar, j2000day::Int64)
+function findyear(calendar, j2000day)
+    j2kday = ifelse(j2000day isa Int32, widen(j2000day), j2000day)
     if calendar == :proleptic_julian
-        return -((-4 * j2000day - 2920488) ÷ 1461)
+        return -((-4 * j2kday - 2920488) ÷ 1461)
     elseif calendar == :julian
-        return -((-4 * j2000day - 2921948) ÷ 1461)
+        return -((-4 * j2kday - 2921948) ÷ 1461)
     end
 
-    year = (400 * j2000day + 292194288) ÷ 146097
+    year = (400 * j2kday + 292194288) ÷ 146097
 
     # The previous estimate is one unit too high in some rare cases
     # (240 days in the 400 years gregorian cycle, about 0.16%)
-    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
-        year -= 1
-    end
-
-    return year
-end
-
-function findyear(calendar, j2000day::Int32)
-    if calendar == :proleptic_julian
-        return -Int((-Int64(4) * j2000day - Int64(2920488)) ÷ Int64(1461))
-    elseif calendar == :julian
-        return -Int((-Int64(4) * j2000day - Int64(2921948)) ÷ Int64(1461))
-    end
-
-    year = Int((Int64(400) * j2000day + Int64(292194288)) ÷ Int64(146097))
-
-    # The previous estimate is one unit too high in some rare cases
-    # (240 days in the 400 years gregorian cycle, about 0.16%)
-    if j2000day <= last_j2000_dayofyear(:gregorian, year - 1)
+    if j2kday <= last_j2000_dayofyear(:gregorian, year - 1)
         year -= 1
     end
 
@@ -61,49 +46,24 @@ function isleap(calendar, year)
     return year % 4 == 0 && (year % 400 == 0 || year % 100 != 0)
 end
 
-const PREVIOUS_MONTH_END_DAY_LEAP = (
-    0,
-    31,
-    60,
-    91,
-    121,
-    152,
-    182,
-    213,
-    244,
-    274,
-    305,
-    335,
-)
+const PREVIOUS_MONTH_END_DAY_LEAP = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
 
-const PREVIOUS_MONTH_END_DAY = (
-    0,
-    31,
-    59,
-    90,
-    120,
-    151,
-    181,
-    212,
-    243,
-    273,
-    304,
-    334,
-)
+const PREVIOUS_MONTH_END_DAY = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
 
 function findmonth(dayinyear, isleap)
-    offset = isleap ? 313 : 323
-    return dayinyear < 32 ? 1 : (10 * dayinyear + offset) ÷ 306
+    offset = ifelse(isleap, 313, 323)
+    return ifelse(dayinyear < 32, 1, (10 * dayinyear + offset) ÷ 306)
 end
 
 function findday(dayinyear, month, isleap)
-    (!isleap && dayinyear > 365) && throw(ArgumentError("Day of year cannot be 366 for a non-leap year."))
-    previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
+    (!isleap && dayinyear > 365) &&
+        throw(ArgumentError("Day of year cannot be 366 for a non-leap year."))
+    previous_days = ifelse(isleap, PREVIOUS_MONTH_END_DAY_LEAP, PREVIOUS_MONTH_END_DAY)
     return dayinyear - previous_days[month]
 end
 
 function finddayinyear(month, day, isleap)
-    previous_days = isleap ? PREVIOUS_MONTH_END_DAY_LEAP : PREVIOUS_MONTH_END_DAY
+    previous_days = ifelse(isleap, PREVIOUS_MONTH_END_DAY_LEAP, PREVIOUS_MONTH_END_DAY)
     return day + previous_days[month]
 end
 
@@ -144,7 +104,7 @@ function Date(offset::Integer)
     return Date(calendar, year, month, day)
 end
 
-Date(epoch::Date, offset::Int) = Date(j2000(epoch) + offset)
+Date(epoch::Date, offset::Int64) = Date(j2000(epoch) + offset)
 
 function Date(year, month, day)
     if month < 1 || month > 12
@@ -174,15 +134,14 @@ function Date(year, dayinyear)
     return Date(calendar, year, month, day)
 end
 
-year(s::Date) = s.year
-month(s::Date) = s.month
-day(s::Date) = s.day
+Dates.year(s::Date) = s.year
+Dates.month(s::Date) = s.month
+Dates.day(s::Date) = s.day
 calendar(s::Date) = s.calendar
 
-Base.show(io::IO, d::Date) = print(io,
-                                   year(d), "-",
-                                   lpad(month(d), 2, '0'), "-",
-                                   lpad(day(d), 2, '0'))
+function Base.show(io::IO, d::Date)
+    return print(io, year(d), "-", lpad(month(d), 2, '0'), "-", lpad(day(d), 2, '0'))
+end
 
 Date(d::Dates.Date) = Date(Dates.year(d), Dates.month(d), Dates.day(d))
 Dates.Date(d::Date) = Dates.Date(year(d), month(d), day(d))
@@ -202,7 +161,7 @@ j2000(d::Date) = j2000(calendar(d), year(d), month(d), day(d))
 
 julian(d::Date) = j2000(d) + J2000
 
-const JULIAN_EPOCH = Date(-4712,  1,  1)
+const JULIAN_EPOCH = Date(-4712, 1, 1)
 const MODIFIED_JULIAN_EPOCH = Date(1858, 11, 17)
 const FIFTIES_EPOCH = Date(1950, 1, 1)
 const CCSDS_EPOCH = Date(1958, 1, 1)
@@ -216,70 +175,121 @@ const UNIX_EPOCH = Date(1970, 1, 1)
 struct Time{T}
     hour::Int
     minute::Int
-    second::T
+    second::Int
+    fraction::T
 
-    function Time(hour, minute, second::T) where T
+    function Time(hour, minute, second, fraction::T) where {T}
         if hour < 0 || hour > 23
             throw(ArgumentError("`hour` must be an integer between 0 and 23."))
         elseif minute < 0 || minute > 59
             throw(ArgumentError("`minute` must be an integer between 0 and 59."))
-        elseif second < 0 || second >= 61.0
-            throw(ArgumentError("`second` must be a float between 0 and 61."))
+        elseif second < 0 || second >= 61
+            throw(ArgumentError("`second` must be an integer between 0 and 61."))
+        elseif fraction < 0 || fraction > 1
+            throw(ArgumentError("`fraction` must be a number between 0 and 1."))
         end
 
-        return new{T}(hour, minute, second)
+        return new{T}(hour, minute, second, fraction)
     end
 end
 
-function Time(second_in_day_a, second_in_day_b)
-    carry = floor(Int, second_in_day_b)
-    wholeseconds = second_in_day_a + carry
-    fractional = second_in_day_b - carry
+function Time(hour, minute, second)
+    sec, frac = divrem(second, 1)
+    return Time(hour, minute, sec, frac)
+end
 
-    # range check
-    if wholeseconds < 0 || wholeseconds > 86400
+function Time(secondinday, fraction)
+    if secondinday < 0 || secondinday > 86400
         throw(ArgumentError("Seconds are out of range"))
     end
 
-    # extract the time components
-    hour = wholeseconds ÷ 3600
-    wholeseconds -= 3600 * hour
-    minute = wholeseconds ÷ 60
-    wholeseconds -= 60 * minute
-    second = wholeseconds + fractional
+    hour = secondinday ÷ 3600
+    secondinday -= 3600 * hour
+    minute = secondinday ÷ 60
+    secondinday -= 60 * minute
 
-    return Time(hour, minute, second)
+    return Time(hour, minute, secondinday, fraction)
 end
 
-Time(t::Dates.Time) = Time(Dates.hour(t), Dates.minute(t),
-                           Dates.second(t) + 1e-3Dates.millisecond(t))
-Dates.Time(t::Time) = Dates.Time(hour(t), minute(t), second(t), millisecond(t))
+function Base.isapprox(a::Time, b::Time; kwargs...)
+    return a.hour == b.hour &&
+           a.minute == b.minute &&
+           isapprox(a.fraction + a.second, b.fraction + b.second; kwargs...)
+end
 
-const H00 = Time(0, 0, 0.0)
-const H12 = Time(12, 0, 0.0)
+function subsecond(fraction, n, r)
+    n % 3 == 0 || throw(ArgumentError("`n` must be divisible by 3."))
+    factor = ifelse(Int === Int32, widen(10), 10)^n
+    rounded = round(fraction, r; digits=n)
+    return round(Int64, rounded * factor, r) % 1000
+end
 
-hour(t::Time) = t.hour
-minute(t::Time) = t.minute
-second(::Type{Float64}, t::Time) = t.second
-second(::Type{Int}, t::Time) = floor(Int, t.second)
-second(t::Time) = second(Int, t)
-millisecond(t::Time) = round(Int, (second(Float64, t) - second(Int, t)) * 1000)
+function subsecond(fraction, n)
+    r = ifelse(subsecond(fraction, n+3, RoundNearest) == 0, RoundNearest, RoundToZero)
+    return subsecond(fraction, n, r)
+end
 
-fractionofday(t::Time) = t.second / 86400 + t.minute / 1440 + t.hour / 24
+subsecond(t::Time, n) = subsecond(t.fraction, n)
 
-secondinday(t::Time) = t.second + 60 * t.minute + 3600 * t.hour
+Dates.hour(t::Time) = t.hour
+Dates.minute(t::Time) = t.minute
+Dates.second(::Type{Float64}, t::Time) = t.fraction + t.second
+Dates.second(::Type{Int}, t::Time) = t.second
+Dates.second(t::Time) = second(Int, t)
+Dates.millisecond(t::Time) = subsecond(t.fraction, 3)
+Dates.microsecond(t::Time) = subsecond(t.fraction, 6)
+Dates.nanosecond(t::Time) = subsecond(t.fraction, 9)
+
+fractionofday(t::Time) = (t.fraction + t.second) / 86400 + t.minute / 1440 + t.hour / 24
+fractionofsecond(t::Time) = t.fraction
+
+secondinday(t::Time) = t.fraction + t.second + 60 * t.minute + 3600 * t.hour
+
+function Time(t::Dates.Time)
+    return Time(
+        Dates.hour(t),
+        Dates.minute(t),
+        Dates.second(t),
+        1e-9 * Dates.nanosecond(t) +
+        1e-6 * Dates.microsecond(t) +
+        1e-3 * Dates.millisecond(t),
+    )
+end
+function Dates.Time(t::Time)
+    return Dates.Time(
+        hour(t),
+        minute(t),
+        second(t),
+        millisecond(t),
+        microsecond(t),
+        nanosecond(t),
+    )
+end
+
+const H00 = Time(0, 0, 0, 0.0)
+const H12 = Time(12, 0, 0, 0.0)
 
 function Base.show(io::IO, t::Time)
     h = lpad(hour(t), 2, '0')
     m = lpad(minute(t), 2, '0')
-    s = lpad(second(Int, t), 2, '0')
+    s = lpad(second(t), 2, '0')
     f = lpad(millisecond(t), 3, '0')
     return print(io, h, ":", m, ":", s, ".", f)
 end
 
-struct DateTime{T}
+struct DateTime{T} <: Dates.AbstractDateTime
     date::Date
     time::Time{T}
+end
+
+Dates.default_format(::Type{DateTime}) = ASTRO_ISO_FORMAT[]
+
+function Base.:(==)(a::DateTime, b::DateTime)
+    return a.date == b.date && a.time == b.time
+end
+
+function Base.isapprox(a::DateTime, b::DateTime; kwargs...)
+    return a.date == b.date && isapprox(a.time, b.time; kwargs...)
 end
 
 Date(dt::DateTime) = dt.date
@@ -287,22 +297,87 @@ Time(dt::DateTime) = dt.time
 
 Base.show(io::IO, dt::DateTime) = print(io, Date(dt), "T", Time(dt))
 
-function DateTime(year, month, day, hour=0, minute=0, second=0.0)
+function DateTime(str::AbstractString, df::Dates.DateFormat=Dates.default_format(DateTime))
+    return Dates.parse(DateTime{Float64}, str, df)
+end
+
+function DateTime(
+    year::Integer,
+    month::Integer,
+    day::Integer,
+    hour::Integer=0,
+    minute::Integer=0,
+    second::Integer=0,
+    fraction=0.0,
+)
+    return DateTime(Date(year, month, day), Time(hour, minute, second, fraction))
+end
+
+function DateTime(
+    year::Integer, month::Integer, day::Integer, hour::Integer, minute::Integer, second
+)
     return DateTime(Date(year, month, day), Time(hour, minute, second))
 end
 
-year(dt::DateTime) = year(Date(dt))
-month(dt::DateTime) = month(Date(dt))
-day(dt::DateTime) = day(Date(dt))
-yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
-hour(dt::DateTime) = hour(Time(dt))
-minute(dt::DateTime) = minute(Time(dt))
-second(typ, dt::DateTime) = second(typ, Time(dt))
-second(dt::DateTime) = second(Int, Time(dt))
-millisecond(dt::DateTime) = millisecond(Time(dt))
+function DateTime(
+    year::Int64,
+    month::Int64,
+    day::Int64,
+    dayofyear::Int64,
+    hour::Int64,
+    minute::Int64,
+    second::Int64,
+    milliseconds::Int64,
+    fractionofsecond::T,
+) where {T}
+    return DateTime{T}(
+        year, month, day, dayofyear, hour, minute, second, milliseconds, fractionofsecond
+    )
+end
 
-function dayofyear(dt::DateTime{C}) where C
-    leap = isleap(C, year(dt))
+function DateTime{T}(
+    year::Int64,
+    month::Int64,
+    day::Int64,
+    dayofyear::Int64,
+    hour::Int64,
+    minute::Int64,
+    second::Int64,
+    milliseconds::Int64,
+    fractionofsecond::T,
+) where {T}
+    if dayofyear != 0
+        date = Date(year, dayofyear)
+    else
+        date = Date(year, month, day)
+    end
+
+    if !iszero(fractionofsecond)
+        time = Time(hour, minute, second, fractionofsecond)
+    else
+        time = Time(hour, minute, second, 1e-3milliseconds)
+    end
+
+    return DateTime{T}(date, time)
+end
+
+Dates.year(dt::DateTime) = year(Date(dt))
+Dates.month(dt::DateTime) = month(Date(dt))
+Dates.day(dt::DateTime) = day(Date(dt))
+Dates.yearmonthday(dt::DateTime) = year(Date(dt)), month(Date(dt)), day(Date(dt))
+Dates.hour(dt::DateTime) = hour(Time(dt))
+Dates.minute(dt::DateTime) = minute(Time(dt))
+Dates.second(typ, dt::DateTime) = second(typ, Time(dt))
+Dates.second(dt::DateTime) = second(Int, Time(dt))
+Dates.millisecond(dt::DateTime) = millisecond(Time(dt))
+Dates.microsecond(dt::DateTime) = microsecond(Time(dt))
+Dates.nanosecond(dt::DateTime) = nanosecond(Time(dt))
+fractionofsecond(dt::DateTime) = fractionofsecond(Time(dt))
+subsecond(dt::DateTime, n) = subsecond(Time(dt), n)
+calendar(dt::DateTime) = calendar(dt.date)
+
+function Dates.dayofyear(dt::DateTime)
+    leap = isleap(calendar(dt), year(dt))
     return finddayinyear(month(dt), day(dt), leap)
 end
 
@@ -310,9 +385,16 @@ julian(dt::DateTime) = fractionofday(Time(dt)) + julian(Date(dt))
 j2000(dt::DateTime) = fractionofday(Time(dt)) + j2000(Date(dt))
 julian_twopart(dt::DateTime) = julian(Date(dt)), fractionofday(Time(dt))
 
-DateTime(dt::Dates.DateTime) = DateTime(Dates.year(dt), Dates.month(dt), Dates.day(dt),
-                                        Dates.hour(dt), Dates.minute(dt),
-                                        1e-3Dates.millisecond(dt) + Dates.second(dt))
+function DateTime(dt::Dates.DateTime)
+    return DateTime(
+        Dates.year(dt),
+        Dates.month(dt),
+        Dates.day(dt),
+        Dates.hour(dt),
+        Dates.minute(dt),
+        1e-3Dates.millisecond(dt) + Dates.second(dt),
+    )
+end
 function Dates.DateTime(dt::DateTime)
     y = year(dt)
     m = month(dt)
@@ -320,9 +402,8 @@ function Dates.DateTime(dt::DateTime)
     h = hour(dt)
     mi = minute(dt)
     s = second(Int, dt)
-    ms = round((second(Float64, dt) - s) * 1000)
+    ms = millisecond(dt)
     return Dates.DateTime(y, m, d, h, mi, s, ms)
 end
 
 end
-

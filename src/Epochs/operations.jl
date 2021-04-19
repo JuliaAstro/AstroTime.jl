@@ -1,5 +1,5 @@
-function Base.isapprox(a::Epoch{S}, b::Epoch{S}; atol::Real=0, rtol::Real=atol>0 ? 0 : √eps()) where S <: TimeScale
-    a.second == b.second && isapprox(a.fraction, b.fraction; atol=atol, rtol=rtol)
+function Base.isapprox(a::Epoch{S}, b::Epoch{S}; kwargs...) where S <: TimeScale
+    return isapprox(a.fraction + a.second, b.fraction + b.second; kwargs...)
 end
 
 function Base.:(==)(a::Epoch, b::Epoch)
@@ -19,7 +19,7 @@ Return the duration between epoch `a` and epoch `b`.
 ### Examples ###
 
 ```jldoctest; setup = :(using AstroTime)
-julia> UTCEpoch(2018, 2, 6, 20, 45, 20.0) - UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+julia> TAIEpoch(2018, 2, 6, 20, 45, 20.0) - TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 20.0 seconds
 ```
 """
