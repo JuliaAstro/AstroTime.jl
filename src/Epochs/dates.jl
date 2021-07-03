@@ -7,7 +7,7 @@ function Epoch{S}(date::Date, time::Time, args...) where S
     return Epoch{S}(sec, time.fraction)
 end
 
-Dates.default_format(::Type{Epoch}) = EPOCH_ISO_FORMAT[]
+Dates.default_format(::Type{<:Epoch}) = EPOCH_ISO_FORMAT[]
 
 """
     Epoch(str[, format])
