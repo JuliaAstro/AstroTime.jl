@@ -83,6 +83,12 @@ import ERFA
         @test_throws MethodError t1 < t0
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
+
+        today = TTEpoch(2000, 1, 1)
+        age_of_the_universe = 13.772e9years
+        big_bang = today - age_of_the_universe
+        baryons = big_bang + 1e-11seconds
+        @test baryons + age_of_the_universe - today == 1e-11seconds
     end
     @testset "Parsing" begin
         @test AstroTime.TimeScales.tryparse(1.0) === nothing
