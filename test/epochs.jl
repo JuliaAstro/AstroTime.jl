@@ -84,7 +84,7 @@ import ERFA
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
 
-        today = TTEpoch(2000, 1, 1)
+        today = TTEpoch(2000, 1, 1, 12, 0, 13.123)
         age_of_the_universe = 13.772e9years
         big_bang = today - age_of_the_universe
         baryons = big_bang + 1e-11seconds

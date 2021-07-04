@@ -15,7 +15,7 @@ julia> TTEpoch(32.184, ep)
 ```
 """
 function Epoch{S2}(offset, ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
-    second, fraction = apply_offset(ep.second, ep.fraction, offset)
+    second, fraction = apply_offset(ep.second, ep.fraction, ep.error, offset)
     Epoch{S2}(second, fraction)
 end
 
@@ -36,8 +36,8 @@ julia> TAIEpoch(ep)
 ```
 """
 function Epoch{S2}(ep::Epoch{S1}) where {S1<:TimeScale, S2<:TimeScale}
-    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
-    Epoch{S2}(second, fraction)
+    second, fraction, error = apply_offset(ep.second, ep.fraction, ep.error, S1(), S2())
+    Epoch{S2}(second, fraction, error)
 end
 
 """
@@ -57,14 +57,14 @@ julia> Epoch(ep, TAI)
 ```
 """
 function Epoch(ep::Epoch{S1}, scale::S2) where {S1<:TimeScale, S2<:TimeScale}
-    second, fraction = apply_offset(ep.second, ep.fraction, S1(), S2())
-    Epoch{S2}(second, fraction)
+    second, fraction, error = apply_offset(ep.second, ep.fraction, ep.error, S1(), S2())
+    Epoch{S2}(second, fraction, error)
 end
 
 function Epoch{S2}(ep::Epoch{S1}, args...) where {S1<:TimeScale, S2<:TimeScale}
     offset = getoffset(S1(), S2(), ep.second, ep.fraction, args...)
-    second, fraction = apply_offset(ep.second, ep.fraction, offset)
-    Epoch{S2}(second, fraction)
+    second, fraction, error = apply_offset(ep.second, ep.fraction, ep.error, offset)
+    Epoch{S2}(second, fraction, error)
 end
 
 Epoch{S}(ep::Epoch{S}) where {S<:TimeScale} = ep
@@ -115,10 +115,11 @@ function getoffset(ep::Epoch{S}, scale::TimeScale) where S<:TimeScale
     total_offset = 0.0
     second = ep.second
     fraction = ep.fraction
+    error = ep.error
     for i in 1:length(path) - 1
         offset::Float64 = getoffset(path[i], path[i+1], second, fraction)
         total_offset += offset
-        second, fraction = apply_offset(second, fraction, offset)
+        second, fraction, error = apply_offset(second, fraction, error, offset)
     end
     return total_offset
 end
@@ -146,19 +147,21 @@ end
 
 @inline function apply_offset(second::Int64,
                               fraction::T,
+                              error::T,
                               from::S1,
-                              to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
+                              to::S2)::Tuple{Int64, T, T} where {T, S1<:TimeScale, S2<:TimeScale}
     path = find_path(from, to)
     isempty(path) && throw(NoPathError(string(from), string(to)))
-    length(path) == 2 && return _apply_offset(second, fraction, from, to)
-    return _apply_offset((second, fraction), path...)
+    length(path) == 2 && return _apply_offset(second, fraction, error, from, to)
+    return _apply_offset((second, fraction, error), path...)
 end
 
 @inline function _apply_offset(second::Int64,
                                fraction::T,
+                               error::T,
                                from::S1,
-                               to::S2)::Tuple{Int64, T} where {T, S1<:TimeScale, S2<:TimeScale}
-    return apply_offset(second, fraction, getoffset(from, to, second, fraction))
+                               to::S2)::Tuple{Int64, T, T} where {T, S1<:TimeScale, S2<:TimeScale}
+    return apply_offset(second, fraction, error, getoffset(from, to, second, fraction))
 end
 
 @generated function _apply_offset(sf, path...)
@@ -554,7 +557,7 @@ julia> getoffset(TT, TDB, 0, 0.0, π, 6371.0, 0.0)
     offset = 0.0
     for _ in 1:3
         offset = -getoffset(TDB, TT, tdb1, tdb2, elong, u, v)
-        tdb1, tdb2 = apply_offset(tt1, tt2, offset)
+        tdb1, tdb2 = apply_offset(tt1, tt2, 0.0, offset)
     end
     return offset
 end

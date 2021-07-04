@@ -25,7 +25,7 @@ julia> TAIEpoch(2018, 2, 6, 20, 45, 20.0) - TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 """
 function Base.:-(a::Epoch{S}, b::Epoch{S}) where S<:TimeScale
     second = a.second - b.second
-    sum, residual = two_sum(a.fraction, -b.fraction)
-    return (residual + sum + second) * seconds
+    fraction = (a.error - b.error) + (a.fraction - b.fraction)
+    return (fraction + second) * seconds
 end
 
