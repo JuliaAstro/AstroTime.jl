@@ -40,6 +40,7 @@ const EPOCH_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff tt
                                                     Dates.Delim{Char, 1},
                                                     Dates.DatePart{'t'}}}}()
 
+include("AccurateArithmetic.jl")
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")

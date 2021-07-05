@@ -19,6 +19,7 @@ import ..AstroDates: Date, DateTime, Time
 import ..AstroDates: calendar, fractionofday, fractionofsecond, secondinday, subsecond
 import ..AstroDates: j2000, julian, julian_twopart
 
+using ..AccurateArithmetic: three_sum, two_sum
 using ..TimeScales: find_path
 
 export CCSDS_EPOCH, FIFTIES_EPOCH, FUTURE_INFINITY, GALILEO_EPOCH, GPS_EPOCH, J2000_EPOCH
