@@ -89,6 +89,13 @@ import ERFA
         big_bang = today - age_of_the_universe
         baryons = big_bang + 1e-11seconds
         @test baryons + age_of_the_universe - today == 1e-11seconds
+
+        reception_time = TDBEpoch("2021-07-01T00:00:00.00")
+        rtlt_a = seconds(1.5days)
+        rtlt_b = rtlt_a + 1e-6seconds
+        transmission_time_a = reception_time + rtlt_a
+        transmission_time_b = reception_time + rtlt_b
+        @test transmission_time_b - transmission_time_a == 1e-6seconds
     end
     @testset "Parsing" begin
         @test AstroTime.TimeScales.tryparse(1.0) === nothing
@@ -239,7 +246,7 @@ import ERFA
         ep_f64 = TAIEpoch(2000, 1, 1)
         ep_err = TAIEpoch(ep_f64.second, 1.0 ± 1.1)
         Δt = (30 ± 0.1) * seconds
-        @test typeof(Δt) == Period{Second,Measurement{Float64}}
+        @test typeof(Δt) == AstroPeriod{Second,Measurement{Float64}}
         @test typeof(ep_f64) == Epoch{InternationalAtomicTime,Float64}
         @test typeof(ep_err) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         @test typeof(ep_f64 + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}

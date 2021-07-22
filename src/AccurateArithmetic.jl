@@ -30,15 +30,14 @@ function four_sum(a, b, c, d)
     return hi, hm, ml, lo
 end
 
-function handle_infinity(a, b)
-    fraction = a + b
+function handle_infinity(fraction)
     second = ifelse(fraction < 0, typemin(Int64), typemax(Int64))
     residual = zero(fraction)
     return second, fraction, residual
 end
 
 function apply_offset(s1::Int64, f1, e1, s2::Int64, f2, e2)
-    isfinite(f1 + f2) || return handle_infinity(f1, f2)
+    isfinite(f1 + f2) || return handle_infinity(f1 + f2)
 
     sum, residual, _ = four_sum(f1, f2, e1, e2)
     int_seconds = floor(Int64, sum)
@@ -48,7 +47,7 @@ function apply_offset(s1::Int64, f1, e1, s2::Int64, f2, e2)
 end
 
 function apply_offset(s1::Int64, f1, e1, offset)
-    isfinite(f1 + offset) || return handle_infinity(f1, offset)
+    isfinite(f1 + offset) || return handle_infinity(f1 + offset)
 
     s2 = floor(Int64, offset)
     f2 = offset - s2

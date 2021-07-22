@@ -83,7 +83,7 @@ julia> AstroTime.format(ep, "dd.mm.yyyy HH:MM ttt")
 
 ## Working with Epochs and Periods
 
-You can shift an `Epoch` in time by adding or subtracting a [`Period`](@ref) to it.
+You can shift an `Epoch` in time by adding or subtracting an [`AstroPeriod`](@ref) to it.
 
 AstroTime.jl provides a convenient way to construct periods by multiplying a value
 with a time unit.
@@ -105,7 +105,7 @@ The following time units are available:
 - `years`
 - `centuries`
 
-To shift an `Epoch` forward in time add a `Period` to it.
+To shift an `Epoch` forward in time add an `AstroPeriod` to it.
 
 ```julia
 julia> ep = UTCEpoch(2000, 1, 1)
@@ -125,7 +125,7 @@ julia> ep - 1days
 1999-12-31T00:00:00.000 UTC
 ```
 
-If you subtract two epochs you will receive the time between them as a `Period`.
+If you subtract two epochs you will receive the time between them as an `AstroPeriod`.
 
 ```julia
 julia> ep1 = UTCEpoch(2000, 1, 1)
@@ -138,8 +138,8 @@ julia> ep2 - ep1
 86400.0 seconds
 ```
 
-You can also construct a `Period` with a different time unit from
-another `Period`.
+You can also construct an `AstroPeriod` with a different time unit from
+another `AstroPeriod`.
 
 ```julia
 julia> dt = 86400.0seconds

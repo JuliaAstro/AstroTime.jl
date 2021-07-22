@@ -32,7 +32,7 @@ for (scale, acronym) in zip(TimeScales.NAMES, TimeScales.ACRONYMS)
         $epoch(::AbstractString)
 
         """
-            $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T<:Period
+            $($name)(jd1::T, jd2::T=zero(T); origin=:j2000) where T<:AstroPeriod
 
         Construct a $($name) from a Julian date (optionally split into
         `jd1` and `jd2`). `origin` determines the variant of Julian

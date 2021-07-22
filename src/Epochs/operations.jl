@@ -8,8 +8,11 @@ end
 
 Base.isless(ep1::Epoch, ep2::Epoch) = isless(value(ep1 - ep2), 0.0)
 
-Base.:+(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, value(seconds(p)))
-Base.:-(ep::Epoch{S}, p::Period) where {S} = Epoch{S}(ep, -value(seconds(p)))
+function Base.:+(ep::Epoch{S}, p::AstroPeriod) where {S}
+    second, fraction, error = apply_offset(ep.second, ep.fraction, ep.error, p.second, p.fraction, p.error)
+    return Epoch{S}(second, fraction, error)
+end
+Base.:-(ep::Epoch, p::AstroPeriod) = ep + (-p)
 
 """
     -(a::Epoch, b::Epoch)
