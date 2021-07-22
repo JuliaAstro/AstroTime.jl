@@ -32,8 +32,7 @@ end
 
 function handle_infinity(fraction)
     second = ifelse(fraction < 0, typemin(Int64), typemax(Int64))
-    residual = zero(fraction)
-    return second, fraction, residual
+    return second, fraction, zero(fraction)
 end
 
 function apply_offset(s1::Int64, f1, e1, s2::Int64, f2, e2)
