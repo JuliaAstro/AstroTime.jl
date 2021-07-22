@@ -54,7 +54,7 @@
     @test centuries(y) == (1.0 / 100.0)centuries
     @test centuries(c) == 1.0centuries
 
-    @test zero(AstroPeriod{Year}) == 0.0years
+    @test zero(AstroPeriod{AstroTime.Periods.Year}) == 0.0years
     @test zero(1years) == 0years
     @test zero(1.0years) == 0.0years
 
@@ -83,7 +83,7 @@
     float_rng = 1.0seconds:3.0seconds
     @test step(float_rng) == 1.0seconds
     @test collect(float_rng) == [1.0seconds, 2.0seconds, 3.0seconds]
-    @test AstroPeriod{Second,Float64}(1.0seconds) == 1.0seconds
+    @test AstroPeriod{AstroTime.Periods.Second,Float64}(1.0seconds) == 1.0seconds
 
     @test Periods.name(seconds) == "seconds"
     @test Periods.name(minutes) == "minutes"

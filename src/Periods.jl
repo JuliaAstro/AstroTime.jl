@@ -2,9 +2,8 @@ module Periods
 
 using ..AccurateArithmetic: apply_offset, handle_infinity
 
-export TimeUnit, Second, Minute, Hour, Day, Year, Century,
+export AstroPeriod, TimeUnit,
     seconds, minutes, hours, days, years, centuries,
-    AstroPeriod,
     -, *, /, +, value, unit,
     SECONDS_PER_MINUTE,
     SECONDS_PER_HOUR,

@@ -246,7 +246,7 @@ import ERFA
         ep_f64 = TAIEpoch(2000, 1, 1)
         ep_err = TAIEpoch(ep_f64.second, 1.0 ± 1.1)
         Δt = (30 ± 0.1) * seconds
-        @test typeof(Δt) == AstroPeriod{Second,Measurement{Float64}}
+        @test typeof(Δt) == AstroPeriod{AstroTime.Periods.Second,Measurement{Float64}}
         @test typeof(ep_f64) == Epoch{InternationalAtomicTime,Float64}
         @test typeof(ep_err) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         @test typeof(ep_f64 + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}

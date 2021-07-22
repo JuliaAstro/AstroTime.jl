@@ -1,6 +1,5 @@
 using AstroTime
-# TODO: Fix clashing `Period` exports
-import Dates
+using Dates
 using Test
 
 AstroTime.load_test_eop()
