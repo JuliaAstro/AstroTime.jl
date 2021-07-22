@@ -236,7 +236,6 @@ macro timescale(scale::Symbol, parent=nothing, oneway=false)
             Dates.Second,
             Dates.Millisecond,
         )
-        Dates.default_format(::Type{$epoch_type}) = Dates.default_format(AstroDates.DateTime)
 
         $reg_expr
 

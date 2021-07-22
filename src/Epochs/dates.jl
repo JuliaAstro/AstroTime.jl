@@ -35,8 +35,6 @@ Epoch(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch))
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
 
-Dates.default_format(::Type{Epoch{S}}) where {S} = Dates.default_format(AstroDates.DateTime)
-
 """
     Epoch{S}(str[, format]) where S
 
