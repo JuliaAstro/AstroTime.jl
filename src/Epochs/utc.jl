@@ -76,7 +76,7 @@ function from_utc(year::Integer, month::Integer, day::Integer,
     return from_utc(dt; scale=scale)
 end
 
-from_utc(dt::Dates.DateTime; scale::S=TAI) where {S} = from_utc(DateTime(dt); scale)
+from_utc(dt::Dates.DateTime; scale::S=TAI) where {S} = from_utc(DateTime(dt); scale=scale)
 
 function from_utc(dt::DateTime; scale::S=TAI) where S
     ep = TAIEpoch(dt)
