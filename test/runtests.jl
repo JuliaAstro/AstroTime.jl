@@ -1,6 +1,5 @@
 using AstroTime
-# TODO: Fix clashing `Period` exports
-import Dates
+using Dates
 using Test
 
 AstroTime.load_test_eop()
@@ -60,7 +59,7 @@ end
         @test TAIEpoch(scet, astronomical_unit) ≈ tai_exp
         @test SCETEpoch(tai_exp, astronomical_unit) ≈ scet
 
-        @test Dates.default_format(SCETEpoch) == AstroTime.ASTRO_ISO_FORMAT[]
+        @test Dates.default_format(SCETEpoch) == AstroTime.EPOCH_ISO_FORMAT[]
 
         @test string(Dummy) == "Dummy"
         @test typeof(Dummy) == DummyScale

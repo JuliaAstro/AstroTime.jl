@@ -5,12 +5,12 @@
     d = 1.0days
     y = 1.0years
     c = 1.0centuries
-    @test s == Period(seconds, 1.0)
-    @test m == Period(minutes, 1.0)
-    @test h == Period(hours, 1.0)
-    @test d == Period(days, 1.0)
-    @test y == Period(years, 1.0)
-    @test c == Period(centuries, 1.0)
+    @test s == AstroPeriod(seconds, 1.0)
+    @test m == AstroPeriod(minutes, 1.0)
+    @test h == AstroPeriod(hours, 1.0)
+    @test d == AstroPeriod(days, 1.0)
+    @test y == AstroPeriod(years, 1.0)
+    @test c == AstroPeriod(centuries, 1.0)
 
     @test seconds(s) == 1.0seconds
     @test seconds(m) == 60.0seconds
@@ -54,7 +54,7 @@
     @test centuries(y) == (1.0 / 100.0)centuries
     @test centuries(c) == 1.0centuries
 
-    @test zero(Period{Year}) == 0.0years
+    @test zero(AstroPeriod{AstroTime.Periods.Year}) == 0.0years
     @test zero(1years) == 0years
     @test zero(1.0years) == 0.0years
 
@@ -83,50 +83,20 @@
     float_rng = 1.0seconds:3.0seconds
     @test step(float_rng) == 1.0seconds
     @test collect(float_rng) == [1.0seconds, 2.0seconds, 3.0seconds]
-    @test Period{Second,Float64}(1.0seconds) == 1.0seconds
+    @test AstroPeriod{AstroTime.Periods.Second,Float64}(1.0seconds) == 1.0seconds
 
-    @test Periods.name(seconds, 1) == "second"
-    @test Periods.name(seconds, 2) == "seconds"
-    @test Periods.name(seconds, 1.0) == "seconds"
-    @test Periods.name(minutes, 1) == "minute"
-    @test Periods.name(minutes, 2) == "minutes"
-    @test Periods.name(minutes, 1.0) == "minutes"
-    @test Periods.name(hours, 1) == "hour"
-    @test Periods.name(hours, 2) == "hours"
-    @test Periods.name(hours, 1.0) == "hours"
-    @test Periods.name(days, 1) == "day"
-    @test Periods.name(days, 2) == "days"
-    @test Periods.name(days, 1.0) == "days"
-    @test Periods.name(years, 1) == "year"
-    @test Periods.name(years, 2) == "years"
-    @test Periods.name(years, 1.0) == "years"
-    @test Periods.name(centuries, 1) == "century"
-    @test Periods.name(centuries, 2) == "centuries"
-    @test Periods.name(centuries, 1.0) == "centuries"
+    @test Periods.name(seconds) == "seconds"
+    @test Periods.name(minutes) == "minutes"
+    @test Periods.name(hours) == "hours"
+    @test Periods.name(days) == "days"
+    @test Periods.name(years) == "years"
+    @test Periods.name(centuries) == "centuries"
 
-    @test string(1seconds) == "1 second"
-    @test string(Int32(1) * seconds) == "1 second"
-    @test string(1.0seconds) == "1.0 seconds"
-    @test string(2seconds) == "2 seconds"
-    @test string(1minutes) == "1 minute"
-    @test string(Int32(1) * minutes) == "1 minute"
-    @test string(1.0minutes) == "1.0 minutes"
-    @test string(2minutes) == "2 minutes"
-    @test string(1hours) == "1 hour"
-    @test string(Int32(1) * hours) == "1 hour"
-    @test string(1.0hours) == "1.0 hours"
-    @test string(2hours) == "2 hours"
-    @test string(1days) == "1 day"
-    @test string(Int32(1) * days) == "1 day"
-    @test string(1.0days) == "1.0 days"
-    @test string(2days) == "2 days"
-    @test string(1years) == "1 year"
-    @test string(Int32(1) * years) == "1 year"
-    @test string(1.0years) == "1.0 years"
-    @test string(2years) == "2 years"
-    @test string(1centuries) == "1 century"
-    @test string(Int32(1) * centuries) == "1 century"
-    @test string(1.0centuries) == "1.0 centuries"
-    @test string(2centuries) == "2 centuries"
+    @test string(1seconds) == "1.0 seconds"
+    @test string(1minutes) == "1.0 minutes"
+    @test string(1hours) == "1.0 hours"
+    @test string(1days) == "1.0 days"
+    @test string(1years) == "1.0 years"
+    @test string(1centuries) == "1.0 centuries"
 end
 

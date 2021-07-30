@@ -41,6 +41,9 @@ import ERFA
         @test to_utc(during_act) == during
         @test to_utc(after_act) == after
 
+        dt = Dates.DateTime(2016, 12, 31, 23, 59, 59, 300)
+        @test dt == to_utc(Dates.DateTime, from_utc(dt))
+
         sixties = AstroTime.DateTime(1961, 3, 5, 23, 4, 12.0)
         sixties_exp = (second=-1225198547, fraction=0.5057117799999999)
         sixties_act = from_utc(sixties)
@@ -83,6 +86,19 @@ import ERFA
         @test_throws MethodError t1 < t0
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
+
+        today = TTEpoch(2000, 1, 1, 12, 0, 13.123)
+        age_of_the_universe = 13.772e9years
+        big_bang = today - age_of_the_universe
+        baryons = big_bang + 1e-11seconds
+        @test baryons + age_of_the_universe - today == 1e-11seconds
+
+        reception_time = TDBEpoch("2021-07-01T00:00:00.00")
+        rtlt_a = seconds(1.5days)
+        rtlt_b = rtlt_a + 1e-6seconds
+        transmission_time_a = reception_time + rtlt_a
+        transmission_time_b = reception_time + rtlt_b
+        @test transmission_time_b - transmission_time_a == 1e-6seconds
     end
     @testset "Parsing" begin
         @test AstroTime.TimeScales.tryparse(1.0) === nothing
@@ -220,11 +236,11 @@ import ERFA
         @test Dates.DateTime(ep) == Dates.DateTime(y, m, d, hr, mn, 59, 371)
     end
     @testset "Ranges" begin
-        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 2, 1)
-        @test step(rng) == 86400.0seconds
-        @test length(rng) == 32
+        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 1, 2)
+        @test step(rng) == 1seconds
+        @test length(rng) == 86401
         @test first(rng) == TAIEpoch(2018, 1, 1)
-        @test last(rng) == TAIEpoch(2018, 2, 1)
+        @test last(rng) == TAIEpoch(2018, 1, 2)
         rng = TAIEpoch(2018, 1, 1):13seconds:TAIEpoch(2018, 1, 1, 0, 1)
         @test step(rng) == 13seconds
         @test last(rng) == TAIEpoch(2018, 1, 1, 0, 0, 52.0)
@@ -233,7 +249,7 @@ import ERFA
         ep_f64 = TAIEpoch(2000, 1, 1)
         ep_err = TAIEpoch(ep_f64.second, 1.0 ± 1.1)
         Δt = (30 ± 0.1) * seconds
-        @test typeof(Δt) == Period{Second,Measurement{Float64}}
+        @test typeof(Δt) == AstroPeriod{AstroTime.Periods.Second,Measurement{Float64}}
         @test typeof(ep_f64) == Epoch{InternationalAtomicTime,Float64}
         @test typeof(ep_err) == Epoch{InternationalAtomicTime,Measurement{Float64}}
         @test typeof(ep_f64 + Δt) == Epoch{InternationalAtomicTime,Measurement{Float64}}

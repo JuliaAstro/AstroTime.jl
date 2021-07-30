@@ -2,7 +2,7 @@ const J2000_TO_JULIAN = 2.451545e6days
 const J2000_TO_MJD = 51544.5days
 
 """
-    Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:Period}
+    Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:AstroPeriod}
 
 Construct an `Epoch` with time scale `S` from a Julian date
 (optionally split into `jd1` and `jd2`). `origin` determines the
@@ -22,7 +22,7 @@ julia> Epoch{InternationalAtomicTime}(2.451545e6days, origin=:julian)
 2000-01-01T12:00:00.000 TAI
 ```
 """
-function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:Period}
+function Epoch{S}(jd1::T, jd2::T=zero(T), args...; origin=:j2000) where {S, T<:AstroPeriod}
     if jd2 > jd1
         jd1, jd2 = jd2, jd1
     end
@@ -52,7 +52,7 @@ end
     julian_period([T,] ep::Epoch; origin=:j2000, scale=timescale(ep), unit=days)
 
 Return the period since Julian Epoch `origin` within the time scale `scale` expressed in
-`unit` for a given epoch `ep`. The result is a [`Period`](@ref) object by default.
+`unit` for a given epoch `ep`. The result is an [`AstroPeriod`](@ref) object by default.
 If the type argument `T` is present, the result is converted to `T` instead.
 
 ### Example ###

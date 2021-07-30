@@ -40,6 +40,7 @@ const EPOCH_ISO_FORMAT = Ref{Dates.DateFormat{Symbol("yyyy-mm-ddTHH:MM:SS.fff tt
                                                     Dates.Delim{Char, 1},
                                                     Dates.DatePart{'t'}}}}()
 
+include("AccurateArithmetic.jl")
 include("TimeScales.jl")
 include("Periods.jl")
 include("AstroDates.jl")
@@ -235,7 +236,6 @@ macro timescale(scale::Symbol, parent=nothing, oneway=false)
             Dates.Second,
             Dates.Millisecond,
         )
-        Dates.default_format(::Type{$epoch_type}) = Dates.default_format(AstroDates.DateTime)
 
         $reg_expr
 

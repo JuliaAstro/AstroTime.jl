@@ -7,7 +7,7 @@ function Epoch{S}(date::Date, time::Time, args...) where S
     return Epoch{S}(sec, time.fraction)
 end
 
-Dates.default_format(::Type{Epoch}) = EPOCH_ISO_FORMAT[]
+Dates.default_format(::Type{<:Epoch}) = EPOCH_ISO_FORMAT[]
 
 """
     Epoch(str[, format])
@@ -34,8 +34,6 @@ julia> Epoch("2018-037T00:00 TAI", "yyyy-DDDTHH:MM ttt")
 Epoch(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch)) = parse(Epoch, str, format)
 
 Epoch(str::AbstractString, format::AbstractString) = Epoch(str, Dates.DateFormat(format))
-
-Dates.default_format(::Type{Epoch{S}}) where {S} = Dates.default_format(AstroDates.DateTime)
 
 """
     Epoch{S}(str[, format]) where S

@@ -1,43 +1,21 @@
 module Periods
 
-export TimeUnit, Second, Minute, Hour, Day, Year, Century,
+using ..AccurateArithmetic: apply_offset, handle_infinity
+
+export AstroPeriod, TimeUnit,
     seconds, minutes, hours, days, years, centuries,
-    Period, -, *, /, +, value, unit,
+    -, *, /, +, value, unit,
     SECONDS_PER_MINUTE,
     SECONDS_PER_HOUR,
     SECONDS_PER_DAY,
     SECONDS_PER_YEAR,
-    SECONDS_PER_CENTURY,
-    MINUTES_PER_HOUR,
-    MINUTES_PER_DAY,
-    MINUTES_PER_YEAR,
-    MINUTES_PER_CENTURY,
-    HOURS_PER_DAY,
-    HOURS_PER_YEAR,
-    HOURS_PER_CENTURY,
-    DAYS_PER_YEAR,
-    DAYS_PER_CENTURY,
-    YEARS_PER_CENTURY
+    SECONDS_PER_CENTURY
 
 const SECONDS_PER_MINUTE   = 60.0
 const SECONDS_PER_HOUR     = 60.0 * 60.0
 const SECONDS_PER_DAY      = 60.0 * 60.0 * 24.0
 const SECONDS_PER_YEAR     = 60.0 * 60.0 * 24.0 * 365.25
 const SECONDS_PER_CENTURY  = 60.0 * 60.0 * 24.0 * 365.25 * 100.0
-
-const MINUTES_PER_HOUR     = 60.0
-const MINUTES_PER_DAY      = 60.0 * 24.0
-const MINUTES_PER_YEAR     = 60.0 * 24.0 * 365.25
-const MINUTES_PER_CENTURY  = 60.0 * 24.0 * 365.25 * 100.0
-
-const HOURS_PER_DAY        = 24.0
-const HOURS_PER_YEAR       = 24.0 * 365.25
-const HOURS_PER_CENTURY    = 24.0 * 365.25 * 100.0
-
-const DAYS_PER_YEAR        = 365.25
-const DAYS_PER_CENTURY     = 365.25 * 100.0
-
-const YEARS_PER_CENTURY    = 100.0
 
 """
 All time units are subtypes of the abstract type `TimeUnit`.
@@ -68,11 +46,18 @@ const centuries = Century()
 
 Base.broadcastable(u::TimeUnit) = Ref(u)
 
-"""
-    Period{U, T}(unit, Δt) where {U<:TimeUnit, T}
+factor(::Second) = 1.0
+factor(::Minute) = SECONDS_PER_MINUTE
+factor(::Hour) = SECONDS_PER_HOUR
+factor(::Day) = SECONDS_PER_DAY
+factor(::Year) = SECONDS_PER_YEAR
+factor(::Century) = SECONDS_PER_CENTURY
 
-A `Period` object represents a time interval of `Δt` with a [`TimeUnit`](@ref) of `unit`.
-Periods should be constructed via the shorthand syntax shown in the examples below.
+"""
+    AstroPeriod{U, T}(unit, Δt) where {U<:TimeUnit, T}
+
+An `AstroPeriod` object represents a time interval of `Δt` with a [`TimeUnit`](@ref) of
+`unit`.  Periods should be constructed via the shorthand syntax shown in the examples below.
 
 ### Examples ###
 
@@ -84,118 +69,118 @@ julia> 1.0minutes
 1.0 minutes
 
 julia> 12hours
-12 hours
+12.0 hours
 
 julia> days_per_year = 365
 365
 julia> days_per_year * days
-365 days
+365.0 days
 
 julia> 10.0years
 10.0 years
 
 julia> 1centuries
-1 century
+1.0 centuries
 ```
 """
-struct Period{U<:TimeUnit, T}
+struct AstroPeriod{U<:TimeUnit, T}
     unit::U
-    Δt::T
+    second::Int64
+    fraction::T
+    error::T
 end
 
-value(p::Period) = p.Δt
-unit(p::Period) = p.unit
-Base.zero(p::Period) = Period(unit(p), zero(value(p)))
-Base.zero(p::Type{<:Period{U}}) where {U} = Period(U(), 0.0)
-Base.zero(p::Type{<:Period{U,T}}) where {U, T} = Period(U(), zero(T))
-Base.eltype(p::Period) = typeof(value(p))
-Base.eltype(p::Type{<:Period{U,T}}) where {U, T} = T
+function AstroPeriod(unit, dt)
+    isfinite(dt) || return AstroPeriod(unit, handle_infinity(dt)...)
 
-name(::Second, val::Integer) = ifelse(val == one(val), "second", "seconds")
-name(::Second, ::Any) = "seconds"
-name(::Minute, val::Integer) = ifelse(val == one(val), "minute", "minutes")
-name(::Minute, ::Any) = "minutes"
-name(::Hour, val::Integer) = ifelse(val == one(val), "hour", "hours")
-name(::Hour, ::Any) = "hours"
-name(::Day, val::Integer) = ifelse(val == one(val), "day", "days")
-name(::Day, ::Any) = "days"
-name(::Year, val::Integer) = ifelse(val == one(val), "year", "years")
-name(::Year, ::Any) = "years"
-name(::Century, val::Integer) = ifelse(val == one(val), "century", "centuries")
-name(::Century, ::Any) = "centuries"
+    seconds = dt * factor(unit)
+    int_seconds = floor(Int64, seconds)
+    fraction = seconds - int_seconds
+    return AstroPeriod(unit, int_seconds, fraction, zero(fraction))
+end
 
-function Base.show(io::IO, p::Period)
+
+(u::TimeUnit)(p::AstroPeriod) = AstroPeriod(u, p.second, p.fraction, p.error)
+
+"""
+    unit(p::AstroPeriod)
+
+Return the unit of the period `p`.
+
+### Examples ###
+
+```jldoctest; setup = :(using AstroTime)
+julia> unit(3.0seconds)
+AstroTime.Periods.Second()
+```
+"""
+unit(p::AstroPeriod) = p.unit
+
+"""
+    value(p::AstroPeriod)
+
+Return the unitless value of the period `p`.
+
+### Examples ###
+
+```jldoctest; setup = :(using AstroTime)
+julia> value(3.0seconds)
+3.0
+```
+"""
+value(p::AstroPeriod) = (p.fraction + p.second) / factor(unit(p))
+
+Base.zero(p::AstroPeriod) = AstroPeriod(unit(p), zero(value(p)))
+Base.zero(p::Type{<:AstroPeriod{U}}) where {U} = AstroPeriod(U(), 0.0)
+Base.zero(p::Type{<:AstroPeriod{U,T}}) where {U, T} = AstroPeriod(U(), zero(T))
+Base.eltype(p::AstroPeriod) = typeof(value(p))
+Base.eltype(p::Type{<:AstroPeriod{U,T}}) where {U, T} = T
+
+name(::Second) = "seconds"
+name(::Minute) = "minutes"
+name(::Hour) = "hours"
+name(::Day) = "days"
+name(::Year) = "years"
+name(::Century) = "centuries"
+
+function Base.show(io::IO, p::AstroPeriod)
     u = unit(p)
     v = value(p)
-    print(io, v, " ", name(u, v))
+    print(io, v, " ", name(u))
 end
 
-Base.:*(Δt::T, unit::TimeUnit) where {T<:Number} = Period(unit, Δt)
-Base.:*(unit::TimeUnit, Δt::T) where {T<:Number} = Period(unit, Δt)
+Base.:*(dt::Number, unit::TimeUnit) = AstroPeriod(unit, dt)
+Base.:*(unit::TimeUnit, dt::Number) = AstroPeriod(unit, dt)
 Base.:*(A::TimeUnit, B::AbstractArray) = broadcast(*, A, B)
 Base.:*(A::AbstractArray, B::TimeUnit) = broadcast(*, A, B)
 
-Base.:+(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt + p2.Δt)
-Base.:-(p1::Period{U}, p2::Period{U}) where {U}= Period(unit(p1), p1.Δt - p2.Δt)
-Base.:-(p::Period) = Period(unit(p), -p.Δt)
-Base.:*(x, p::Period) = Period(unit(p), p.Δt * x)
-Base.:*(p::Period, x) = Period(unit(p), p.Δt * x)
-Base.:/(p::Period, x) = Period(unit(p), p.Δt / x)
+Base.:-(p::AstroPeriod) = AstroPeriod(unit(p), -p.second, -p.fraction, -p.error)
 
-Base.isless(p1::Period{U}, p2::Period{U}) where {U} = isless(value(p1), value(p2))
-Base.isapprox(p1::Period{U}, p2::Period{U}) where {U} = value(p1) ≈ value(p2)
+function Base.:+(p1::AstroPeriod{U}, p2::AstroPeriod{U}) where U
+    second, fraction, error = apply_offset(p1.second, p1.fraction, p1.error, p2.second, p2.fraction, p2.error)
+    return AstroPeriod(U(), second, fraction, error)
+end
 
-(::Base.Colon)(start::Period{U,T}, stop::Period{U,T}) where {U,T} = (:)(start, one(T) * U(), stop)
+Base.:-(p1::AstroPeriod, p2::AstroPeriod) = p1 + (-p2)
+Base.:*(x, p::AstroPeriod) = AstroPeriod(unit(p), value(p) * x)
+Base.:*(p::AstroPeriod, x) = AstroPeriod(unit(p), value(p) * x)
+Base.:/(p::AstroPeriod, x) = AstroPeriod(unit(p), value(p) / x)
 
-function (::Base.Colon)(start::Period{U}, step::Period{U}, stop::Period{U}) where {U}
+Base.isless(p1::AstroPeriod{U}, p2::AstroPeriod{U}) where {U} = isless(value(p1), value(p2))
+Base.:(==)(p1::AstroPeriod{U}, p2::AstroPeriod{U}) where {U} = value(p1) == value(p2)
+function Base.isapprox(p1::AstroPeriod{U}, p2::AstroPeriod{U}; kwargs...) where {U}
+    return isapprox(value(p1), value(p2); kwargs...)
+end
+
+(::Base.Colon)(start::AstroPeriod{U,T}, stop::AstroPeriod{U,T}) where {U,T} = (:)(start, one(T) * U(), stop)
+
+function (::Base.Colon)(start::AstroPeriod{U}, step::AstroPeriod{U}, stop::AstroPeriod{U}) where {U}
     step = start < stop ? step : -step
     StepRangeLen(start, step, floor(Int, value(stop-start)/value(step))+1)
 end
 
-Period{U,T}(p::Period{U,T}) where {U,T} = p
+AstroPeriod{U,T}(p::AstroPeriod{U,T}) where {U,T} = p
 
-Base.step(r::StepRangeLen{<:Period}) = r.step
-
-(::Second)(p::Period{Second})   = p
-(::Second)(p::Period{Minute})   = Period(seconds, p.Δt * SECONDS_PER_MINUTE)
-(::Second)(p::Period{Hour})     = Period(seconds, p.Δt * SECONDS_PER_HOUR)
-(::Second)(p::Period{Day})      = Period(seconds, p.Δt * SECONDS_PER_DAY)
-(::Second)(p::Period{Year})     = Period(seconds, p.Δt * SECONDS_PER_YEAR)
-(::Second)(p::Period{Century})  = Period(seconds, p.Δt * SECONDS_PER_CENTURY)
-
-(::Minute)(p::Period{Second})   = Period(minutes, p.Δt / SECONDS_PER_MINUTE)
-(::Minute)(p::Period{Minute})   = p
-(::Minute)(p::Period{Hour})     = Period(minutes, p.Δt * MINUTES_PER_HOUR)
-(::Minute)(p::Period{Day})      = Period(minutes, p.Δt * MINUTES_PER_DAY)
-(::Minute)(p::Period{Year})     = Period(minutes, p.Δt * MINUTES_PER_YEAR)
-(::Minute)(p::Period{Century})  = Period(minutes, p.Δt * MINUTES_PER_CENTURY)
-
-(::Hour)(p::Period{Second})     = Period(hours, p.Δt / SECONDS_PER_HOUR)
-(::Hour)(p::Period{Minute})     = Period(hours, p.Δt / MINUTES_PER_HOUR)
-(::Hour)(p::Period{Hour})       = p
-(::Hour)(p::Period{Day})        = Period(hours, p.Δt * HOURS_PER_DAY)
-(::Hour)(p::Period{Year})       = Period(hours, p.Δt * HOURS_PER_YEAR)
-(::Hour)(p::Period{Century})    = Period(hours, p.Δt * HOURS_PER_CENTURY)
-
-(::Day)(p::Period{Second})      = Period(days, p.Δt / SECONDS_PER_DAY)
-(::Day)(p::Period{Minute})      = Period(days, p.Δt / MINUTES_PER_DAY)
-(::Day)(p::Period{Hour})        = Period(days, p.Δt / HOURS_PER_DAY)
-(::Day)(p::Period{Day})         = p
-(::Day)(p::Period{Year})        = Period(days, p.Δt * DAYS_PER_YEAR)
-(::Day)(p::Period{Century})     = Period(days, p.Δt * DAYS_PER_CENTURY)
-
-(::Year)(p::Period{Second})     = Period(years, p.Δt / SECONDS_PER_YEAR)
-(::Year)(p::Period{Minute})     = Period(years, p.Δt / MINUTES_PER_YEAR)
-(::Year)(p::Period{Hour})       = Period(years, p.Δt / HOURS_PER_YEAR)
-(::Year)(p::Period{Day})        = Period(years, p.Δt / DAYS_PER_YEAR)
-(::Year)(p::Period{Year})       = p
-(::Year)(p::Period{Century})    = Period(years, p.Δt * YEARS_PER_CENTURY)
-
-(::Century)(p::Period{Second})  = Period(centuries, p.Δt / SECONDS_PER_CENTURY)
-(::Century)(p::Period{Minute})  = Period(centuries, p.Δt / MINUTES_PER_CENTURY)
-(::Century)(p::Period{Hour})    = Period(centuries, p.Δt / HOURS_PER_CENTURY)
-(::Century)(p::Period{Day})     = Period(centuries, p.Δt / DAYS_PER_CENTURY)
-(::Century)(p::Period{Year})    = Period(centuries, p.Δt / YEARS_PER_CENTURY)
-(::Century)(p::Period{Century}) = p
+Base.step(r::StepRangeLen{<:AstroPeriod}) = r.step
 
 end

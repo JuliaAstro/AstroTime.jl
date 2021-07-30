@@ -1,6 +1,6 @@
 name = "AstroTime"
 uuid = "c61b5328-d09d-5e37-a9a8-0eb41c39009c"
-version = "0.6.2"
+version = "0.7.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -12,15 +12,15 @@ MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 
 [compat]
-ERFA = "0.5, 0.6"
+ERFA = "0.5, 0.6, 1.0"
 EarthOrientation = "0.7"
 ItemGraphs = "0.4"
 LeapSeconds = "1.1"
 MacroTools = "0.5"
-Measurements = "2.2"
+Measurements = "2"
 MuladdMacro = "0.2"
 Reexport = "0.2, 1"
-julia = "1"
+julia = "1.3"
 
 [extras]
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"

@@ -18,6 +18,7 @@ import ..EPOCH_ISO_FORMAT
 import ..AstroDates: Date, DateTime, Time
 import ..AstroDates: calendar, fractionofday, fractionofsecond, secondinday, subsecond
 import ..AstroDates: j2000, julian, julian_twopart
+import ..AccurateArithmetic: apply_offset, two_sum
 
 using ..TimeScales: find_path
 
