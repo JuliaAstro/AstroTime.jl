@@ -24,11 +24,11 @@ julia> import Pkg; Pkg.add("AstroTime")
 # Create an Epoch based on the TT (Terrestial Time) scale
 tt = TTEpoch("2018-01-01T12:00:00")
 
-# Transform to UTC (Universal Time Coordinated)
-utc = UTCEpoch(tt)
+# Transform to TAI (International Atomic Time)
+tai = TAIEpoch(tt)
 
 # Transform to TDB (Barycentric Dynamical Time)
-utc = TDBEpoch(utc)
+tdb = TDBEpoch(tai)
 
 # Shift an Epoch by one day
 another_day = tt + 1days

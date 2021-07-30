@@ -2,12 +2,17 @@
 
 This tutorial will walk you through the features and functionality of AstroTime.jl.
 Everything in this package revolves around the `Epoch` data type.
-`Epochs` are a high-precision, time-scale aware version of the [`DateTime`](https://docs.julialang.org/en/v1.0/stdlib/Dates) type from Julia's standard library.
-This means that while `DateTime` timestamps are always assumed to be based on Universal Time (UT), `Epochs` can be created in several pre-defined time scales or custom user-defined time scales.
+`Epochs` are a high-precision, time-scale aware version of the
+[`DateTime`](https://docs.julialang.org/en/v1.0/stdlib/Dates) type from Julia's standard
+library.
+This means that while `DateTime` timestamps are always assumed to be based on Universal
+Time (UT), `Epochs` can be created in several pre-defined time scales or custom user-defined
+time scales.
 
 ## Creating Epochs
 
-You construct `Epoch` instances similar to `DateTime` instance, for example by using date and time components.
+You construct `Epoch` instances similar to `DateTime` instances, for example by using date
+and time components.
 The main difference is that you need to supply the time scale to be used.
 Out of the box, the following time scales are defined:
 
@@ -18,6 +23,11 @@ Out of the box, the following time scales are defined:
 - [`TCB`](@ref): [Barycentric Coordinate Time](https://en.wikipedia.org/wiki/Barycentric_Coordinate_Time)
 - [`TDB`](@ref): [Barycentric Dynamical Time](https://en.wikipedia.org/wiki/Barycentric_Dynamical_Time)
 
+Conspicuously missing from this list is [Coordinated Universal Time (UTC)](https://en.wikipedia.org/wiki/Coordinated_Universal_Time).
+While AstroTime.jl does support UTC, it requires special treatment due to the discontinuities
+in the time scale from the introduction of leap seconds.
+See [UTC and Leap Seconds](@ref) for more details.
+
 [^1]:
     Transformations to and from UT1 depend on the measured quantity ΔUT1 which is
     published in [IERS](https://www.iers.org) tables on a weekly basis. AstroTime.jl can
@@ -27,13 +37,16 @@ Out of the box, the following time scales are defined:
 ```julia
 using AstroTime
 
-ep = Epoch{CoordinatedUniversalTime}(2018, 2, 6, 20, 45, 0.0)
+ep = Epoch{InternationalAtomicTime}(2018, 2, 6, 20, 45, 0.0)
 
 # The following shorthand syntax also works
-ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
+ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 
 # Or in another time scale
-ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
+ep = TTEpoch(2018, 2, 6, 20, 45, 0.0)
+
+# Or use UTC with leap second handling
+ep = from_utc(2018, 2, 6, 20, 45, 0.0)
 ```
 
 You can also parse an `Epoch` from a string.
@@ -41,44 +54,45 @@ AstroTime.jl uses the [`DateFormat`](https://docs.julialang.org/en/stable/stdlib
 For example:
 
 ```julia
-ep = UTCEpoch("2018-02-06T20:45:00.000", "yyyy-mm-ddTHH:MM:SS.sss")
+ep = TAIEpoch("2018-02-06T20:45:00.000", "yyyy-mm-ddTHH:MM:SS.fff")
 
-# The format string above `yyyy-mm-ddTHH:MM:SS.sss` is also the default format.
+# The format string above `yyyy-mm-ddTHH:MM:SS.fff` is also the default format.
 # Thus, this also works...
-ep = UTCEpoch("2018-02-06T20:45:00.000")
+ep = TAIEpoch("2018-02-06T20:45:00.000")
 
 import Dates
 
 # You can also reuse the format string
 df = Dates.dateformat"dd.mm.yyyy HH:MM"
 
-utc = UTCEpoch("06.02.2018 20:45", df)
+utc = from_utc("06.02.2018 20:45", df)
 tai = TAIEpoch("06.02.2018 20:45", df)
 ```
 
-There are two additional character codes supported.
+There are three additional character codes supported.
 
+- `f`: This character code is parsed as the fraction of the current second and supports an arbitrary number of decimal places.
 - `t`: This character code is parsed as the time scale.
 - `D`: This character code is parsed as the day number within a year.
 
 ```julia
 # The time scale can be omitted from the constructor because it is already
 # defined in the input string
-julia> Epoch("2018-02-06T20:45:00.000 UTC", "yyyy-mm-ddTHH:MM:SS.sss ttt")
-2018-02-06T20:45:00.000 UTC
+julia> Epoch("2018-02-06T20:45:00.000 TAI", "yyyy-mm-ddTHH:MM:SS.fff ttt")
+2018-02-06T20:45:00.000 TAI
 
 # February 6 is the 37th day of the year
-julia> UTCEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.sss")
-2018-02-06T20:45:00.000 UTC
+julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff")
+2018-02-06T20:45:00.000 TAI
 ```
 
 When printing `Epochs`, you can format the output in the same way.
 
 ```julia
-julia> ep = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-2018-02-06T20:45:00.000 UTC
+julia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 TAI
 julia> AstroTime.format(ep, "dd.mm.yyyy HH:MM ttt")
-06.02.2018 20:45 UTC
+06.02.2018 20:45 TAI
 ```
 
 ## Working with Epochs and Periods
@@ -108,31 +122,31 @@ The following time units are available:
 To shift an `Epoch` forward in time add an `AstroPeriod` to it.
 
 ```julia
-julia> ep = UTCEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 UTC
+julia> ep = TAIEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TAI
 
 julia> ep + 1days
-2000-01-02T00:00:00.000 UTC
+2000-01-02T00:00:00.000 TAI
 ```
 
 Or subtract it to shift the `Epoch` backwards.
 
 ```julia
-julia> ep = UTCEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 UTC
+julia> ep = TAIEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TAI
 
 julia> ep - 1days
-1999-12-31T00:00:00.000 UTC
+1999-12-31T00:00:00.000 TAI
 ```
 
 If you subtract two epochs you will receive the time between them as an `AstroPeriod`.
 
 ```julia
-julia> ep1 = UTCEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 UTC
+julia> ep1 = TAIEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TAI
 
-julia> ep2 = UTCEpoch(2000, 1, 2)
-2000-01-02T00:00:00.000 UTC
+julia> ep2 = TAIEpoch(2000, 1, 2)
+2000-01-02T00:00:00.000 TAI
 
 julia> ep2 - ep1
 86400.0 seconds
@@ -159,23 +173,94 @@ julia> value(days(dt))
 1.0
 ```
 
+## Ranges
+
+You can also construct ranges of `Epoch`s. The default step size one second.
+
+```julia
+julia> TAIEpoch(2021, 7, 30, 17, 34, 30.0):TAIEpoch(2021, 7, 30, 17, 34, 31.0)
+2021-07-30T17:34:30.000 TAI:1.0 seconds:2021-07-30T17:34:31.000 TAI
+```
+
+Or you can adjust the step size with any of the units supported.
+
+```julia
+julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
+5-element Vector{TAIEpoch{Float64}}:
+ 2000-01-01T00:00:00.000 TAI
+ 2000-01-02T00:00:00.000 TAI
+ 2000-01-03T00:00:00.000 TAI
+ 2000-01-04T00:00:00.000 TAI
+ 2000-01-05T00:00:00.000 TAI
+```
+
 ## Converting Between Time Scales
 
 You convert an `Epoch` to another time scale by constructing a new `Epoch` with the
 target time scale from it.
 
 ```julia
-julia> utc = UTCEpoch(2018, 2, 6, 20, 45, 0.0)
-2018-02-06T20:45:00.000 UTC
+julia> tai = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
+2018-02-06T20:45:00.000 TAI
 
-julia> tai = TAIEpoch(utc) # Convert to TAI
+julia> tt = TTEpoch(tai) # Convert to TT
+2018-02-06T20:45:32.184 TT
+```
+
+### UTC and Leap Seconds
+
+UTC is the primary civil time standard and aims to provide a time scale based on TAI and
+uniform SI seconds that is at the same time aligned with UT1 which is based on solar time
+and governed by the rotation of the Earth. The problem is that Earth's rotation speed is
+much more irregular compared to atomic clocks which define the SI second.
+Over the past decades, Earth's rotation has continuously slowed and thus TAI has been
+running ahead of UT1.
+
+Leap seconds are inserted into the UTC time scale to keep it within 0.9 seconds of UT1.
+This introduces ambiguities in AstroTime.jl's data model (see [#50](@ref)).
+As a consequence, `UTCEpoch`s are not supported.
+Nevertheless, UTC is supported as an I/O format for timestamps through the
+[`from_utc`](@ref) and [`to_utc`](@ref) functions.
+
+The last leap second was introduced at the end of December 31, 2016. You can create a
+`TAIEpoch` (or other `Epoch`s) from a UTC date with proper leap second handling:
+
+```julia
+julia> from_utc(2016, 12, 31, 23, 59, 60.0)
+2017-01-01T00:00:36.000 TAI
+
+julia> from_utc("2016-12-31T23:59:60.0")
+2017-01-01T00:00:36.000 TAI
+
+julia> from_utc("2016-12-31T23:59:60.0", scale=TDB)
+2017-01-01T00:01:08.183 TDB
+```
+
+You can also use `Dates.DateTime` but note that you cannot represent a leap second
+date with it.
+
+```julia
+julia> tai = from_utc(Dates.DateTime(2018, 2, 6, 20, 45, 0, 0))
 2018-02-06T20:45:37.000 TAI
+```
+
+And go back to UTC:
+
+```julia
+julia> to_utc(tai)
+"2018-02-06T20:45:00.000"
+
+julia> to_utc(String, tai, Dates.dateformat"yyyy-mm-dd")
+"2018-02-06"
+
+julia> to_utc(Dates.DateTime, tai)
+2018-02-06T20:45:00
 ```
 
 ### High-Precision Conversions and Custom Offsets
 
 Some time scale transformations depend on measured quantities which cannot be accurately
-predicted (e.g. UTC to UT1) or there are different algortihms which offer variable levels
+predicted (e.g. UT1) or there are different algorithms which offer variable levels
 of accuracy.
 For the former, AstroTime.jl can download the required data automatically from the internet.
 You need to run `AstroTime.update()` periodically (weekly) to keep this data up-to-date.
@@ -274,24 +359,24 @@ julia> import Dates; Dates.DateTime(ep)
 AstroTime.jl enables you to create your own first-class time scales via the [`@timescale`](@ref) macro.
 The macro will define the necessary structs and register the new time scale.
 
-Let's start with a simple example and assume that you want to define `GMT` as an alias for `UTC`.
+Let's start with a simple example and assume that you want to define `EphemerisTime` as an alias for `TDB`.
 You need to provide the name of the time scale and optionally a "parent" time scale to which it is linked.
 
 ```julia
-@timescale GMT UTC
+@timescale EphemerisTime TDB
 ```
 
 At this point, you can already use the new time scale to create epochs.
 
 ```julia
-julia> GMT
-GMT
+julia> EphemerisTime
+EphemerisTime
 
-julia> typeof(GMT)
-GMTScale
+julia> typeof(EphemerisTime)
+EphemerisTimeScale
 
-julia> gmt = GMTEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 GMT
+julia> et = EphemerisTimeEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 EphemerisTime
 ```
 
 Conversion to other `Epoch` types will not yet work for the newly created time
@@ -300,29 +385,28 @@ If you are unsure which methods are needed, you can try to transform the epoch
 and the resulting error message will provide a hint.
 
 ```julia
-julia> UTCEpoch(gmt)
-ERROR: No conversion 'GMT->UTC' available. If one of these is a custom time scale,
-you may need to define `AstroTime.Epochs.getoffset(::GMTScale, ::CoordinatedUniversalTime,
-second, fraction, args...)`.
+julia> TDBEpoch(et)
+ERROR: No conversion 'EphemerisTime->TDB' available. If one of these is a custom time scale,
+you may need to define `AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction, args...)`.
 ```
 
-To enable transformations between `GMT` and `UTC` in both directions you need
+To enable transformations between `EphemerisTime` and `TDB` in both directions you need
 to define the following methods.
-Since `GMT` is the same offset as `UTC`, these can just return zero.
+Since `EphemerisTime` and `TDB` are identical, the offset between them is zero.
 
 ```julia
-AstroTime.Epochs.getoffset(::GMTType, ::CoordinatedUniversalTime, second, fraction) = 0.0
-AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::GMTType, second, fraction) = 0.0
+AstroTime.Epochs.getoffset(::EphemerisTimeType, ::CoordinatedUniversalTime, second, fraction) = 0.0
+AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::EphemerisTimeType, second, fraction) = 0.0
 ```
 
-You can now use `GMTEpoch` like any other epoch type, e.g.
+You can now use `EphemerisTimeEpoch` like any other epoch type, e.g.
 
 ```julia
-julia> ep = UTCEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 UTC
+julia> ep = TDBEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TDB
 
-julia> GMTEpoch(ep)
-2000-01-01T00:00:00.000 GMT
+julia> EphemerisTimeEpoch(ep)
+2000-01-01T00:00:00.000 EphemerisTime
 ```
 
 For a more complex example, let's reimplement the Geocentric Coordinate
@@ -365,13 +449,13 @@ which is the distance of the spacecraft from Earth.
 ```julia
 const speed_of_light = 299792458.0 # m/s
 
-@timescale SCET UTC
+@timescale SCET TAI
 
-function AstroTime.Epochs.getoffset(::SCETType, ::CoordinatedUniversalTime,
+function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
                                     second, fraction, distance)
     return distance / speed_of_light
 end
-function AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::SCETType,
+function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
                                     second, fraction, distance)
     return -distance / speed_of_light
 end
@@ -385,11 +469,11 @@ For example, for a spacecraft that is one astronomical unit away from Earth:
 julia> astronomical_unit = 149597870700.0 # m
 149597870700.0
 
-julia> ep = UTCEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 UTC
+julia> ep = TAIEpoch(2000, 1, 1)
+2000-01-01T00:00:00.000 TAI
 
 julia> SCETEpoch(ep, astronomical_unit)
-2000-01-01T00:08:19.005 SCET
+1999-12-31T23:51:40.995 SCET
 ```
 
 !!! note
@@ -401,7 +485,8 @@ default graph of time scales by defining a time scale without a parent.
 ```julia
 julia> @timescale Disjoint
 
-julia> typeof(Disjoint) = DisjointScale
+julia> typeof(Disjoint)
+DisjointScale
 ```
 
 By defining additional time scales connected to this scale and the appropriate
