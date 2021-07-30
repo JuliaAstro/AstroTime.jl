@@ -111,7 +111,7 @@ Return the unit of the period `p`.
 
 ```jldoctest; setup = :(using AstroTime)
 julia> unit(3.0seconds)
-Second()
+AstroTime.Periods.Second()
 ```
 """
 unit(p::AstroPeriod) = p.unit

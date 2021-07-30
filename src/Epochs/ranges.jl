@@ -1,4 +1,4 @@
-(::Base.Colon)(start::Epoch{S}, stop::Epoch{S}) where {S} = (:)(start, 1.0days, stop)
+(::Base.Colon)(start::Epoch{S}, stop::Epoch{S}) where {S} = (:)(start, 1.0seconds, stop)
 
 function (::Base.Colon)(start::Epoch{S}, step::AstroPeriod, stop::Epoch{S}) where S
     step = seconds(step)

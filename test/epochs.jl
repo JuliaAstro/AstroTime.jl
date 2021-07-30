@@ -41,6 +41,9 @@ import ERFA
         @test to_utc(during_act) == during
         @test to_utc(after_act) == after
 
+        dt = Dates.DateTime(2016, 12, 31, 23, 59, 59, 300)
+        @test dt == to_utc(Dates.DateTime, from_utc(dt))
+
         sixties = AstroTime.DateTime(1961, 3, 5, 23, 4, 12.0)
         sixties_exp = (second=-1225198547, fraction=0.5057117799999999)
         sixties_act = from_utc(sixties)
@@ -233,11 +236,11 @@ import ERFA
         @test Dates.DateTime(ep) == Dates.DateTime(y, m, d, hr, mn, 59, 371)
     end
     @testset "Ranges" begin
-        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 2, 1)
-        @test step(rng) == 86400.0seconds
-        @test length(rng) == 32
+        rng = TAIEpoch(2018, 1, 1):TAIEpoch(2018, 1, 2)
+        @test step(rng) == 1seconds
+        @test length(rng) == 86401
         @test first(rng) == TAIEpoch(2018, 1, 1)
-        @test last(rng) == TAIEpoch(2018, 2, 1)
+        @test last(rng) == TAIEpoch(2018, 1, 2)
         rng = TAIEpoch(2018, 1, 1):13seconds:TAIEpoch(2018, 1, 1, 0, 1)
         @test step(rng) == 13seconds
         @test last(rng) == TAIEpoch(2018, 1, 1, 0, 0, 52.0)
