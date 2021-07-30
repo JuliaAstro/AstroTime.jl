@@ -59,21 +59,21 @@ function from_utc(str::AbstractString,
         dateformat::Dates.DateFormat=Dates.default_format(AstroDates.DateTime);
         scale::TimeScale=TAI)
     dt = AstroDates.DateTime(str, dateformat)
-    return from_utc(dt; scale)
+    return from_utc(dt; scale=scale)
 end
 
 function from_utc(year::Integer, month::Integer, day::Integer,
     hour::Integer=0, minute::Integer=0, second::Integer=0, fraction=0.0;
     scale::TimeScale=TAI)
     dt = DateTime(year, month, day, hour, minute, second, fraction)
-    return from_utc(dt; scale)
+    return from_utc(dt; scale=scale)
 end
 
 function from_utc(year::Integer, month::Integer, day::Integer,
     hour::Integer, minute::Integer, seconds;
     scale::TimeScale=TAI)
     dt = DateTime(year, month, day, hour, minute, seconds)
-    return from_utc(dt; scale)
+    return from_utc(dt; scale=scale)
 end
 
 from_utc(dt::Dates.DateTime; scale::S=TAI) where {S} = from_utc(DateTime(dt); scale)
