@@ -23,7 +23,7 @@ code `t` which is parsed as the time scale.  The default format is `yyyy-mm-ddTH
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> Epoch("2018-02-06T20:45:00.0 TAI")
 2018-02-06T20:45:00.000 TAI
 
@@ -46,7 +46,7 @@ be used which is parsed as "day of year" (see the example below).  The default f
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> Epoch{InternationalAtomicTime}("2018-02-06T20:45:00.0")
 2018-02-06T20:45:00.000 TAI
 
@@ -57,11 +57,14 @@ julia> Epoch{InternationalAtomicTime}("2018-037T00:00", "yyyy-DDDTHH:MM")
 2018-02-06T00:00:00.000 TAI
 ```
 """
-function Epoch{S}(str::AbstractString, format::Dates.DateFormat=Dates.default_format(Epoch{S})) where S
+function Epoch{S}(str::AbstractString,
+                  format::Dates.DateFormat=Dates.default_format(Epoch{S})) where S
     return Dates.parse(Epoch{S}, str, format)
 end
 
-Epoch{S}(str::AbstractString, format::AbstractString) where {S} = Epoch{S}(str, Dates.DateFormat(format))
+function Epoch{S}(str::AbstractString, format::AbstractString) where {S}
+    return Epoch{S}(str, Dates.DateFormat(format))
+end
 
 Epoch{S}(d::Date) where {S} = Epoch{S}(d, AstroDates.H00)
 
@@ -75,7 +78,7 @@ Construct an `Epoch` with time scale `S` from date and time components.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> Epoch{InternationalAtomicTime}(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
 

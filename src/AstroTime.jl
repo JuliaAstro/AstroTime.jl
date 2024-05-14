@@ -190,14 +190,14 @@ Define a new time scale and the corresponding `Epoch` type alias.
 
 # Example
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> @timescale GMT TAI
 
 julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMTScale, T} where T
+Epoch{GMTScale}
 
 julia> find_path(TT, GMT)
 3-element Vector{TimeScale}:

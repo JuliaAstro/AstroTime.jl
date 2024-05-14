@@ -14,7 +14,7 @@ variant of Julian date that is used. Possible values are:
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> Epoch{InternationalAtomicTime}(0.0days, 0.5days)
 2000-01-02T00:00:00.000 TAI
 
@@ -57,7 +57,7 @@ If the type argument `T` is present, the result is converted to `T` instead.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
 
@@ -101,7 +101,7 @@ Return the J2000 Julian Date for epoch `ep`.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> j2000(TAIEpoch(2000, 1, 1, 12))
 0.0 days
 ```
@@ -115,7 +115,7 @@ Return the Julian Date for epoch `ep`.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> julian(TAIEpoch(2000, 1, 1, 12))
 2.451545e6 days
 ```
@@ -129,7 +129,7 @@ Return the Modified Julian Date for epoch `ep`.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> modified_julian(TAIEpoch(2000, 1, 1, 12))
 51544.5 days
 ```
@@ -144,7 +144,7 @@ of the Julian day number and the fraction of the day.
 
 ### Example ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> julian_twopart(TAIEpoch(2000, 1, 2))
 (2.451545e6 days, 0.5 days)
 ```

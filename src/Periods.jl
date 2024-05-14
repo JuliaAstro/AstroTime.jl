@@ -61,7 +61,7 @@ An `AstroPeriod` object represents a time interval of `Δt` with a [`TimeUnit`](
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> 3.0seconds
 3.0 seconds
 
@@ -109,7 +109,7 @@ Return the unit of the period `p`.
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> unit(3.0seconds)
 AstroTime.Periods.Second()
 ```
@@ -123,7 +123,7 @@ Return the unitless value of the period `p`.
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime)
+```jldoctest
 julia> value(3.0seconds)
 3.0
 ```

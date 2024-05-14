@@ -13,7 +13,7 @@ time components.
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime; import Dates)
+```jldoctest; setup = :(import Dates)
 julia> from_utc(2016, 12, 31, 23, 59, 60, 0.0)
 2017-01-01T00:00:36.000 TAI
 
@@ -39,7 +39,7 @@ Create a UTC timestamp or `Dates.DateTime` from an `Epoch` `ep`.
 
 ### Examples ###
 
-```jldoctest; setup = :(using AstroTime; import Dates)
+```jldoctest; setup = :(import Dates)
 julia> tai = from_utc(Dates.DateTime(2018, 2, 6, 20, 45, 0, 0))
 2018-02-06T20:45:37.000 TAI
 
@@ -146,4 +146,3 @@ end
 function Dates.now(::Type{Epoch})
     return from_utc(Dates.now(Dates.UTC); scale=TAI)
 end
-

@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using Dates
+    using AstroTime
+end
+```
 # Tutorial
 
 This tutorial will walk you through the features and functionality of AstroTime.jl.
@@ -49,9 +55,10 @@ ep = TTEpoch(2018, 2, 6, 20, 45, 0.0)
 ep = from_utc(2018, 2, 6, 20, 45, 0.0)
 ```
 
-You can also parse an `Epoch` from a string.
-AstroTime.jl uses the [`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat) type and specification language from the `Dates` module from Julia's standard library.
-For example:
+You can also parse an `Epoch` from a string. AstroTime.jl uses the
+[`DateFormat`](https://docs.julialang.org/en/stable/stdlib/Dates/#Dates.DateFormat)
+type and specification language from the `Dates` module from Julia's standard
+library. For example:
 
 ```julia
 ep = TAIEpoch("2018-02-06T20:45:00.000", "yyyy-mm-ddTHH:MM:SS.fff")
@@ -88,11 +95,12 @@ julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff")
 
 When printing `Epochs`, you can format the output in the same way.
 
-```julia
+```jldoctest
 julia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
+
 julia> AstroTime.format(ep, "dd.mm.yyyy HH:MM ttt")
-06.02.2018 20:45 TAI
+"06.02.2018 20:45 TAI"
 ```
 
 ## Working with Epochs and Periods
@@ -102,12 +110,12 @@ You can shift an `Epoch` in time by adding or subtracting an [`AstroPeriod`](@re
 AstroTime.jl provides a convenient way to construct periods by multiplying a value
 with a time unit.
 
-```julia
+```jldoctest
 julia> 23 * seconds
-23 seconds
+23.0 seconds
 
 julia> 1hours # You can use Julia's factor juxtaposition syntax and omit the `*`
-1 hour
+1.0 hours
 ```
 
 The following time units are available:
@@ -121,7 +129,7 @@ The following time units are available:
 
 To shift an `Epoch` forward in time add an `AstroPeriod` to it.
 
-```julia
+```jldoctest
 julia> ep = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -131,7 +139,7 @@ julia> ep + 1days
 
 Or subtract it to shift the `Epoch` backwards.
 
-```julia
+```jldoctest
 julia> ep = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -141,7 +149,7 @@ julia> ep - 1days
 
 If you subtract two epochs you will receive the time between them as an `AstroPeriod`.
 
-```julia
+```jldoctest
 julia> ep1 = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -155,7 +163,7 @@ julia> ep2 - ep1
 You can also construct an `AstroPeriod` with a different time unit from
 another `AstroPeriod`.
 
-```julia
+```jldoctest
 julia> dt = 86400.0seconds
 86400.0 seconds
 
@@ -165,7 +173,7 @@ julia> days(dt)
 
 To access the raw value of a period, i.e. without a unit, use the `value` function.
 
-```julia
+```jldoctest
 julia> dt = 86400.0seconds
 86400.0 seconds
 
@@ -177,14 +185,14 @@ julia> value(days(dt))
 
 You can also construct ranges of `Epoch`s. The default step size one second.
 
-```julia
+```jldoctest
 julia> TAIEpoch(2021, 7, 30, 17, 34, 30.0):TAIEpoch(2021, 7, 30, 17, 34, 31.0)
 2021-07-30T17:34:30.000 TAI:1.0 seconds:2021-07-30T17:34:31.000 TAI
 ```
 
 Or you can adjust the step size with any of the units supported.
 
-```julia
+```jldoctest
 julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
 5-element Vector{TAIEpoch{Float64}}:
  2000-01-01T00:00:00.000 TAI
@@ -199,7 +207,7 @@ julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
 You convert an `Epoch` to another time scale by constructing a new `Epoch` with the
 target time scale from it.
 
-```julia
+```jldoctest
 julia> tai = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
 
@@ -225,7 +233,7 @@ Nevertheless, UTC is supported as an I/O format for timestamps through the
 The last leap second was introduced at the end of December 31, 2016. You can create a
 `TAIEpoch` (or other `Epoch`s) from a UTC date with proper leap second handling:
 
-```julia
+```jldoctest
 julia> from_utc(2016, 12, 31, 23, 59, 60.0)
 2017-01-01T00:00:36.000 TAI
 
@@ -239,14 +247,14 @@ julia> from_utc("2016-12-31T23:59:60.0", scale=TDB)
 You can also use `Dates.DateTime` but note that you cannot represent a leap second
 date with it.
 
-```julia
+```jldoctest tai2utc
 julia> tai = from_utc(Dates.DateTime(2018, 2, 6, 20, 45, 0, 0))
 2018-02-06T20:45:37.000 TAI
 ```
 
 And go back to UTC:
 
-```julia
+```jldoctest tai2utc
 julia> to_utc(tai)
 "2018-02-06T20:45:00.000"
 
@@ -264,16 +272,16 @@ predicted (e.g. UT1) or there are different algorithms which offer variable leve
 of accuracy.
 For the former, AstroTime.jl can download the required data automatically from the internet.
 You need to run `AstroTime.update()` periodically (weekly) to keep this data up-to-date.
-For the latter, AstroTime.jl will use the alogrithm which provides the best trade-off between
-accuracy and performance for most applications.
+For the latter, AstroTime.jl will use the alogrithm which provides the best trade-off
+between accuracy and performance for most applications.
 
 If you cannot use the internet or want to use a different data source, e.g. a time ephemeris,
 to obtain the offset between time scales, you can use the following constructor for epochs
 which overrides the default algorithms.
 
 ```julia
-# AstroTime.jl provides a higher precision TDB<->TT transformation that is dependent on
-# the position of the observer on Earth
+# AstroTime.jl provides a higher precision TDB<->TT transformation that
+# is dependent on the position of the observer on Earth
 
 tt = TTEpoch(2018, 2, 6, 20, 46, 9.184)
 dt = getoffset(tt, TDB, elong, u, v)
@@ -293,7 +301,7 @@ Three different base epochs are supported:
 
 You can get Julian date in days from an `Epoch` like this:
 
-```julia
+```jldoctest
 julia> ep = TTEpoch(2000,1,2)
 2000-01-02T00:00:00.000 TT
 
@@ -309,7 +317,7 @@ julia> modified_julian(ep)
 
 To construct an `Epoch` from a Julian date do this:
 
-```julia
+```jldoctest
 julia> TTEpoch(0.5days) # J2000 is the default
 2000-01-02T00:00:00.000 TT
 
@@ -326,9 +334,8 @@ julia> TTEpoch(86400.0seconds, origin=:j2000)
 2000-01-02T12:00:00.000 TT
 ```
 
-Some libraries (such as [ERFA](https://github.com/JuliaAstro/ERFA.jl)) expect a two-part Julian date
-as input.
-You can use [`julian_twopart(ep)`](@ref) in this case.
+Some libraries (such as [ERFA](https://github.com/JuliaAstro/ERFA.jl)) expect a
+two-part Julian date as input. You can use [`julian_twopart(ep)`](@ref) in this case.
 If you need more control over the output, have a look at the [`julian_period`](@ref) function.
 
 !!! warning
@@ -338,7 +345,7 @@ If you need more control over the output, have a look at the [`julian_period`](@
 ## Converting to Standard Library Types
 
 `Epoch` instances satisfy the `AbstractDateTime` interface specified in the
-[Dates](https://docs.julialang.org/en/v1.0/stdlib/Dates) module of Julia's standard library. 
+[Dates](https://docs.julialang.org/en/v1.0/stdlib/Dates) module of Julia's standard library.
 Thus, you should be able to pass them to other libraries which expect a standard `DateTime`.
 Please open an issue on [the issue tracker](https://github.com/JuliaAstro/AstroTime.jl/issues)
 if you encounter any problems with this.
@@ -346,7 +353,7 @@ if you encounter any problems with this.
 It is nevertheless possible to convert an `Epoch` to a `DateTime` if it should become necessary.
 Please note that the time scale information will be lost in the process.
 
-```julia
+```jldoctest
 julia> ep = TTEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TT
 
@@ -362,13 +369,13 @@ The macro will define the necessary structs and register the new time scale.
 Let's start with a simple example and assume that you want to define `EphemerisTime` as an alias for `TDB`.
 You need to provide the name of the time scale and optionally a "parent" time scale to which it is linked.
 
-```julia
-@timescale EphemerisTime TDB
+```jldoctest custom-time-scale
+julia> @timescale EphemerisTime TDB
 ```
 
 At this point, you can already use the new time scale to create epochs.
 
-```julia
+```jldoctest custom-time-scale
 julia> EphemerisTime
 EphemerisTime
 
@@ -394,14 +401,15 @@ To enable transformations between `EphemerisTime` and `TDB` in both directions y
 to define the following methods.
 Since `EphemerisTime` and `TDB` are identical, the offset between them is zero.
 
-```julia
-AstroTime.Epochs.getoffset(::EphemerisTimeType, ::CoordinatedUniversalTime, second, fraction) = 0.0
-AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::EphemerisTimeType, second, fraction) = 0.0
+```jldoctest custom-time-scale
+julia> AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction) = 0.0;
+
+julia> AstroTime.Epochs.getoffset(::BarycentricDynamicalTime, ::EphemerisTimeScale, second, fraction) = 0.0;
 ```
 
 You can now use `EphemerisTimeEpoch` like any other epoch type, e.g.
 
-```julia
+```jldoctest custom-time-scale
 julia> ep = TDBEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TDB
 
@@ -446,28 +454,29 @@ which takes the one-way light time into account.
 You could use the following definitions adding the `distance` parameter
 which is the distance of the spacecraft from Earth.
 
-```julia
-const speed_of_light = 299792458.0 # m/s
+```jldoctest scet
+julia> const speed_of_light = 299792458.0; # m/s
 
-@timescale SCET TAI
+julia> @timescale SCET TAI
 
-function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
-                                    second, fraction, distance)
-    return distance / speed_of_light
-end
-function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
-                                    second, fraction, distance)
-    return -distance / speed_of_light
-end
+julia> function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
+                                           second, fraction, distance)
+           return distance / speed_of_light
+       end
+
+julia> function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
+                                           second, fraction, distance)
+           return -distance / speed_of_light
+       end
 ```
 
 If you want to convert another epoch to `SCET`, you now need to pass this
 additional parameter.
 For example, for a spacecraft that is one astronomical unit away from Earth:
 
-```julia
+```jldoctest scet
 julia> astronomical_unit = 149597870700.0 # m
-149597870700.0
+1.495978707e11
 
 julia> ep = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
@@ -482,7 +491,7 @@ julia> SCETEpoch(ep, astronomical_unit)
 You can also introduce time scales that are disjoint from AstroTime.jl's
 default graph of time scales by defining a time scale without a parent.
 
-```julia
+```jldoctest
 julia> @timescale Disjoint
 
 julia> typeof(Disjoint)
