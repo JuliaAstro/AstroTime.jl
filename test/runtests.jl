@@ -78,4 +78,6 @@ end
         @test find_path(OneWay, TDB) == []
         @test_throws NoPathError TDBEpoch(OneWayEpoch(2000, 1, 1))
     end
+
+    include("doctests.jl")
 end
