@@ -60,36 +60,46 @@ You can also parse an `Epoch` from a string. AstroTime.jl uses the
 type and specification language from the `Dates` module from Julia's standard
 library. For example:
 
-```julia
-ep = TAIEpoch("2018-02-06T20:45:00.000", "yyyy-mm-ddTHH:MM:SS.fff")
+```jldoctest
+julia> ep = TAIEpoch("2018-02-06T20:45:00.000", "yyyy-mm-ddTHH:MM:SS.fff")
+2018-02-06T20:45:00.000 TAI
+```
 
-# The format string above `yyyy-mm-ddTHH:MM:SS.fff` is also the default format.
-# Thus, this also works...
-ep = TAIEpoch("2018-02-06T20:45:00.000")
+The format string above `yyyy-mm-ddTHH:MM:SS.fff` is also the default format.
+Thus, this also works:
+```jldoctest
+julia> ep = TAIEpoch("2018-02-06T20:45:00.000")
+2018-02-06T20:45:00.000 TAI
+```
 
-import Dates
+You can also reuse the format string
+```jldoctest
+julia> import Dates
 
-# You can also reuse the format string
-df = Dates.dateformat"dd.mm.yyyy HH:MM"
+julia> df = Dates.dateformat"dd.mm.yyyy HH:MM"
+dateformat"dd.mm.yyyy HH:MM"
 
-utc = from_utc("06.02.2018 20:45", df)
-tai = TAIEpoch("06.02.2018 20:45", df)
+julia> utc = from_utc("06.02.2018 20:45", df)
+2018-02-06T20:45:37.000 TAI
+
+julia> tai = TAIEpoch("06.02.2018 20:45", df)
+2018-02-06T20:45:00.000 TAI
 ```
 
 There are three additional character codes supported.
 
-- `f`: This character code is parsed as the fraction of the current second and supports an arbitrary number of decimal places.
+- `f`: This character code is parsed as the fraction of the current second and
+       supports an arbitrary number of decimal places.
 - `t`: This character code is parsed as the time scale.
 - `D`: This character code is parsed as the day number within a year.
 
-```julia
-# The time scale can be omitted from the constructor because it is already
-# defined in the input string
+The time scale can be omitted from the constructor in the first example because
+it is already defined in the input string
+```jldoctest
 julia> Epoch("2018-02-06T20:45:00.000 TAI", "yyyy-mm-ddTHH:MM:SS.fff ttt")
 2018-02-06T20:45:00.000 TAI
 
-# February 6 is the 37th day of the year
-julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff")
+julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff") # February 6 is the 37th day of the year
 2018-02-06T20:45:00.000 TAI
 ```
 
@@ -204,8 +214,8 @@ julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
 
 ## Converting Between Time Scales
 
-You convert an `Epoch` to another time scale by constructing a new `Epoch` with the
-target time scale from it.
+You convert an `Epoch` to another time scale by constructing a new `Epoch` with
+the target time scale from it.
 
 ```jldoctest
 julia> tai = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
@@ -221,8 +231,8 @@ UTC is the primary civil time standard and aims to provide a time scale based on
 uniform SI seconds that is at the same time aligned with UT1 which is based on solar time
 and governed by the rotation of the Earth. The problem is that Earth's rotation speed is
 much more irregular compared to atomic clocks which define the SI second.
-Over the past decades, Earth's rotation has continuously slowed and thus TAI has been
-running ahead of UT1.
+Over the past decades, Earth's rotation has continuously slowed and thus TAI has
+been running ahead of UT1.
 
 Leap seconds are inserted into the UTC time scale to keep it within 0.9 seconds of UT1.
 This introduces ambiguities in AstroTime.jl's data model (see [#50](@ref)).
@@ -230,8 +240,8 @@ As a consequence, `UTCEpoch`s are not supported.
 Nevertheless, UTC is supported as an I/O format for timestamps through the
 [`from_utc`](@ref) and [`to_utc`](@ref) functions.
 
-The last leap second was introduced at the end of December 31, 2016. You can create a
-`TAIEpoch` (or other `Epoch`s) from a UTC date with proper leap second handling:
+The last leap second was introduced at the end of December 31, 2016. You can create
+a `TAIEpoch` (or other `Epoch`s) from a UTC date with proper leap second handling:
 
 ```jldoctest
 julia> from_utc(2016, 12, 31, 23, 59, 60.0)
@@ -267,17 +277,17 @@ julia> to_utc(Dates.DateTime, tai)
 
 ### High-Precision Conversions and Custom Offsets
 
-Some time scale transformations depend on measured quantities which cannot be accurately
-predicted (e.g. UT1) or there are different algorithms which offer variable levels
-of accuracy.
+Some time scale transformations depend on measured quantities which cannot be
+accurately predicted (e.g. UT1) or there are different algorithms which offer
+variable levels of accuracy.
 For the former, AstroTime.jl can download the required data automatically from the internet.
 You need to run `AstroTime.update()` periodically (weekly) to keep this data up-to-date.
 For the latter, AstroTime.jl will use the alogrithm which provides the best trade-off
 between accuracy and performance for most applications.
 
-If you cannot use the internet or want to use a different data source, e.g. a time ephemeris,
-to obtain the offset between time scales, you can use the following constructor for epochs
-which overrides the default algorithms.
+If you cannot use the internet or want to use a different data source, e.g. a
+time ephemeris, to obtain the offset between time scales, you can use the
+following constructor for epochs which overrides the default algorithms.
 
 ```julia
 # AstroTime.jl provides a higher precision TDB<->TT transformation that
@@ -339,8 +349,8 @@ two-part Julian date as input. You can use [`julian_twopart(ep)`](@ref) in this 
 If you need more control over the output, have a look at the [`julian_period`](@ref) function.
 
 !!! warning
-    You should not convert an `Epoch` to a Julian date to do arithmetic because this will result in a loss
-    of accuracy.
+    You should not convert an `Epoch` to a Julian date to do arithmetic because
+    this will result in a loss of accuracy.
 
 ## Converting to Standard Library Types
 
@@ -501,4 +511,3 @@ DisjointScale
 By defining additional time scales connected to this scale and the appropriate
 `getoffset` methods, you can create your own graph of time scales that is
 completely independent of the defaults provided by the library.
-
