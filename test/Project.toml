@@ -1,5 +1,6 @@
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 ERFA = "17511681-8477-586a-8d98-4cfd5a1f2ec3"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 SPICE = "5bab7191-041a-5c2e-a744-024b9c3a5062"

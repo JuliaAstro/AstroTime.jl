@@ -1,5 +1,4 @@
 using AstroTime.AstroDates
-import Dates
 
 const REFERENCES = (
     (-4713, 12, 31, -2451546),

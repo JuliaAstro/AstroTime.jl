@@ -1,6 +1,4 @@
-using Test
 using Documenter
-using AstroTime
 
 @testset "Doctests" begin
     setup = quote
