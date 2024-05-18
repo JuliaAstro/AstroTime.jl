@@ -2,6 +2,8 @@ using AstroTime
 using Dates
 using Test
 
+include("doctests.jl")
+
 AstroTime.load_test_eop()
 
 const speed_of_light = 299792458.0 # m/s
@@ -39,6 +41,7 @@ end
     include("periods.jl")
     include("astrodates.jl")
     include("epochs.jl")
+
     @testset "Custom Time Scales" begin
         # TODO: Change me
         tai = TAIEpoch(2000, 1, 1, 0, 0, 0.1)
@@ -78,6 +81,4 @@ end
         @test find_path(OneWay, TDB) == []
         @test_throws NoPathError TDBEpoch(OneWayEpoch(2000, 1, 1))
     end
-
-    include("doctests.jl")
 end
