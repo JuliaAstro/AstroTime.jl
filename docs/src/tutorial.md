@@ -472,35 +472,32 @@ which takes the one-way light time into account.
 You could use the following definitions adding the `distance` parameter
 which is the distance of the spacecraft from Earth.
 
-```jldoctest scet
-julia> const speed_of_light = 299792458.0; # m/s
+```@example scet
+using AstroTime # hide
+const speed_of_light = 299792458.0 # m/s
 
-julia> @timescale SCET TAI
+@timescale SCET TAI
 
-julia> function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
-                                           second, fraction, distance)
-           return distance / speed_of_light
-       end
+function AstroTime.Epochs.getoffset(::SCETScale, ::InternationalAtomicTime,
+                                    second, fraction, distance)
+    return distance / speed_of_light
+end
 
-julia> function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
-                                           second, fraction, distance)
-           return -distance / speed_of_light
-       end
+function AstroTime.Epochs.getoffset(::InternationalAtomicTime, ::SCETScale,
+                                    second, fraction, distance)
+    return -distance / speed_of_light
+end
+nothing # hide
 ```
 
 If you want to convert another epoch to `SCET`, you now need to pass this
 additional parameter.
 For example, for a spacecraft that is one astronomical unit away from Earth:
 
-```jldoctest scet
-julia> astronomical_unit = 149597870700.0 # m
-1.495978707e11
-
-julia> ep = TAIEpoch(2000, 1, 1)
-2000-01-01T00:00:00.000 TAI
-
-julia> SCETEpoch(ep, astronomical_unit)
-1999-12-31T23:51:40.995 SCET
+```@repl scet
+astronomical_unit = 149597870700.0 # m
+ep = TAIEpoch(2000, 1, 1)
+SCETEpoch(ep, astronomical_unit)
 ```
 
 !!! note
