@@ -379,13 +379,13 @@ The macro will define the necessary structs and register the new time scale.
 Let's start with a simple example and assume that you want to define `EphemerisTime` as an alias for `TDB`.
 You need to provide the name of the time scale and optionally a "parent" time scale to which it is linked.
 
-```jldoctest custom-time-scale
+```jldoctest custom_timescale
 julia> @timescale EphemerisTime TDB
 ```
 
 At this point, you can already use the new time scale to create epochs.
 
-```jldoctest custom-time-scale
+```jldoctest custom_timescale
 julia> EphemerisTime
 EphemerisTime
 
@@ -401,25 +401,33 @@ because you need to provide the necessary methods for `getoffset`.
 If you are unsure which methods are needed, you can try to transform the epoch
 and the resulting error message will provide a hint.
 
-```julia
+```jldoctest custom_timescale
 julia> TDBEpoch(et)
-ERROR: No conversion 'EphemerisTime->TDB' available. If one of these is a custom time scale,
-you may need to define `AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction, args...)`.
+ERROR: No conversion 'EphemerisTime->TDB' available. If one of these is a custom time scale, you may need to define `AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction, args...)`.
+[...]
 ```
 
 To enable transformations between `EphemerisTime` and `TDB` in both directions you need
 to define the following methods.
 Since `EphemerisTime` and `TDB` are identical, the offset between them is zero.
 
-```jldoctest custom-time-scale
-julia> AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction) = 0.0;
+```jldoctest custom_timescale
+julia> function AstroTime.Epochs.getoffset(
+               ::EphemerisTimeScale, ::BarycentricDynamicalTime,
+               second, fraction)
+           return 0.0
+       end
 
-julia> AstroTime.Epochs.getoffset(::BarycentricDynamicalTime, ::EphemerisTimeScale, second, fraction) = 0.0;
+julia> function AstroTime.Epochs.getoffset(
+               ::BarycentricDynamicalTime, ::EphemerisTimeScale,
+               second, fraction)
+           return 0.0
+       end
 ```
 
 You can now use `EphemerisTimeEpoch` like any other epoch type, e.g.
 
-```jldoctest custom-time-scale
+```jldoctest custom_timescale
 julia> ep = TDBEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TDB
 
