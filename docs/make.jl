@@ -14,6 +14,7 @@ makedocs(
     authors = "Helge Eichhorn and the AstroTime.jl contributors",
     pages = pages,
     strict = true,
+    checkdocs = :exports,
 )
 
 deploydocs(
