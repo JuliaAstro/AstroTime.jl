@@ -131,7 +131,7 @@ Get the current date and time as an `Epoch`. The default time scale is TAI.
 
 # Example
 
-```julia
+```julia-repl
 julia> now(Epoch)
 2021-04-11T13:20:29.160 TAI
 
@@ -146,4 +146,3 @@ end
 function Dates.now(::Type{Epoch})
     return from_utc(Dates.now(Dates.UTC); scale=TAI)
 end
-
