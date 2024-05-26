@@ -197,7 +197,7 @@ julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMTScale, T} where T
+Epoch{GMTScale}
 
 julia> find_path(TT, GMT)
 3-element Vector{TimeScale}:
