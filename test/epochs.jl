@@ -82,8 +82,14 @@ import ERFA
         t0 = TTEpoch(2000, 1, 1, 12, 0, 32.0)
         t1 = TAIEpoch(2000, 1, 1, 12, 0, 32.0)
         t2 = TAIEpoch(2000, 1, 1, 12, 0, 0.0)
-        @test_throws MethodError t1 - t0
-        @test_throws MethodError t1 < t0
+        # promotion rules change what error is thrown
+        if VERSION < v"1.4"
+            @test_throws MethodError t1 - t0
+            @test_throws MethodError t1 < t0
+        else
+            @test_throws ErrorException t1 - t0
+            @test_throws ErrorException t1 < t0
+        end
         @test t2 - t1 == -32.0seconds
         @test t2 < t1
 
@@ -270,4 +276,3 @@ import ERFA
         @test typeof(UT1Epoch(tcb_err)) == Epoch{UniversalTime,Measurement{Float64}}
     end
 end
-
