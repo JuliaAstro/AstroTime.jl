@@ -98,5 +98,9 @@
     @test string(1days) == "1.0 days"
     @test string(1years) == "1.0 years"
     @test string(1centuries) == "1.0 centuries"
+
+    # lazy ranges (#65)
+    @test (1:3) * seconds === seconds * (1:3)
+    @test (1:3) * seconds isa AbstractRange
 end
 
