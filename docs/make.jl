@@ -13,7 +13,7 @@ makedocs(
     sitename = "AstroTime.jl",
     authors = "Helge Eichhorn and the AstroTime.jl contributors",
     pages = pages,
-    strict = true,
+    #strict = true,
     checkdocs = :exports,
 )
 
