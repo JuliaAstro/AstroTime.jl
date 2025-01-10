@@ -1,7 +1,6 @@
 module TimeScales
 
-using ItemGraphs: ItemGraph, add_edge!, add_vertex!, items
-
+using Graphs
 import Dates
 
 export
@@ -77,24 +76,50 @@ for (acronym, name) in zip(ACRONYMS, NAMES)
     end
 end
 
-const SCALES = ItemGraph{TimeScale}()
+# Create a DiGraph to store the time scales
+const SCALES = SimpleDiGraph{Int}()
+const SCALE_VERTICES = Dict{TimeScale, Int}()
+const VERTEX_SCALES = Dict{Int, TimeScale}()
 
-function register_scale!(s)
-    add_vertex!(SCALES, s)
+function register_scale!(s::TimeScale)
+    if !haskey(SCALE_VERTICES, s)
+        v = add_vertex!(SCALES)
+        SCALE_VERTICES[s] = v
+        VERTEX_SCALES[v] = s
+    end
 end
 
-function link_scales!(s1, s2; oneway=false)
-    add_edge!(SCALES, s1, s2)
-    oneway || add_edge!(SCALES, s2, s1)
+function link_scales!(s1::TimeScale, s2::TimeScale; oneway=false)
+    # Ensure both scales are registered
+    register_scale!(s1)
+    register_scale!(s2)
+    
+    # Add the edge
+    add_edge!(SCALES, SCALE_VERTICES[s1], SCALE_VERTICES[s2])
+    oneway || add_edge!(SCALES, SCALE_VERTICES[s2], SCALE_VERTICES[s1])
 end
 
-link_scales!(TAI, TT)
-link_scales!(TAI, UT1)
-link_scales!(TT, TCG)
-link_scales!(TT, TDB)
-link_scales!(TCB, TDB)
-
-find_path(from, to) = items(SCALES, from, to)
+function find_path(from::TimeScale, to::TimeScale)
+    # Get vertex indices
+    v_from = SCALE_VERTICES[from]
+    v_to = SCALE_VERTICES[to]
+    
+    # Find shortest path
+    path = dijkstra_shortest_paths(SCALES, v_from)
+    
+    # Extract path vertices
+    path_vertices = Int[]
+    current = v_to
+    while current != v_from
+        pushfirst!(path_vertices, current)
+        current = path.parents[current]
+        current == 0 && return TimeScale[] # No path exists
+    end
+    pushfirst!(path_vertices, v_from)
+    
+    # Convert vertices back to TimeScales
+    return [VERTEX_SCALES[v] for v in path_vertices]
+end
 
 struct NotATimeScale <: TimeScale end
 
@@ -110,5 +135,11 @@ tryparse(::Any) = nothing
     return val, i
 end
 
-end
+# Initialize the graph with the time scale relationships
+link_scales!(TAI, TT)
+link_scales!(TAI, UT1)
+link_scales!(TT, TCG)
+link_scales!(TT, TDB)
+link_scales!(TCB, TDB)
 
+end
