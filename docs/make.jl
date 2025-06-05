@@ -8,6 +8,7 @@ include("pages.jl")
 makedocs(
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
+        canonical = "https://JuliaAstro.org/AstroImages/stable/",
     ),
     modules = [AstroTime],
     sitename = "AstroTime.jl",
@@ -15,7 +16,6 @@ makedocs(
     pages = pages,
     #strict = true,
     checkdocs = :exports,
-    canonical = "https://JuliaAstro.org/AstroImages/stable/",
 )
 
 deploydocs(
