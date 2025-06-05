@@ -15,9 +15,11 @@ makedocs(
     pages = pages,
     #strict = true,
     checkdocs = :exports,
+    canonical = "https://JuliaAstro.org/AstroImages/stable/",
 )
 
 deploydocs(
     repo = "github.com/JuliaAstro/AstroTime.jl.git",
     push_preview = true,
+    versions = ["stable" => "v^", "v#.#"], # Restrict to minor releases
 )
