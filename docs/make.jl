@@ -5,8 +5,8 @@ setup = quote
 end
 DocMeta.setdocmeta!(AstroTime, :DocTestSetup, setup; recursive = true)
 include("pages.jl")
-makedocs(
-    format = Documenter.HTML(
+makedocs(;
+    format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", nothing) == "true",
         canonical = "https://JuliaAstro.org/AstroImages/stable/",
     ),
@@ -18,7 +18,7 @@ makedocs(
     checkdocs = :exports,
 )
 
-deploydocs(
+deploydocs(;
     repo = "github.com/JuliaAstro/AstroTime.jl.git",
     push_preview = true,
     versions = ["stable" => "v^", "v#.#"], # Restrict to minor releases
