@@ -15,7 +15,6 @@ jobs:
         version:
           - 'min' # Minimum supported version according to the Project.toml file.
           - '1' # Leave this line unchanged. '1' will automatically expand to the latest stable 1.x release of Julia.
-          - 'lts'
           - 'nightly'
         os:
           - ubuntu-latest
