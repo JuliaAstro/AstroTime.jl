@@ -83,7 +83,8 @@ const VERTEX_SCALES = Dict{Int, TimeScale}()
 
 function register_scale!(s::TimeScale)
     if !haskey(SCALE_VERTICES, s)
-        v = add_vertex!(SCALES)
+        add_vertex!(SCALES)
+        v = nv(SCALES)
         SCALE_VERTICES[s] = v
         VERTEX_SCALES[v] = s
     end
