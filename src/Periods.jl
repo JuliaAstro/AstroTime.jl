@@ -153,6 +153,9 @@ Base.:*(dt::Number, unit::TimeUnit) = AstroPeriod(unit, dt)
 Base.:*(unit::TimeUnit, dt::Number) = AstroPeriod(unit, dt)
 Base.:*(A::TimeUnit, B::AbstractArray) = broadcast(*, A, B)
 Base.:*(A::AbstractArray, B::TimeUnit) = broadcast(*, A, B)
+# handle ranges in lazy fashion
+Base.:*(B::TimeUnit, R::AbstractRange) = first(R) * B:step(R) * B:last(R) * B
+Base.:*(R::AbstractRange, B::TimeUnit) = first(R) * B:step(R) * B:last(R) * B
 
 Base.:-(p::AstroPeriod) = AstroPeriod(unit(p), -p.second, -p.fraction, -p.error)
 
