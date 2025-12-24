@@ -197,7 +197,7 @@ julia> GMT isa TimeScale
 true
 
 julia> GMTEpoch
-Epoch{GMTScale, T} where T
+Epoch{GMTScale}
 
 julia> find_path(TT, GMT)
 3-element Vector{TimeScale}:
@@ -248,8 +248,8 @@ function load_eop(files...)
 end
 
 function load_test_eop()
-    finals = joinpath(@__DIR__, "..", "test", "data", "finals.csv")
-    finals2000A = joinpath(@__DIR__, "..", "test", "data", "finals2000A.csv")
+    finals = joinpath(@__DIR__, "..", "test", "data", "finals.all.csv")
+    finals2000A = joinpath(@__DIR__, "..", "test", "data", "finals2000A.all.csv")
     load_eop(finals, finals2000A)
 end
 

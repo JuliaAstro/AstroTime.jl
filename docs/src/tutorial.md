@@ -75,22 +75,24 @@ There are three additional character codes supported.
 - `t`: This character code is parsed as the time scale.
 - `D`: This character code is parsed as the day number within a year.
 
-```julia
-# The time scale can be omitted from the constructor because it is already
-# defined in the input string
+The time scale can be omitted from the constructor in the first example because
+it is already defined in the input string
+```julia-repl
 julia> Epoch("2018-02-06T20:45:00.000 TAI", "yyyy-mm-ddTHH:MM:SS.fff ttt")
 2018-02-06T20:45:00.000 TAI
+```
 
-# February 6 is the 37th day of the year
-julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff")
+```julia-repl
+julia> TAIEpoch("2018-037T20:45:00.000", "yyyy-DDDTHH:MM:SS.fff") # February 6 is the 37th day of the year
 2018-02-06T20:45:00.000 TAI
 ```
 
 When printing `Epochs`, you can format the output in the same way.
 
-```julia
+```julia-repl
 julia> ep = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
+
 julia> AstroTime.format(ep, "dd.mm.yyyy HH:MM ttt")
 06.02.2018 20:45 TAI
 ```
@@ -102,7 +104,7 @@ You can shift an `Epoch` in time by adding or subtracting an [`AstroPeriod`](@re
 AstroTime.jl provides a convenient way to construct periods by multiplying a value
 with a time unit.
 
-```julia
+```julia-repl
 julia> 23 * seconds
 23 seconds
 
@@ -121,7 +123,7 @@ The following time units are available:
 
 To shift an `Epoch` forward in time add an `AstroPeriod` to it.
 
-```julia
+```julia-repl
 julia> ep = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -131,7 +133,7 @@ julia> ep + 1days
 
 Or subtract it to shift the `Epoch` backwards.
 
-```julia
+```julia-repl
 julia> ep = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -141,7 +143,7 @@ julia> ep - 1days
 
 If you subtract two epochs you will receive the time between them as an `AstroPeriod`.
 
-```julia
+```julia-repl
 julia> ep1 = TAIEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TAI
 
@@ -155,7 +157,7 @@ julia> ep2 - ep1
 You can also construct an `AstroPeriod` with a different time unit from
 another `AstroPeriod`.
 
-```julia
+```julia-repl
 julia> dt = 86400.0seconds
 86400.0 seconds
 
@@ -165,7 +167,7 @@ julia> days(dt)
 
 To access the raw value of a period, i.e. without a unit, use the `value` function.
 
-```julia
+```julia-repl
 julia> dt = 86400.0seconds
 86400.0 seconds
 
@@ -177,14 +179,14 @@ julia> value(days(dt))
 
 You can also construct ranges of `Epoch`s. The default step size one second.
 
-```julia
+```julia-repl
 julia> TAIEpoch(2021, 7, 30, 17, 34, 30.0):TAIEpoch(2021, 7, 30, 17, 34, 31.0)
 2021-07-30T17:34:30.000 TAI:1.0 seconds:2021-07-30T17:34:31.000 TAI
 ```
 
 Or you can adjust the step size with any of the units supported.
 
-```julia
+```julia-repl
 julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
 5-element Vector{TAIEpoch{Float64}}:
  2000-01-01T00:00:00.000 TAI
@@ -199,7 +201,7 @@ julia> collect(TAIEpoch(2000, 1, 1):1days:TAIEpoch(2000, 1, 5))
 You convert an `Epoch` to another time scale by constructing a new `Epoch` with the
 target time scale from it.
 
-```julia
+```julia-repl
 julia> tai = TAIEpoch(2018, 2, 6, 20, 45, 0.0)
 2018-02-06T20:45:00.000 TAI
 
@@ -225,7 +227,7 @@ Nevertheless, UTC is supported as an I/O format for timestamps through the
 The last leap second was introduced at the end of December 31, 2016. You can create a
 `TAIEpoch` (or other `Epoch`s) from a UTC date with proper leap second handling:
 
-```julia
+```julia-repl
 julia> from_utc(2016, 12, 31, 23, 59, 60.0)
 2017-01-01T00:00:36.000 TAI
 
@@ -239,14 +241,14 @@ julia> from_utc("2016-12-31T23:59:60.0", scale=TDB)
 You can also use `Dates.DateTime` but note that you cannot represent a leap second
 date with it.
 
-```julia
+```julia-repl
 julia> tai = from_utc(Dates.DateTime(2018, 2, 6, 20, 45, 0, 0))
 2018-02-06T20:45:37.000 TAI
 ```
 
 And go back to UTC:
 
-```julia
+```julia-repl
 julia> to_utc(tai)
 "2018-02-06T20:45:00.000"
 
@@ -293,7 +295,7 @@ Three different base epochs are supported:
 
 You can get Julian date in days from an `Epoch` like this:
 
-```julia
+```julia-repl
 julia> ep = TTEpoch(2000,1,2)
 2000-01-02T00:00:00.000 TT
 
@@ -309,7 +311,7 @@ julia> modified_julian(ep)
 
 To construct an `Epoch` from a Julian date do this:
 
-```julia
+```julia-repl
 julia> TTEpoch(0.5days) # J2000 is the default
 2000-01-02T00:00:00.000 TT
 
@@ -346,7 +348,7 @@ if you encounter any problems with this.
 It is nevertheless possible to convert an `Epoch` to a `DateTime` if it should become necessary.
 Please note that the time scale information will be lost in the process.
 
-```julia
+```julia-repl
 julia> ep = TTEpoch(2000,1,1)
 2000-01-01T00:00:00.000 TT
 
@@ -368,7 +370,7 @@ You need to provide the name of the time scale and optionally a "parent" time sc
 
 At this point, you can already use the new time scale to create epochs.
 
-```julia
+```julia-repl
 julia> EphemerisTime
 EphemerisTime
 
@@ -384,7 +386,7 @@ because you need to provide the necessary methods for `getoffset`.
 If you are unsure which methods are needed, you can try to transform the epoch
 and the resulting error message will provide a hint.
 
-```julia
+```julia-repl
 julia> TDBEpoch(et)
 ERROR: No conversion 'EphemerisTime->TDB' available. If one of these is a custom time scale,
 you may need to define `AstroTime.Epochs.getoffset(::EphemerisTimeScale, ::BarycentricDynamicalTime, second, fraction, args...)`.
@@ -401,7 +403,7 @@ AstroTime.Epochs.getoffset(::CoordinatedUniversalTime, ::EphemerisTimeType, seco
 
 You can now use `EphemerisTimeEpoch` like any other epoch type, e.g.
 
-```julia
+```julia-repl
 julia> ep = TDBEpoch(2000, 1, 1)
 2000-01-01T00:00:00.000 TDB
 
@@ -465,7 +467,7 @@ If you want to convert another epoch to `SCET`, you now need to pass this
 additional parameter.
 For example, for a spacecraft that is one astronomical unit away from Earth:
 
-```julia
+```julia-repl
 julia> astronomical_unit = 149597870700.0 # m
 149597870700.0
 
@@ -482,7 +484,7 @@ julia> SCETEpoch(ep, astronomical_unit)
 You can also introduce time scales that are disjoint from AstroTime.jl's
 default graph of time scales by defining a time scale without a parent.
 
-```julia
+```julia-repl
 julia> @timescale Disjoint
 
 julia> typeof(Disjoint)
@@ -492,4 +494,3 @@ DisjointScale
 By defining additional time scales connected to this scale and the appropriate
 `getoffset` methods, you can create your own graph of time scales that is
 completely independent of the defaults provided by the library.
-

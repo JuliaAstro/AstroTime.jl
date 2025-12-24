@@ -2,10 +2,11 @@
 
 *Astronomical time keeping in Julia*
 
+[![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaAstro.github.io/AstroTime/stable)
+[![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaAstro.github.io/AstroTime.jl/dev)
+
 [![Build Status](https://github.com/JuliaAstro/AstroTime.jl/workflows/CI/badge.svg?branch=master)](https://github.com/JuliaAstro/AstroTime.jl/actions)
 [![Coverage](https://codecov.io/gh/JuliaAstro/AstroTime.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaAstro/AstroTime.jl)
-[![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaAstro.github.io/AstroTime.jl/stable)
-[![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaAstro.github.io/AstroTime.jl/dev)
 
 AstroTime.jl provides a high-precision, time-scale aware, `DateTime`-like data type which supports
 all commonly used astronomical time scales.
