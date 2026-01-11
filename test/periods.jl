@@ -103,4 +103,3 @@
     @test (1:3) * seconds === seconds * (1:3)
     @test (1:3) * seconds isa AbstractRange
 end
-

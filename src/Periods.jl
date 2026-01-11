@@ -11,11 +11,13 @@ export AstroPeriod, TimeUnit,
     SECONDS_PER_YEAR,
     SECONDS_PER_CENTURY
 
-const SECONDS_PER_MINUTE   = 60.0
-const SECONDS_PER_HOUR     = 60.0 * 60.0
-const SECONDS_PER_DAY      = 60.0 * 60.0 * 24.0
-const SECONDS_PER_YEAR     = 60.0 * 60.0 * 24.0 * 365.25
-const SECONDS_PER_CENTURY  = 60.0 * 60.0 * 24.0 * 365.25 * 100.0
+const SECONDS_PER_MINUTE   = 60
+const SECONDS_PER_HOUR     = 60 * SECONDS_PER_MINUTE
+const SECONDS_PER_DAY      = 24 * SECONDS_PER_HOUR
+# Julian year, turns out to be an integer number of seconds in a year
+# despite it containing a fraction of a day
+const SECONDS_PER_YEAR     = (365+1//4) * SECONDS_PER_DAY |> Integer
+const SECONDS_PER_CENTURY  = 100 * SECONDS_PER_YEAR
 
 """
 All time units are subtypes of the abstract type `TimeUnit`.
@@ -46,7 +48,7 @@ const centuries = Century()
 
 Base.broadcastable(u::TimeUnit) = Ref(u)
 
-factor(::Second) = 1.0
+factor(::Second) = 1
 factor(::Minute) = SECONDS_PER_MINUTE
 factor(::Hour) = SECONDS_PER_HOUR
 factor(::Day) = SECONDS_PER_DAY
