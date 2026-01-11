@@ -11,13 +11,13 @@ export AstroPeriod, TimeUnit,
     SECONDS_PER_YEAR,
     SECONDS_PER_CENTURY
 
-const SECONDS_PER_MINUTE   = 60
-const SECONDS_PER_HOUR     = 60 * SECONDS_PER_MINUTE
-const SECONDS_PER_DAY      = 24 * SECONDS_PER_HOUR
+const SECONDS_PER_MINUTE   =        60                       |> Int64
+const SECONDS_PER_HOUR     =        60  * SECONDS_PER_MINUTE |> Int64
+const SECONDS_PER_DAY      =        24  * SECONDS_PER_HOUR   |> Int64
 # Julian year, turns out to be an integer number of seconds in a year
 # despite it containing a fraction of a day
-const SECONDS_PER_YEAR     = (365+1//4) * SECONDS_PER_DAY |> Integer
-const SECONDS_PER_CENTURY  = 100 * SECONDS_PER_YEAR
+const SECONDS_PER_YEAR     = (365+1//4) * SECONDS_PER_DAY    |> Int64
+const SECONDS_PER_CENTURY  =       100  * SECONDS_PER_YEAR   |> Int64
 
 """
 All time units are subtypes of the abstract type `TimeUnit`.
