@@ -1,5 +1,6 @@
 const J2000_TO_JULIAN = 2.451545e6days
 const J2000_TO_MJD = 51544.5days
+const J2000_TO_JYEAR = 2000.0years
 
 """
     Epoch{S}(jd1::T, jd2::T=zero(T); origin=:j2000) where {S, T<:AstroPeriod}
@@ -135,6 +136,31 @@ julia> modified_julian(TAIEpoch(2000, 1, 1, 12))
 ```
 """
 modified_julian(ep::Epoch) = julian_period(ep; origin=:modified_julian)
+
+"""
+    jyear(ep; scale = timescale(ep))
+
+Return the Julian epoch year of epoch `ep`: the fractional year label used in
+designations like J2000.0, defined as ``2000 + (\\mathrm{JD} - 2451545)/365.25`` with the Julian Date evaluated within the time scale `scale`. Pass `scale = TT` for the strict IAU definition of Julian epochs.
+
+!!! note
+    To label a UTC calendar date the way astropy's `Time(...).jyear` does,
+    construct the epoch from the calendar stamp directly (e.g.,
+    `jyear(TAIEpoch(dt))`). Going through [`from_utc`](@ref) shifts the clock
+    reading into TAI by the accumulated leap seconds, changing the result at
+    the ``10^{-6}`` year level.
+
+### Example ###
+
+```jldoctest; setup = :(using AstroTime)
+julia> jyear(TAIEpoch(2000, 1, 1, 12))
+2000.0 years
+
+julia> jyear(TAIEpoch(2012, 7, 1))
+2012.4969199178645 years
+```
+"""
+jyear(ep::Epoch; scale = timescale(ep)) = J2000_TO_JYEAR + julian_period(ep; scale, unit = years)
 
 """
     julian_twopart(ep)

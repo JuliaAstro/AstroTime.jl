@@ -23,7 +23,7 @@ import ..AccurateArithmetic: apply_offset, two_sum
 using ..TimeScales: find_path
 
 export CCSDS_EPOCH, FIFTIES_EPOCH, FUTURE_INFINITY, GALILEO_EPOCH, GPS_EPOCH, J2000_EPOCH
-export J2000_TO_JULIAN, J2000_TO_MJD, JULIAN_EPOCH, MODIFIED_JULIAN_EPOCH, PAST_INFINITY
+export J2000_TO_JULIAN, J2000_TO_JYEAR, J2000_TO_MJD, JULIAN_EPOCH, MODIFIED_JULIAN_EPOCH, PAST_INFINITY
 export UNIX_EPOCH
 export Epoch
 export NoOffsetError, NoPathError
@@ -32,7 +32,7 @@ export millisecond, microsecond, nanosecond, subsecond
 export yearmonthday, dayofyear, fractionofday, fractionofsecond, secondinday
 export timescale, now
 export getoffset, insideleap
-export j2000, julian, julian_period, julian_twopart, modified_julian
+export j2000, julian, julian_period, julian_twopart, jyear, modified_julian
 export from_utc, to_utc
 export -
 
