@@ -207,6 +207,9 @@ import ERFA
         ep = TAIEpoch(jd, origin=:modified_julian)
         @test ep == TAIEpoch(2000, 1, 1, 12)
         @test modified_julian(ep) == jd
+        @test jyear(TAIEpoch(2000, 1, 1, 12)) == 2000.0 * years
+        @test value(jyear(TAIEpoch(2000, 1, 1, 12); scale = TT)) ≈ 2000.0 + 32.184 / SECONDS_PER_YEAR
+        @test value(jyear(TAIEpoch(365.25 * days))) ≈ 2001.0
         @test_throws ArgumentError TAIEpoch(jd, origin=:julia)
     end
     @testset "Accessors" begin
