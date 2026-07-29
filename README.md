@@ -1,12 +1,13 @@
 # AstroTime
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.org/AstroTime/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.org/AstroTime.jl/dev)
+
+[![Test](https://github.com/JuliaAstro/AstroTime.jl/actions/workflows/Test.yml/badge.svg)](https://github.com/JuliaAstro/AstroTime.jl/actions/workflows/Test.yml)
+[![Coverage](https://codecov.io/gh/JuliaAstro/AstroTime.jl/graph/badge.svg)](https://codecov.io/gh/JuliaAstro/AstroTime.jl)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 *Astronomical time keeping in Julia*
-
-[![Stable Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaAstro.github.io/AstroTime/stable)
-[![Dev Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaAstro.github.io/AstroTime.jl/dev)
-
-[![Build Status](https://github.com/JuliaAstro/AstroTime.jl/workflows/CI/badge.svg?branch=master)](https://github.com/JuliaAstro/AstroTime.jl/actions)
-[![Coverage](https://codecov.io/gh/JuliaAstro/AstroTime.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaAstro/AstroTime.jl)
 
 AstroTime.jl provides a high-precision, time-scale aware, `DateTime`-like data type which supports
 all commonly used astronomical time scales.
