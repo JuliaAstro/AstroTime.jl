@@ -6,12 +6,12 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "julia"
-    # Location of Julia projects
-    directories: ["/", "/docs", "/test", "/test/coverage"]
+    directories: ["/", "/docs", "/test"] # Location of Julia projects
     schedule:
       interval: "weekly"
+    groups: # Group all julia package updates into a single PR
+      all-julia-packages:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "AstroTime" # Ignore package itself
-    groups:
-      per-dependency:
-        group-by: dependency-name
